@@ -8,15 +8,15 @@ function GestionAlumnos() {
     nombres: "",
     apellidos: "",
     correo: "",
-    contrasena: ""
+    contrasena: "",
   });
 
   // 🔹 función central para cargar alumnos
   const fetchAlumnos = () => {
     fetch("http://localhost:5000/admin/alumnos")
-      .then(res => res.json())
-      .then(data => setAlumnos(data))
-      .catch(err => console.error("Error cargando alumnos:", err));
+      .then((res) => res.json())
+      .then((data) => setAlumnos(data))
+      .catch((err) => console.error("Error cargando alumnos:", err));
   };
 
   useEffect(() => {
@@ -29,7 +29,7 @@ function GestionAlumnos() {
       nombres: alumno.nombres,
       apellidos: alumno.apellidos || "",
       correo: alumno.correo,
-      contrasena: ""
+      contrasena: "",
     });
   };
 
@@ -39,12 +39,12 @@ function GestionAlumnos() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(formData),
     })
-      .then(res => res.json())
+      .then((res) => res.json())
       .then(() => {
         fetchAlumnos(); // 🔹 refresca la tabla
         setEditId(null);
       })
-      .catch(err => console.error("Error guardando alumno:", err));
+      .catch((err) => console.error("Error guardando alumno:", err));
   };
 
   const handleDelete = (id) => {
@@ -52,7 +52,7 @@ function GestionAlumnos() {
       .then(() => {
         fetchAlumnos(); // 🔹 refresca la tabla
       })
-      .catch(err => console.error("Error eliminando alumno:", err));
+      .catch((err) => console.error("Error eliminando alumno:", err));
   };
 
   return (
@@ -70,14 +70,16 @@ function GestionAlumnos() {
           </tr>
         </thead>
         <tbody>
-          {alumnos.map(alumno => (
+          {alumnos.map((alumno) => (
             <tr key={alumno.usuario_id}>
               <td>{alumno.usuario_id}</td>
               <td>
                 {editId === alumno.usuario_id ? (
                   <input
                     value={formData.nombres}
-                    onChange={(e) => setFormData({ ...formData, nombres: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, nombres: e.target.value })
+                    }
                   />
                 ) : (
                   alumno.nombres
@@ -87,7 +89,9 @@ function GestionAlumnos() {
                 {editId === alumno.usuario_id ? (
                   <input
                     value={formData.apellidos}
-                    onChange={(e) => setFormData({ ...formData, apellidos: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, apellidos: e.target.value })
+                    }
                   />
                 ) : (
                   alumno.apellidos
@@ -97,7 +101,9 @@ function GestionAlumnos() {
                 {editId === alumno.usuario_id ? (
                   <input
                     value={formData.correo}
-                    onChange={(e) => setFormData({ ...formData, correo: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, correo: e.target.value })
+                    }
                   />
                 ) : (
                   alumno.correo
@@ -108,7 +114,9 @@ function GestionAlumnos() {
                   <input
                     type="password"
                     value={formData.contrasena}
-                    onChange={(e) => setFormData({ ...formData, contrasena: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, contrasena: e.target.value })
+                    }
                   />
                 ) : (
                   "******"
@@ -116,11 +124,26 @@ function GestionAlumnos() {
               </td>
               <td>
                 {editId === alumno.usuario_id ? (
-                  <button className="save-btn" onClick={() => handleSave(alumno.usuario_id)}>Guardar</button>
+                  <button
+                    className="save-btn"
+                    onClick={() => handleSave(alumno.usuario_id)}
+                  >
+                    Guardar
+                  </button>
                 ) : (
-                  <button className="edit-btn" onClick={() => handleEdit(alumno)}>Editar</button>
+                  <button
+                    className="edit-btn"
+                    onClick={() => handleEdit(alumno)}
+                  >
+                    Editar
+                  </button>
                 )}
-                <button className="delete-btn" onClick={() => handleDelete(alumno.usuario_id)}>Eliminar</button>
+                <button
+                  className="delete-btn"
+                  onClick={() => handleDelete(alumno.usuario_id)}
+                >
+                  Eliminar
+                </button>
               </td>
             </tr>
           ))}

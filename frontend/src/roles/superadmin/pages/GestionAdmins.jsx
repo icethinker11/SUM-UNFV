@@ -37,7 +37,8 @@ const GestionAdmins = () => {
   };
 
   const eliminarAdmin = async (id) => {
-    if (!window.confirm("¿Seguro que deseas eliminar este administrador?")) return;
+    if (!window.confirm("¿Seguro que deseas eliminar este administrador?"))
+      return;
     try {
       await axios.delete(`http://localhost:5000/superadmin/admins/${id}`);
       setMensaje("Administrador eliminado correctamente ✅");
@@ -96,7 +97,11 @@ const GestionAdmins = () => {
       </div>
 
       {mensaje && (
-        <div className={tipoMensaje === "success" ? "alert-success" : "alert-error"}>
+        <div
+          className={
+            tipoMensaje === "success" ? "alert-success" : "alert-error"
+          }
+        >
           {mensaje}
         </div>
       )}
@@ -173,7 +178,11 @@ const GestionAdmins = () => {
                       />
                     </td>
                     <td>
-                      <select name="formacion" value={form.formacion || ""} onChange={handleChange}>
+                      <select
+                        name="formacion"
+                        value={form.formacion || ""}
+                        onChange={handleChange}
+                      >
                         <option value="">Seleccione</option>
                         <option value="Licenciado">Licenciado</option>
                         <option value="Ingeniero">Ingeniero</option>
@@ -183,7 +192,11 @@ const GestionAdmins = () => {
                       </select>
                     </td>
                     <td>
-                      <select name="cargo" value={form.cargo || ""} onChange={handleChange}>
+                      <select
+                        name="cargo"
+                        value={form.cargo || ""}
+                        onChange={handleChange}
+                      >
                         <option value="">Seleccione</option>
                         <option value="Coordinador">Coordinador</option>
                         <option value="Supervisor">Supervisor</option>
@@ -213,13 +226,20 @@ const GestionAdmins = () => {
                       />
                     </td>
                     <td>
-                      <select name="estado" value={form.estado || ""} onChange={handleChange}>
+                      <select
+                        name="estado"
+                        value={form.estado || ""}
+                        onChange={handleChange}
+                      >
                         <option value="Activo">Activo</option>
                         <option value="Inactivo">Inactivo</option>
                       </select>
                     </td>
                     <td className="actions">
-                      <button className="btn-save" onClick={() => guardarCambios(admin.usuario_id)}>
+                      <button
+                        className="btn-save"
+                        onClick={() => guardarCambios(admin.usuario_id)}
+                      >
                         <FaSave />
                       </button>
                       <button className="btn-cancel" onClick={cancelarEdicion}>
@@ -241,17 +261,24 @@ const GestionAdmins = () => {
                     <td>{admin.correo}</td>
                     <td
                       style={{
-                        color: admin.estado === "Activo" ? "#16a34a" : "#dc2626",
+                        color:
+                          admin.estado === "Activo" ? "#16a34a" : "#dc2626",
                         fontWeight: 600,
                       }}
                     >
                       {admin.estado}
                     </td>
                     <td className="actions">
-                      <button className="btn-edit" onClick={() => iniciarEdicion(admin)}>
+                      <button
+                        className="btn-edit"
+                        onClick={() => iniciarEdicion(admin)}
+                      >
                         <FaEdit />
                       </button>
-                      <button className="btn-delete" onClick={() => eliminarAdmin(admin.usuario_id)}>
+                      <button
+                        className="btn-delete"
+                        onClick={() => eliminarAdmin(admin.usuario_id)}
+                      >
                         <FaTrash />
                       </button>
                     </td>

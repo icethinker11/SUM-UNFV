@@ -164,26 +164,36 @@ def eliminar_curso(curso_id):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-# ===========================
-# LISTAR CURSOS
-# ===========================
 @curso_bp.route("/", methods=["GET"])
 def listar_cursos():
+    conn = None
+    cur = None
     try:
         conn = get_db()
         cur = conn.cursor(cursor_factory=RealDictCursor)
+        
+        # Consulta que devuelve las columnas necesarias (curso_id, codigo, nombre)
         cur.execute("""
             SELECT c.curso_id, c.codigo, c.nombre, c.creditos, c.ciclo, 
                    c.horas_teoricas, c.horas_practicas, c.tipo, c.estado, c.fecha_creacion
             FROM curso c
-            ORDER BY c.curso_id DESC
+            ORDER BY c.nombre ASC
         """)
+        
         cursos = cur.fetchall()
-        cur.close()
-        conn.close()
-        return jsonify(cursos)
+        
+        # 🔑 Formato esperado por tu frontend: Devuelve el array de objetos directamente.
+        # [ {"curso_id": 1, "codigo": "IS101", "nombre": "..."}, {...} ]
+        return jsonify(cursos), 200
+    
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        print(f"❌ Error en listar_cursos: {e}")
+        return jsonify({"error": "Error interno al obtener la lista de cursos."}), 500
+        
+    finally:
+        # Cerrar recursos de la base de datos
+        if cur: cur.close()
+        if conn: conn.close()
 
 # ===========================
 # CONSULTAR CURSOS 

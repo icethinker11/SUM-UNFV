@@ -1,6 +1,7 @@
 /* styles/crear-docente.css */
 .crear-docente-container {
-  margin-left: 240px; /* Mismo ancho que el sidebar */
+  margin-left: 240px;
+  /* Mismo ancho que el sidebar */
   padding: 2rem;
   min-height: 100vh;
   background-color: #fef7ff;
@@ -98,7 +99,7 @@
     margin-left: 0;
     padding: 1rem;
   }
-  
+
   .crear-docente-form {
     padding: 1.5rem;
   }

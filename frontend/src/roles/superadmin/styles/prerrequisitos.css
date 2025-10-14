@@ -8,8 +8,9 @@
     padding: 30px;
     width: 90%;
     max-width: 800px;
-    margin: 40px auto; /* Clave para el centrado horizontal */
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1); 
+    margin: 40px auto;
+    /* Clave para el centrado horizontal */
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
 
 .contenedor-prerrequisitos h2 {
@@ -24,6 +25,7 @@
     border-bottom: 1px solid #eee;
     padding-bottom: 15px;
 }
+
 .contenedor-prerrequisitos h2 svg {
     margin-right: 10px;
     color: #3f51b5;
@@ -44,7 +46,7 @@
 
 .grupo {
     flex: 1;
-    min-width: 250px; 
+    min-width: 250px;
     display: flex;
     flex-direction: column;
 }
@@ -66,13 +68,14 @@ select {
 }
 
 .botones {
-    align-self: flex-end; 
+    align-self: flex-end;
     display: flex;
     gap: 10px;
     min-width: 250px;
 }
 
-.btn-guardar, .btn-limpiar {
+.btn-guardar,
+.btn-limpiar {
     padding: 10px 15px;
     border: none;
     border-radius: 8px;
@@ -138,7 +141,7 @@ select {
 
 .tabla-prerreq {
     margin-top: 30px;
-    border-top: 2px dashed #ddd; 
+    border-top: 2px dashed #ddd;
     padding-top: 20px;
 }
 
@@ -146,7 +149,7 @@ select {
     width: 100%;
     border-collapse: collapse;
     margin-top: 20px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .tabla-prerreq th {

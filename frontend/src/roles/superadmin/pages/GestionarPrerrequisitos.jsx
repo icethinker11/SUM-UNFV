@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import "../styles/prerrequisitos.css";
+import "../styles/prerrequisitos.css"; 
 import { FaSave, FaTrash, FaBroom } from "react-icons/fa";
 import { ListChecks } from "lucide-react"; // AJUSTE: Usamos ListChecks para el título (como en el CSS)
+
 
 const GestionPrerrequisitos = () => {
   const [cursos, setCursos] = useState([]);
@@ -35,19 +36,20 @@ const GestionPrerrequisitos = () => {
     }
   };
 
-  const cargarPrerrequisitos = async (idCurso) => {
-    // Limpiamos el mensaje de la acción anterior
-    setMensaje(""); 
+const cargarPrerrequisitos = async (idCurso) => {
+    // ❌ ELIMINAR ESTA LÍNEA: setMensaje(""); 
+    // Dejamos que los mensajes de éxito/error permanezcan hasta que una nueva acción los cambie.
+
     try {
       const res = await axios.get(`${BASE_URL}/superadmin/prerrequisitos/${idCurso}`);
       setPrerrequisitos(res.data);
     } catch (err) {
       console.error("Error al cargar prerrequisitos:", err);
-      // AJUSTE: Captura errores de 404/400 de Flask, que podría devolver un objeto con error.
+      // Solo limpiamos si hay un error de carga, mostrando el mensaje de error.
       setPrerrequisitos([]); 
       setMensaje(err.response?.data?.error || "Error al cargar prerrequisitos ❌");
     }
-  };
+};
 
   const manejarCursoPrincipal = (id) => {
     setCursoPrincipal(id);
@@ -55,27 +57,46 @@ const GestionPrerrequisitos = () => {
     else setPrerrequisitos([]); // Limpiar la tabla si se selecciona la opción por defecto
   };
 
-  const guardarPrerrequisito = async () => {
+const guardarPrerrequisito = async () => {
+    // Limpiamos mensajes previos
+    setMensaje("");
+    
+    // 1. Validación de Frontend
     if (!cursoPrincipal || !cursoRequisito) {
-      setMensaje("Selecciona ambos cursos ⚠️");
-      return;
+        setMensaje("Selecciona ambos cursos ⚠️");
+        return;
     }
 
     try {
-      const res = await axios.post(`${BASE_URL}/superadmin/definir-prerrequisito`, {
-        // AJUSTE: Convertir a número (aunque Flask puede manejar el string, es buena práctica)
-        id_curso: parseInt(cursoPrincipal), 
-        id_curso_requerido: parseInt(cursoRequisito),
-      });
-      
-      // AJUSTE: El mensaje de éxito es 201 y se obtiene del backend
-      setMensaje(res.data.mensaje || "Prerrequisito agregado ✅");
-      cargarPrerrequisitos(cursoPrincipal);
-      setCursoRequisito("");
+        // Ejecutamos la petición POST a Flask
+        const res = await axios.post(`${BASE_URL}/superadmin/definir-prerrequisito`, {
+            // Aseguramos que los IDs sean números enteros (crucial para Flask/PostgreSQL)
+            id_curso: parseInt(cursoPrincipal), 
+            id_curso_requerido: parseInt(cursoRequisito),
+        });
+        
+        // 2. Manejo de Éxito (Status 201)
+        // Usamos el mensaje exacto para garantizar que la clase 'success' se active.
+        setMensaje(res.data.mensaje || "Prerrequisito ingresado satisfactoriamente ✅");
+        
+        // Recargamos la lista para actualizar la tabla inmediatamente
+        cargarPrerrequisitos(cursoPrincipal);
+        setCursoRequisito(""); // Limpiamos el selector de requisito
+        
     } catch (err) {
-      setMensaje(err.response?.data?.error || "Error al agregar prerrequisito ❌");
+        // 3. Manejo de Errores (Status 400, 500 o Network Error)
+        const serverError = err.response?.data?.error;
+        
+        if (serverError) {
+             // Muestra el error amigable devuelto por Flask (ej: "Este prerrequisito ya se encuentra registrado...")
+             setMensaje(serverError); 
+        } else {
+             // Error de conexión, red o un fallo crítico del servidor (500)
+             setMensaje("Error al agregar prerrequisito ❌. Verifica la conexión o el servidor.");
+             console.error("Error POST (Conexión/Red):", err);
+        }
     }
-  };
+};
 
   const eliminarPrerrequisito = async (id) => {
     if (!window.confirm("¿Seguro que deseas eliminar este prerrequisito?")) return;

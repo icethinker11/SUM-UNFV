@@ -17,7 +17,11 @@ export default function ConsultarCursos() {
 
       if (response.ok) {
         setCursos(data);
-        setMensaje(data.length ? "" : "⚠️ No se encontraron cursos para el ciclo seleccionado.");
+        setMensaje(
+          data.length
+            ? ""
+            : "⚠️ No se encontraron cursos para el ciclo seleccionado."
+        );
       } else {
         setMensaje("❌ Error al obtener los cursos.");
       }

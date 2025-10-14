@@ -8,12 +8,12 @@
 .gestion-docentes-container h2 {
   color: #2c3e50;
   margin-bottom: 15px;
-  margin-left:50px;
+  margin-left: 50px;
 }
 
 .gestion-docentes-table {
   width: 90%;
-  margin-left:50px;
+  margin-left: 50px;
   border-collapse: collapse;
   background: #ffffff;
   box-shadow: 0px 3px 8px rgba(0, 0, 0, 0.15);
@@ -22,7 +22,7 @@
 }
 
 .gestion-docentes-table th {
-    margin-right: 50px;
+  margin-right: 50px;
   background: #34495e;
   color: white;
   text-align: left;
@@ -30,7 +30,6 @@
 }
 
 .gestion-docentes-table td {
-
   border-bottom: 1px solid #ddd;
   padding: 20px;
 }

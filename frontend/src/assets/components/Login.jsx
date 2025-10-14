@@ -61,7 +61,9 @@ function Login({ onLoginSuccess }) {
             La Universidad Nacional Federico Villarreal, formando profesionales
             líderes en Ingeniería Industrial y de Sistemas.
           </p>
-          <a href="#login-form" className="scroll-down">Ir al login ↓</a>
+          <a href="#login-form" className="scroll-down">
+            Ir al login ↓
+          </a>
         </div>
       </section>
 
@@ -107,15 +109,24 @@ function Login({ onLoginSuccess }) {
         </div>
       </section>
       {/* Footer */}
-<footer className="footer">
-  <p>© 2025 Universidad Nacional Federico Villarreal - FIIS</p>
-  <div className="social-links">
-    <a href="https://www.facebook.com/unfv.oficial" target="_blank" rel="noreferrer">Facebook</a>
-    <a href="https://www.instagram.com/" target="_blank" rel="noreferrer">Instagram</a>
-    <a href="https://www.linkedin.com/" target="_blank" rel="noreferrer">LinkedIn</a>
-  </div>
-</footer>
-
+      <footer className="footer">
+        <p>© 2025 Universidad Nacional Federico Villarreal - FIIS</p>
+        <div className="social-links">
+          <a
+            href="https://www.facebook.com/unfv.oficial"
+            target="_blank"
+            rel="noreferrer"
+          >
+            Facebook
+          </a>
+          <a href="https://www.instagram.com/" target="_blank" rel="noreferrer">
+            Instagram
+          </a>
+          <a href="https://www.linkedin.com/" target="_blank" rel="noreferrer">
+            LinkedIn
+          </a>
+        </div>
+      </footer>
     </div>
   );
 }

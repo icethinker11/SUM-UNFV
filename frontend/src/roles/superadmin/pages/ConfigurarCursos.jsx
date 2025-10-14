@@ -7,7 +7,9 @@ function ConfigurarCursos() {
         <input className="border p-2 w-full" placeholder="Nombre del curso" />
         <input className="border p-2 w-full" placeholder="Créditos" />
         <input className="border p-2 w-full" placeholder="Ciclo recomendado" />
-        <button className="bg-black text-white px-4 py-2 rounded">Guardar</button>
+        <button className="bg-black text-white px-4 py-2 rounded">
+          Guardar
+        </button>
       </form>
     </div>
   );

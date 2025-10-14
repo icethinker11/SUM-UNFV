@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import './styles/sidebar-admin.css';
+import "./styles/sidebar-admin.css";
 
 function SidebarAdmin({ usuario }) {
   return (
@@ -13,7 +13,9 @@ function SidebarAdmin({ usuario }) {
       {/* Información del usuario */}
       <div className="user-info">
         <p className="user-id">Usuario ID: {usuario.usuario_id}</p>
-        <p className="user-name">Admin ({usuario.nombres || "Administrador"})</p>
+        <p className="user-name">
+          Admin ({usuario.nombres || "Administrador"})
+        </p>
       </div>
 
       {/* Navegación */}

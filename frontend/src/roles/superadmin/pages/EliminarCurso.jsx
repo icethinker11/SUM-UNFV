@@ -24,9 +24,12 @@ export default function EliminarCurso() {
 
   const eliminarCurso = async (cursoId) => {
     try {
-      const res = await fetch(`http://localhost:5000/curso/eliminar/${cursoId}`, {
-        method: "DELETE",
-      });
+      const res = await fetch(
+        `http://localhost:5000/curso/eliminar/${cursoId}`,
+        {
+          method: "DELETE",
+        }
+      );
 
       const data = await res.json();
 
@@ -57,10 +60,14 @@ export default function EliminarCurso() {
       {confirmar ? (
         <div className="confirmacion">
           <p>
-            ¿Seguro que deseas eliminar el curso <strong>{confirmar.nombre}</strong>?
+            ¿Seguro que deseas eliminar el curso{" "}
+            <strong>{confirmar.nombre}</strong>?
           </p>
           <div className="botones">
-            <button onClick={() => eliminarCurso(confirmar.curso_id)} className="btn-eliminar">
+            <button
+              onClick={() => eliminarCurso(confirmar.curso_id)}
+              className="btn-eliminar"
+            >
               Sí, eliminar
             </button>
             <button onClick={() => setConfirmar(null)} className="btn-cancelar">

@@ -1,7 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
+import axios from "axios";
 import "../styles/crear-admin.css";
 
+const BASE_URL = "http://localhost:5000/superadmin";
+
 function CrearAdmin() {
+  // ESTADO PRINCIPAL (Todos los campos del formulario)
   const [formData, setFormData] = useState({
     nombres: "",
     apellidos: "",
@@ -12,83 +16,119 @@ function CrearAdmin() {
     distrito_id: "",
     fecha_nacimiento: "",
     id_formacion: "",
-    id_especialidad: "", // cargo ahora se maneja como id_especialidad
+    id_especialidad: "",
     escuela_id: "",
-    experiencia_lab: ""
+    experiencia_lab: "",
   });
 
+  // ESTADOS DE DATOS AUXILIARES Y JERARQUÍA DE UBICACIÓN
   const [escuelas, setEscuelas] = useState([]);
-  const [distritos, setDistritos] = useState([]);
   const [formaciones, setFormaciones] = useState([]);
   const [especialidades, setEspecialidades] = useState([]);
+
+  const [departamentos, setDepartamentos] = useState([]);
+  const [provincias, setProvincias] = useState([]);
+  const [distritos, setDistritos] = useState([]);
+
+  const [departamentoSeleccionado, setDepartamentoSeleccionado] = useState("");
+  const [provinciaSeleccionada, setProvinciaSeleccionada] = useState("");
+
   const [mensaje, setMensaje] = useState("");
   const [error, setError] = useState("");
 
-  // ==========================
-  // 🔹 Cargar datos del backend
-  // ==========================
-  useEffect(() => {
-    const cargarDatos = async () => {
-      try {
-        const [resEscuelas, resDistritos, resFormaciones, resEspecialidades] =
-          await Promise.all([
-            fetch("http://localhost:5000/superadmin/escuelas"),
-            fetch("http://localhost:5000/superadmin/distritos"),
-            fetch("http://localhost:5000/superadmin/formaciones"),
-            fetch("http://localhost:5000/superadmin/especialidades")
-          ]);
+  // ==========================================================
+  // 1. LÓGICA DE CARGA INICIAL Y JERARQUÍA GEOGRÁFICA
+  // ==========================================================
+  // CrearAdmin.jsx (Reemplaza el bloque useCallback completo)
 
-        if (!resEscuelas.ok || !resDistritos.ok || !resFormaciones.ok || !resEspecialidades.ok) {
-          throw new Error("Error al cargar datos desde el servidor");
-        }
+  const cargarDatosAuxiliares = useCallback(async () => {
+    try {
+      // 🔑 CRÍTICO: Usamos AXIOS para todas las llamadas iniciales
+      // Axios devuelve el JSON directamente en .data
+      const [resDptos, resEscuelas, resFormaciones, resEspecialidades] =
+        await Promise.all([
+          axios.get(`${BASE_URL}/departamentos-geo`),
+          axios.get(`${BASE_URL}/escuelas`),
+          axios.get(`${BASE_URL}/formaciones`),
+          axios.get(`${BASE_URL}/especialidades`),
+        ]);
 
-        const dataEscuelas = await resEscuelas.json();
-        const dataDistritos = await resDistritos.json();
-        const dataFormaciones = await resFormaciones.json();
-        const dataEspecialidades = await resEspecialidades.json();
+      // NOTA: No necesitamos .json(), ya que Axios lo hizo. Accedemos a .data
+      setDepartamentos(resDptos.data.departamentos || []);
+      setEscuelas(resEscuelas.data.escuelas || []);
+      setFormaciones(resFormaciones.data.formaciones || []);
+      setEspecialidades(resEspecialidades.data.especialidades || []);
 
-        setEscuelas(dataEscuelas.escuelas || []);
-        setDistritos(dataDistritos.distritos || []);
-        setFormaciones(dataFormaciones.formaciones || []);
-        setEspecialidades(dataEspecialidades.especialidades || []);
-      } catch (err) {
-        console.error("❌ Error al cargar datos:", err);
-        setError("Error al cargar escuelas, distritos, formaciones o especialidades");
-      }
-    };
-
-    cargarDatos();
+      setError("");
+    } catch (err) {
+      console.error("❌ Error al cargar datos iniciales (AXIOS):", err);
+      // Si hay un error, el mensaje viene en la respuesta del servidor o es un error de red.
+      setError(
+        err.response?.data?.error || "Error al cargar datos auxiliares."
+      );
+    }
   }, []);
 
-  // ==========================
-  // 🔹 Manejar cambios en inputs
-  // ==========================
+  useEffect(() => {
+    cargarDatosAuxiliares();
+  }, [cargarDatosAuxiliares]);
+
+  // Cargar PROVINCIAS (usa axios)
+  useEffect(() => {
+    setProvincias([]);
+    setProvinciaSeleccionada("");
+    setDistritos([]);
+    setFormData((prev) => ({ ...prev, distrito_id: "" }));
+    if (departamentoSeleccionado) {
+      axios
+        .get(`${BASE_URL}/provincias/${departamentoSeleccionado}`)
+        .then((res) => setProvincias(res.data.provincias || []))
+        .catch((err) => console.error("Error cargando provincias", err));
+    }
+  }, [departamentoSeleccionado]);
+
+  // Cargar DISTRITOS (usa axios)
+  useEffect(() => {
+    setDistritos([]);
+    setFormData((prev) => ({ ...prev, distrito_id: "" }));
+    if (provinciaSeleccionada) {
+      axios
+        .get(`${BASE_URL}/distritos/${provinciaSeleccionada}`)
+        .then((res) => setDistritos(res.data.distritos || []))
+        .catch((err) => console.error("Error cargando distritos", err));
+    }
+  }, [provinciaSeleccionada]);
+
+  // ==========================================================
+  // 2. MANEJO DE ESTADO Y SUBMIT
+  // ==========================================================
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
+    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
-  // ==========================
-  // 🔹 Enviar formulario
-  // ==========================
   const handleSubmit = async (e) => {
     e.preventDefault();
     setMensaje("");
     setError("");
 
+    if (!formData.distrito_id) {
+      return setError(
+        "Por favor, complete la selección de ubicación hasta el Distrito."
+      );
+    }
+
     try {
-      const response = await fetch("http://localhost:5000/superadmin/crear-admin", {
+      const response = await fetch(`${BASE_URL}/crear-admin`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(formData),
       });
 
       const data = await response.json();
 
       if (response.ok) {
-        setMensaje(data.mensaje || "Administrador creado correctamente");
+        setMensaje(data.mensaje || "Administrador creado correctamente ✅");
+        // Reset del formulario después del éxito
         setFormData({
           nombres: "",
           apellidos: "",
@@ -101,8 +141,10 @@ function CrearAdmin() {
           id_formacion: "",
           id_especialidad: "",
           escuela_id: "",
-          experiencia_lab: ""
+          experiencia_lab: "",
         });
+        setDepartamentoSeleccionado("");
+        setProvinciaSeleccionada("");
       } else {
         setError(data.error || "Error al crear administrador");
       }
@@ -112,14 +154,13 @@ function CrearAdmin() {
     }
   };
 
-  // ==========================
-  // 🔹 Renderizado del formulario
-  // ==========================
+  // ==========================================================
+  // 3. RENDERIZADO DEL FORMULARIO (JSX)
+  // ==========================================================
   return (
     <div className="crear-admin-container">
       <div className="crear-admin-card">
         <h2>Registrar Administrador</h2>
-
         {mensaje && <div className="alert success">{mensaje}</div>}
         {error && <div className="alert error">{error}</div>}
 
@@ -144,7 +185,6 @@ function CrearAdmin() {
               required
             />
           </div>
-
           <div className="form-row">
             <input
               type="text"
@@ -184,14 +224,47 @@ function CrearAdmin() {
             />
           </div>
 
-          {/* UBICACIÓN */}
+          {/* UBICACIÓN (JERÁRQUICA) */}
           <h3>📍 Ubicación</h3>
           <div className="form-row">
+            {/* 1. SELECT DEPARTAMENTO */}
+            <select
+              value={departamentoSeleccionado}
+              onChange={(e) => setDepartamentoSeleccionado(e.target.value)}
+              required
+            >
+              <option value="">Seleccione departamento</option>
+              {departamentos.map((d) => (
+                <option key={d.departamento_id} value={d.departamento_id}>
+                  {d.nombre_departamento}
+                </option>
+              ))}
+            </select>
+
+            {/* 2. SELECT PROVINCIA */}
+            <select
+              value={provinciaSeleccionada}
+              onChange={(e) => setProvinciaSeleccionada(e.target.value)}
+              required
+              disabled={!departamentoSeleccionado}
+            >
+              <option value="">Seleccione provincia</option>
+              {provincias.map((p) => (
+                <option key={p.provincia_id} value={p.provincia_id}>
+                  {p.nombre_provincia}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="form-row">
+            {/* 3. SELECT DISTRITO (Guarda el ID final) */}
             <select
               name="distrito_id"
               value={formData.distrito_id}
               onChange={handleChange}
               required
+              disabled={!provinciaSeleccionada}
             >
               <option value="">Seleccione distrito</option>
               {distritos.map((d) => (
@@ -200,6 +273,8 @@ function CrearAdmin() {
                 </option>
               ))}
             </select>
+
+            {/* Dirección detallada */}
             <input
               type="text"
               name="direccion_detalle"
@@ -209,7 +284,7 @@ function CrearAdmin() {
             />
           </div>
 
-          {/* FORMACIÓN Y ESPECIALIDAD */}
+          {/* INFORMACIÓN PROFESIONAL */}
           <h3>🎓 Información Profesional</h3>
           <div className="form-row">
             <select
@@ -241,7 +316,6 @@ function CrearAdmin() {
             </select>
           </div>
 
-          {/* EXPERIENCIA LABORAL */}
           <div className="form-row">
             <input
               type="text"
@@ -250,9 +324,10 @@ function CrearAdmin() {
               onChange={handleChange}
               placeholder="Tiempo - Experiencia laboral"
             />
+            <div></div>
           </div>
 
-          {/* ESCUELA */}
+          {/* DATOS INSTITUCIONALES */}
           <h3>🏫 Datos Institucionales</h3>
           <select
             name="escuela_id"

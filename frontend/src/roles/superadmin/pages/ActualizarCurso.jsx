@@ -14,7 +14,7 @@ export default function ActualizarCurso() {
     horasTeoricas: "",
     horasPracticas: "",
     tipo: "Obligatorio",
-    escuela: "Escuela Profesional de Ingeniería de Sistemas"
+    escuela: "Escuela Profesional de Ingeniería de Sistemas",
   });
   const [cursoOriginal, setCursoOriginal] = useState(null);
 
@@ -60,7 +60,7 @@ export default function ActualizarCurso() {
         horasTeoricas: "",
         horasPracticas: "",
         tipo: "Obligatorio",
-        escuela: "Escuela Profesional de Ingeniería de Sistemas"
+        escuela: "Escuela Profesional de Ingeniería de Sistemas",
       });
       setCursoOriginal(null);
       setMensaje("");
@@ -75,14 +75,16 @@ export default function ActualizarCurso() {
     setMensaje("");
 
     try {
-      const response = await fetch(`http://localhost:5000/curso/${cursoSeleccionadoId}`);
-      
+      const response = await fetch(
+        `http://localhost:5000/curso/${cursoSeleccionadoId}`
+      );
+
       if (response.ok) {
         const data = await response.json();
-        
+
         // Guardar datos originales para comparar cambios
         setCursoOriginal(data);
-        
+
         // Actualizar estado del curso con los datos cargados
         setCurso({
           codigo: data.codigo || "",
@@ -92,13 +94,15 @@ export default function ActualizarCurso() {
           horasTeoricas: data.horas_teoricas?.toString() || "",
           horasPracticas: data.horas_practicas?.toString() || "",
           tipo: data.tipo || "Obligatorio",
-          escuela: "Escuela Profesional de Ingeniería de Sistemas"
+          escuela: "Escuela Profesional de Ingeniería de Sistemas",
         });
-        
+
         setMensaje("✅ Curso cargado correctamente");
       } else {
         const errorData = await response.json();
-        setMensaje(`❌ Error: ${errorData.error || "No se pudo cargar el curso"}`);
+        setMensaje(
+          `❌ Error: ${errorData.error || "No se pudo cargar el curso"}`
+        );
       }
     } catch (error) {
       setMensaje("❌ Error de conexión con el servidor");
@@ -110,9 +114,9 @@ export default function ActualizarCurso() {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setCurso(prev => ({
+    setCurso((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
@@ -120,12 +124,14 @@ export default function ActualizarCurso() {
     if (!cursoOriginal) return false;
 
     const cambios = [];
-    
+
     // Verificar cambios en créditos
     if (parseInt(curso.creditos) !== cursoOriginal.creditos) {
-      cambios.push(`Créditos cambiados de ${cursoOriginal.creditos} a ${curso.creditos}`);
+      cambios.push(
+        `Créditos cambiados de ${cursoOriginal.creditos} a ${curso.creditos}`
+      );
     }
-    
+
     // Verificar cambios en ciclo
     if (curso.ciclo !== cursoOriginal.ciclo) {
       cambios.push(`Ciclo cambiado de ${cursoOriginal.ciclo} a ${curso.ciclo}`);
@@ -133,12 +139,16 @@ export default function ActualizarCurso() {
 
     // Verificar cambios en horas teóricas
     if (parseInt(curso.horasTeoricas) !== cursoOriginal.horas_teoricas) {
-      cambios.push(`Horas teóricas cambiadas de ${cursoOriginal.horas_teoricas} a ${curso.horasTeoricas}`);
+      cambios.push(
+        `Horas teóricas cambiadas de ${cursoOriginal.horas_teoricas} a ${curso.horasTeoricas}`
+      );
     }
 
     // Verificar cambios en horas prácticas
     if (parseInt(curso.horasPracticas) !== cursoOriginal.horas_practicas) {
-      cambios.push(`Horas prácticas cambiadas de ${cursoOriginal.horas_practicas} a ${curso.horasPracticas}`);
+      cambios.push(
+        `Horas prácticas cambiadas de ${cursoOriginal.horas_practicas} a ${curso.horasPracticas}`
+      );
     }
 
     setCambiosPeligrosos(cambios);
@@ -177,36 +187,40 @@ export default function ActualizarCurso() {
 
   const actualizarCurso = async () => {
     try {
-      const response = await fetch(`http://localhost:5000/curso/actualizar/${cursoSeleccionadoId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          codigo: curso.codigo,
-          nombre: curso.nombre,
-          creditos: parseInt(curso.creditos),
-          ciclo: curso.ciclo,
-          horas_teoricas: parseInt(curso.horasTeoricas),
-          horas_practicas: parseInt(curso.horasPracticas),
-          tipo: curso.tipo,
-          usuario_modificacion: 1
-        }),
-      });
+      const response = await fetch(
+        `http://localhost:5000/curso/actualizar/${cursoSeleccionadoId}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            codigo: curso.codigo,
+            nombre: curso.nombre,
+            creditos: parseInt(curso.creditos),
+            ciclo: curso.ciclo,
+            horas_teoricas: parseInt(curso.horasTeoricas),
+            horas_practicas: parseInt(curso.horasPracticas),
+            tipo: curso.tipo,
+            usuario_modificacion: 1,
+          }),
+        }
+      );
 
       const data = await response.json();
 
       if (response.ok) {
         setMensaje("✅ Curso actualizado exitosamente");
         setMostrarAdvertencia(false);
-        
+
         // Recargar la lista de cursos para reflejar los cambios
         const refreshResponse = await fetch("http://localhost:5000/curso/");
         if (refreshResponse.ok) {
           const refreshedCursos = await refreshResponse.json();
           setCursos(refreshedCursos);
         }
-        
       } else {
-        setMensaje(`❌ Error: ${data.error || "No se pudo actualizar el curso"}`);
+        setMensaje(
+          `❌ Error: ${data.error || "No se pudo actualizar el curso"}`
+        );
         setMostrarAdvertencia(false);
       }
     } catch (error) {
@@ -230,7 +244,7 @@ export default function ActualizarCurso() {
       horasTeoricas: "",
       horasPracticas: "",
       tipo: "Obligatorio",
-      escuela: "Escuela Profesional de Ingeniería de Sistemas"
+      escuela: "Escuela Profesional de Ingeniería de Sistemas",
     });
     setCursoOriginal(null);
     setMensaje("");
@@ -239,7 +253,7 @@ export default function ActualizarCurso() {
   // Verificar si hay cambios en el formulario
   const hayCambios = () => {
     if (!cursoOriginal) return false;
-    
+
     return (
       curso.codigo !== cursoOriginal.codigo ||
       curso.nombre !== cursoOriginal.nombre ||
@@ -259,8 +273,8 @@ export default function ActualizarCurso() {
       <div className="seleccion-curso">
         <h3>1. Seleccionar Curso a Actualizar</h3>
         <div className="selector-curso">
-          <select 
-            value={cursoSeleccionadoId} 
+          <select
+            value={cursoSeleccionadoId}
             onChange={(e) => setCursoSeleccionadoId(e.target.value)}
             disabled={cargandoCursos}
           >
@@ -271,17 +285,16 @@ export default function ActualizarCurso() {
               </option>
             ))}
           </select>
-          <button 
-            onClick={limpiarSeleccion}
-            className="btn-cancelar"
-          >
+          <button onClick={limpiarSeleccion} className="btn-cancelar">
             🔄 Cambiar Curso
           </button>
         </div>
         {cargando && <div className="cargando-mini">Cargando curso...</div>}
       </div>
 
-      {cargandoCursos && <div className="cargando">Cargando lista de cursos...</div>}
+      {cargandoCursos && (
+        <div className="cargando">Cargando lista de cursos...</div>
+      )}
 
       {/* Formulario de actualización */}
       {cursoOriginal && (
@@ -291,14 +304,24 @@ export default function ActualizarCurso() {
           {/* Información del curso actual */}
           <div className="info-curso-actual">
             <h4>Curso Seleccionado:</h4>
-            <p><strong>{cursoOriginal.codigo} - {cursoOriginal.nombre}</strong></p>
-            <p><strong>Ciclo Actual:</strong> {cursoOriginal.ciclo} | <strong>Créditos:</strong> {cursoOriginal.creditos}</p>
+            <p>
+              <strong>
+                {cursoOriginal.codigo} - {cursoOriginal.nombre}
+              </strong>
+            </p>
+            <p>
+              <strong>Ciclo Actual:</strong> {cursoOriginal.ciclo} |{" "}
+              <strong>Créditos:</strong> {cursoOriginal.creditos}
+            </p>
           </div>
 
           {mostrarAdvertencia && (
             <div className="advertencia-matricula">
               <h4>⚠️ Advertencia: Cambios que afectan la matrícula</h4>
-              <p>Los siguientes cambios pueden impactar en estudiantes matriculados:</p>
+              <p>
+                Los siguientes cambios pueden impactar en estudiantes
+                matriculados:
+              </p>
               <ul>
                 {cambiosPeligrosos.map((cambio, index) => (
                   <li key={index}>{cambio}</li>
@@ -308,7 +331,10 @@ export default function ActualizarCurso() {
                 <button onClick={actualizarCurso} className="btn-confirmar">
                   ✅ Confirmar Actualización
                 </button>
-                <button onClick={cancelarActualizacion} className="btn-cancelar-advertencia">
+                <button
+                  onClick={cancelarActualizacion}
+                  className="btn-cancelar-advertencia"
+                >
                   ❌ Cancelar
                 </button>
               </div>
@@ -356,7 +382,12 @@ export default function ActualizarCurso() {
 
               <div className="grupo-formulario">
                 <label>Ciclo *</label>
-                <select name="ciclo" value={curso.ciclo} onChange={handleChange} required>
+                <select
+                  name="ciclo"
+                  value={curso.ciclo}
+                  onChange={handleChange}
+                  required
+                >
                   <option value="">-- Selecciona ciclo --</option>
                   <option value="I">I</option>
                   <option value="II">II</option>
@@ -408,32 +439,32 @@ export default function ActualizarCurso() {
 
               <div className="grupo-formulario">
                 <label>Escuela</label>
-                <input 
-                  type="text" 
-                  value={curso.escuela} 
-                  readOnly 
+                <input
+                  type="text"
+                  value={curso.escuela}
+                  readOnly
                   className="campo-readonly"
                 />
               </div>
             </div>
 
             <div className="botones-accion">
-              <button 
-                type="submit" 
+              <button
+                type="submit"
                 className="btn-actualizar"
                 disabled={!hayCambios()}
               >
                 {hayCambios() ? "💾 Actualizar Curso" : "✅ Sin cambios"}
               </button>
-              <button 
-                type="button" 
+              <button
+                type="button"
                 onClick={limpiarSeleccion}
                 className="btn-cancelar"
               >
                 🔄 Seleccionar Otro Curso
               </button>
-              <button 
-                type="button" 
+              <button
+                type="button"
                 onClick={() => navigate("/superadmin/consultar-cursos")}
                 className="btn-cancelar"
               >
@@ -442,20 +473,28 @@ export default function ActualizarCurso() {
             </div>
           </form>
 
-          {hayCambios() && cambiosPeligrosos.length > 0 && !mostrarAdvertencia && (
-            <div className="info-cambios">
-              <p>ℹ️ Algunos cambios pueden afectar estudiantes matriculados</p>
-            </div>
-          )}
+          {hayCambios() &&
+            cambiosPeligrosos.length > 0 &&
+            !mostrarAdvertencia && (
+              <div className="info-cambios">
+                <p>
+                  ℹ️ Algunos cambios pueden afectar estudiantes matriculados
+                </p>
+              </div>
+            )}
         </div>
       )}
 
       {mensaje && (
-        <div className={`mensaje ${
-          mensaje.includes('✅') ? 'success' : 
-          mensaje.includes('❌') ? 'error' : 
-          'warning'
-        }`}>
+        <div
+          className={`mensaje ${
+            mensaje.includes("✅")
+              ? "success"
+              : mensaje.includes("❌")
+              ? "error"
+              : "warning"
+          }`}
+        >
           {mensaje}
         </div>
       )}

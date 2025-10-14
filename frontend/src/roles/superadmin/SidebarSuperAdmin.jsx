@@ -111,7 +111,14 @@ function SidebarSuperAdmin({ usuario }) {
               >
                 🔗 Definir Prerrequisito
               </Link>
-              
+{/* 2. Listar (Ver la tabla) */}
+              <Link
+                to="/superadmin/listar-prerrequisitos"
+                className="submenu-link"
+              >
+                📋 Listar Prerrequisitos
+              </Link>
+
             </div>
           )}
         </div>
