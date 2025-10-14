@@ -1,0 +1,105 @@
+/* styles/crear-docente.css */
+.crear-docente-container {
+  margin-left: 240px; /* Mismo ancho que el sidebar */
+  padding: 2rem;
+  min-height: 100vh;
+  background-color: #fef7ff;
+}
+
+.crear-docente-form {
+  max-width: 650px;
+  margin: 0 auto;
+  background: white;
+  padding: 3rem;
+  border-radius: 15px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.crear-docente-form h2 {
+  font-size: 1.8rem;
+  font-weight: bold;
+  color: #ce2222;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #f76055;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: #374151;
+}
+
+.form-group input,
+.form-group select {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: border-color 0.3s ease;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: #f75555;
+  box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.1);
+}
+
+.form-group input::placeholder {
+  color: #9ca3af;
+}
+
+.btn-submit {
+  width: 100%;
+  background-color: #ce3622;
+  color: white;
+  border: none;
+  padding: 0.875rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.btn-submit:hover {
+  background-color: #f75555;
+}
+
+.alert-success {
+  background-color: #dcfce7;
+  color: #166534;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  border-left: 4px solid #22c55e;
+}
+
+.alert-error {
+  background-color: #fee2e2;
+  color: #991b1b;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  border-left: 4px solid #ef4444;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .crear-docente-container {
+    margin-left: 0;
+    padding: 1rem;
+  }
+  
+  .crear-docente-form {
+    padding: 1.5rem;
+  }
+}

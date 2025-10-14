@@ -1,0 +1,113 @@
+/* Contenedor principal */
+.crear-curso {
+  margin-left: 240px; /* mismo ancho que el sidebar */
+  padding: 2rem;
+  min-height: 100vh;
+  background-color: #f8fafc;
+}
+
+/* Formulario */
+.form-curso {
+  max-width: 650px;
+  margin: 0 auto;
+  background: white;
+  padding: 3rem;
+  border-radius: 15px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Título */
+.crear-curso h2 {
+  font-size: 1.8rem;
+  font-weight: bold;
+  color: #1f2937;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #000;
+}
+
+/* Labels + inputs */
+.form-curso label {
+  display: flex;
+  flex-direction: column;
+  font-weight: 500;
+  color: #374151;
+  font-size: 1rem;
+}
+
+.form-curso input,
+.form-curso select {
+  margin-top: 0.5rem;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: border-color 0.3s ease;
+}
+
+.form-curso input:focus,
+.form-curso select:focus {
+  outline: none;
+  border-color: #000;
+  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.1);
+}
+
+.form-curso input::placeholder {
+  color: #9ca3af;
+}
+
+/* Botón */
+.form-curso button {
+  width: 100%;
+  background-color: #000;
+  color: white;
+  border: none;
+  padding: 0.875rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.form-curso button:hover {
+  background-color: #333;
+}
+
+/* Mensajes */
+.mensaje {
+  max-width: 650px;
+  margin: 1.5rem auto;
+  padding: 1rem;
+  border-radius: 8px;
+  font-weight: 500;
+}
+
+.mensaje:has(> .success) {
+  background-color: #dcfce7;
+  color: #166534;
+  border-left: 4px solid #22c55e;
+}
+
+.mensaje:has(> .error) {
+  background-color: #fee2e2;
+  color: #991b1b;
+  border-left: 4px solid #ef4444;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .crear-curso {
+    margin-left: 0;
+    padding: 1rem;
+  }
+
+  .form-curso {
+    padding: 1.5rem;
+  }
+}

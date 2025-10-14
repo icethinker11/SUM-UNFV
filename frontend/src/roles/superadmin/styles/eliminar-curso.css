@@ -1,0 +1,124 @@
+.eliminar-curso {
+  max-width: 900px;
+  margin: 40px auto;
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 25px 35px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.eliminar-curso h2 {
+  text-align: center;
+  margin-bottom: 25px;
+  color: #2c3e50;
+}
+
+/* Mensaje de estado */
+.mensaje {
+  text-align: center;
+  margin: 15px 0;
+  font-weight: 500;
+  color: #333;
+  background-color: #f4f6f8;
+  padding: 10px;
+  border-radius: 6px;
+  border-left: 4px solid #3498db;
+}
+
+/* Tabla de cursos */
+.tabla-cursos {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 15px;
+}
+
+.tabla-cursos th,
+.tabla-cursos td {
+  border: 1px solid #e0e0e0;
+  padding: 10px 12px;
+  text-align: center;
+}
+
+.tabla-cursos th {
+  background-color: #3498db;
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.tabla-cursos tr:nth-child(even) {
+  background-color: #f8f9fa;
+}
+
+.tabla-cursos tr:hover {
+  background-color: #eef6ff;
+  transition: 0.2s;
+}
+
+/* Botones */
+.btn-eliminar {
+  background-color: #e74c3c;
+  color: #fff;
+  border: none;
+  padding: 7px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.btn-eliminar:hover {
+  background-color: #c0392b;
+}
+
+.btn-cancelar {
+  background-color: #7f8c8d;
+  color: #fff;
+  border: none;
+  padding: 7px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.btn-cancelar:hover {
+  background-color: #636e72;
+}
+
+/* Cuadro de confirmación */
+.confirmacion {
+  text-align: center;
+  padding: 25px;
+  background-color: #fff3cd;
+  border: 1px solid #ffeeba;
+  border-radius: 10px;
+  color: #856404;
+}
+
+.confirmacion p {
+  font-size: 16px;
+  margin-bottom: 20px;
+}
+
+.confirmacion .botones {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .tabla-cursos th,
+  .tabla-cursos td {
+    padding: 8px 5px;
+    font-size: 13px;
+  }
+
+  .eliminar-curso {
+    padding: 20px;
+  }
+
+  .confirmacion p {
+    font-size: 14px;
+  }
+}

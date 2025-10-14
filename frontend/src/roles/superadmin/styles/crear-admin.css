@@ -1,0 +1,100 @@
+.crear-admin-container {
+  margin-left: 200  px;
+  padding: 2rem;
+  min-height: 100vh;
+  background-color: #f9fafb;
+}
+
+.crear-admin-card {
+  background: #fff;
+  padding: 2rem 3rem;
+  border-radius: 15px;
+  box-shadow: 0 6px 15px rgba(0,0,0,0.05);
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.crear-admin-card h2 {
+  text-align: center;
+  font-size: 2rem;
+  color: #1e293b;
+  margin-bottom: 1.5rem;
+  border-bottom: 3px solid #000;
+  padding-bottom: 0.5rem;
+}
+
+h3 {
+  font-size: 1.2rem;
+  margin: 1.5rem 0 1rem;
+  color: #111827;
+  border-left: 4px solid #000;
+  padding-left: 0.5rem;
+}
+
+.form-row {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+input, select {
+  flex: 1;
+  padding: 0.8rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 10px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+input:focus, select:focus {
+  outline: none;
+  border-color: #000;
+  box-shadow: 0 0 0 3px rgba(0,0,0,0.1);
+}
+
+.btn-submit {
+  width: 100%;
+  background: #000;
+  color: white;
+  border: none;
+  padding: 0.9rem;
+  font-weight: bold;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+  margin-top: 1.5rem;
+}
+
+.btn-submit:hover {
+  background: #333;
+}
+
+.alert {
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.alert.success {
+  background: #dcfce7;
+  color: #166534;
+  border-left: 4px solid #22c55e;
+}
+
+.alert.error {
+  background: #fee2e2;
+  color: #991b1b;
+  border-left: 4px solid #ef4444;
+}
+
+@media (max-width: 768px) {
+  .crear-admin-container {
+    margin-left: 0;
+    padding: 1rem;
+  }
+
+  .form-row {
+    flex-direction: column;
+  }
+}

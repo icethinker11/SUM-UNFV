@@ -1,0 +1,68 @@
+/* styles/sidebar-docente.css */
+.sidebar-docente {
+  width: 240px;
+  height: 100vh;
+  background: linear-gradient(to bottom, #1d4ed8, #3b82f6) !important;
+  color: white;
+  padding: 1.5rem 1rem;
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  left: 0;
+  top: 0;
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+}
+
+.sidebar-docente h2 {
+  font-size: 1.25rem;
+  font-weight: bold;
+  margin-bottom: 1.5rem;
+  color: white;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.sidebar-docente p {
+  margin-bottom: 1rem;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.875rem;
+  padding: 0.5rem;
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 0.375rem;
+}
+
+.sidebar-docente nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.sidebar-docente a {
+  color: rgba(255, 255, 255, 0.9);
+  text-decoration: none;
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.sidebar-docente a:hover {
+  color: #fff !important;
+  background-color: rgba(255, 255, 255, 0.15);
+  transform: translateX(5px);
+}
+
+/* Efectos adicionales para mejorar la apariencia */
+.sidebar-docente a {
+  border-left: 3px solid transparent;
+}
+
+.sidebar-docente a:hover {
+  border-left: 3px solid #fff;
+}

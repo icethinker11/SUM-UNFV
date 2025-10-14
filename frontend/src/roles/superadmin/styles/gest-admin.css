@@ -1,0 +1,143 @@
+.gestion-admin {
+  margin-left: 240px; /* espacio del sidebar */
+  padding: 30px;
+  background-color: #f9fafb;
+  min-height: 100vh;
+  transition: all 0.3s ease;
+}
+
+.header-admin {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+}
+
+.header-admin h2 {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.alert-success,
+.alert-error {
+  padding: 12px 18px;
+  border-radius: 8px;
+  font-weight: 500;
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+.alert-success {
+  background-color: #dcfce7;
+  color: #166534;
+  border: 1px solid #16a34a;
+}
+
+.alert-error {
+  background-color: #fee2e2;
+  color: #b91c1c;
+  border: 1px solid #dc2626;
+}
+
+.table-wrapper {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  overflow-x: auto;
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+.admin-table th {
+  background-color: #2563eb;
+  color: white;
+  padding: 12px 10px;
+  text-align: left;
+  font-weight: 600;
+}
+
+.admin-table td {
+  padding: 10px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.admin-table tr:hover {
+  background-color: #f3f4f6;
+  transition: background 0.3s;
+}
+
+.admin-table input,
+.admin-table select {
+  width: 100%;
+  padding: 6px 8px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background-color: #fff;
+  font-size: 0.9rem;
+  outline: none;
+}
+
+.admin-table input:focus,
+.admin-table select:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-edit,
+.btn-delete,
+.btn-save,
+.btn-cancel {
+  border: none;
+  cursor: pointer;
+  padding: 6px 9px;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  transition: all 0.2s ease-in-out;
+  color: white;
+}
+
+.btn-edit {
+  background-color: #3b82f6;
+}
+.btn-edit:hover {
+  background-color: #2563eb;
+}
+
+.btn-delete {
+  background-color: #ef4444;
+}
+.btn-delete:hover {
+  background-color: #dc2626;
+}
+
+.btn-save {
+  background-color: #22c55e;
+}
+.btn-save:hover {
+  background-color: #16a34a;
+}
+
+.btn-cancel {
+  background-color: #6b7280;
+}
+.btn-cancel:hover {
+  background-color: #4b5563;
+}
+
+@media (max-width: 1024px) {
+  .gestion-admin {
+    margin-left: 0;
+    padding: 20px;
+  }
+}

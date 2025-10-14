@@ -1,0 +1,175 @@
+/* ======================================================
+   ESTILOS GENERALES Y CENTRADO DE LA PÁGINA
+   ====================================================== */
+
+.contenedor-prerrequisitos {
+    background: #fff;
+    border-radius: 12px;
+    padding: 30px;
+    width: 90%;
+    max-width: 800px;
+    margin: 40px auto; /* Clave para el centrado horizontal */
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1); 
+}
+
+.contenedor-prerrequisitos h2 {
+    text-align: center;
+    color: #1a237e;
+    font-weight: 700;
+    font-size: 1.8rem;
+    margin-bottom: 25px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 15px;
+}
+.contenedor-prerrequisitos h2 svg {
+    margin-right: 10px;
+    color: #3f51b5;
+}
+
+/* ======================================================
+   FORMULARIO DE DEFINICIÓN DE PRERREQUISITOS
+   ====================================================== */
+
+.formulario-prerreq {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 20px;
+    margin-bottom: 25px;
+    align-items: flex-start;
+}
+
+.grupo {
+    flex: 1;
+    min-width: 250px; 
+    display: flex;
+    flex-direction: column;
+}
+
+.grupo label {
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 5px;
+}
+
+select {
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    background-color: #fafafa;
+    font-size: 1rem;
+    height: 40px;
+    transition: border-color 0.2s;
+}
+
+.botones {
+    align-self: flex-end; 
+    display: flex;
+    gap: 10px;
+    min-width: 250px;
+}
+
+.btn-guardar, .btn-limpiar {
+    padding: 10px 15px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    flex-grow: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+}
+
+.btn-guardar {
+    background-color: #3f51b5;
+    color: white;
+}
+
+.btn-limpiar {
+    background-color: #9e9e9e;
+    color: white;
+}
+
+/* ======================================================
+   MENSAJES DE FEEDBACK
+   ====================================================== */
+
+.mensaje-box {
+    text-align: center;
+    font-weight: 600;
+    margin-top: 15px;
+    padding: 12px 20px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.mensaje.success {
+    background-color: #e8f5e9;
+    color: #2e7d32;
+    border: 1px solid #a5d6a7;
+}
+
+.mensaje.error {
+    background-color: #ffebee;
+    color: #d32f2f;
+    border: 1px solid #ef9a9a;
+}
+
+.info {
+    text-align: center;
+    color: #555;
+    font-style: italic;
+    margin-top: 15px;
+    padding: 10px 0;
+}
+
+/* ======================================================
+   TABLA DE PRERREQUISITOS (LISTAR Y ELIMINAR)
+   ====================================================== */
+
+.tabla-prerreq {
+    margin-top: 30px;
+    border-top: 2px dashed #ddd; 
+    padding-top: 20px;
+}
+
+.tabla-prerreq table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.tabla-prerreq th {
+    background-color: #3f51b5;
+    color: white;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.btn-eliminar {
+    background-color: #e53935;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.btn-eliminar:hover {
+    background-color: #c62828;
+}

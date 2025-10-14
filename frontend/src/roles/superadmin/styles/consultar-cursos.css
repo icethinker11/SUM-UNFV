@@ -1,0 +1,57 @@
+.consultar-cursos {
+  max-width: 1000px;
+  margin: 30px auto;
+  background: #ffffff;
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.1);
+}
+
+.consultar-cursos h2 {
+  text-align: center;
+  color: #2c3e50;
+  margin-bottom: 20px;
+}
+
+.filtros {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.filtros select {
+  margin-left: 10px;
+  padding: 6px 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background: #f9f9f9;
+}
+
+.tabla-cursos {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 15px;
+}
+
+.tabla-cursos th {
+  background-color: #34495e;
+  color: white;
+  padding: 10px;
+}
+
+.tabla-cursos td {
+  text-align: center;
+  padding: 8px;
+  border: 1px solid #ddd;
+}
+
+.tabla-cursos tr:nth-child(even) {
+  background-color: #f4f6f8;
+}
+
+.mensaje {
+  text-align: center;
+  color: #c0392b;
+  margin-bottom: 10px;
+}
+
