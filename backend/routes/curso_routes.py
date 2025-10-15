@@ -230,4 +230,55 @@ def consultar_cursos():
         print("Error en consultar_cursos:", e)
         return jsonify({"error": str(e)}), 500
     
-    
+# ===========================
+# VERIFICAR SI TIENE ESTUDIANTES MATRICULADOS
+# ===========================
+@curso_bp.route("/<int:curso_id>/estudiantes", methods=["GET"])
+def verificar_estudiantes_curso(curso_id):
+    try:
+        conn = get_db()
+        cur = conn.cursor()
+        
+        # Verificar si existen matrículas en secciones de este curso
+        cur.execute("""
+            SELECT COUNT(DISTINCT m.estudiante_id) 
+            FROM matricula m
+            INNER JOIN seccion s ON m.seccion_id = s.seccion_id
+            WHERE s.curso_id = %s AND m.estado = 'ACTIVO'
+        """, (curso_id,))
+        
+        count = cur.fetchone()[0]
+        cur.close()
+        conn.close()
+        
+        return jsonify({"tiene_estudiantes": count > 0, "cantidad": count}), 200
+        
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+# ===========================
+# VERIFICAR SI TIENE DOCENTE ASIGNADO
+# ===========================
+@curso_bp.route("/<int:curso_id>/docente", methods=["GET"])
+def verificar_docente_curso(curso_id):
+    try:
+        conn = get_db()
+        cur = conn.cursor()
+        
+        # Verificar si hay secciones con docente asignado
+        cur.execute("""
+            SELECT COUNT(*) 
+            FROM seccion 
+            WHERE curso_id = %s 
+              AND docente_id IS NOT NULL
+              AND estado IN ('PROGRAMADO', 'EN CURSO')
+        """, (curso_id,))
+        
+        count = cur.fetchone()[0]
+        cur.close()
+        conn.close()
+        
+        return jsonify({"tiene_docente": count > 0, "secciones": count}), 200
+        
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500      

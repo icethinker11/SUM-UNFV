@@ -1,0 +1,95 @@
+.main-content {
+  margin-left: 250px;
+  padding: 20px;
+  width: calc(100% - 250px);
+  background-color: #f8f9fa;
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+.encabezado-eliminar h1 {
+  font-size: 24px;
+  color: #2C3E50;
+  margin-bottom: 5px;
+}
+
+.encabezado-eliminar p {
+  color: #666;
+  margin-bottom: 10px;
+}
+
+.busqueda-eliminar {
+  position: relative;
+  max-width: 500px;
+  margin-bottom: 20px;
+}
+
+.busqueda-eliminar .icono-buscar {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.busqueda-eliminar input {
+  width: 100%;
+  padding: 10px 15px 10px 35px;
+  border: 1px solid #ccc;
+  border-radius: 20px;
+  outline: none;
+}
+
+.grid-cursos {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.tarjeta-curso {
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  transition: box-shadow 0.3s ease;
+}
+
+.tarjeta-curso:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.header-curso {
+  display: flex;
+  justify-content: space-between;
+  color: #666;
+  font-size: 14px;
+  margin-bottom: 10px;
+}
+
+.nombre-curso {
+  font-size: 18px;
+  font-weight: bold;
+  color: #2C3E50;
+  margin: 10px 0;
+}
+
+.boton-eliminar {
+  width: 100%;
+  background-color: #dc3545;
+  color: white;
+  padding: 10px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.3s;
+}
+
+.boton-eliminar:hover {
+  background-color: #c82333;
+}
+
+
+
+
+
