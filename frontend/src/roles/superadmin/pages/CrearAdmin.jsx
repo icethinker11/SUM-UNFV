@@ -5,10 +5,10 @@ import "../styles/crear-admin.css";
 const BASE_URL = "http://localhost:5000/superadmin";
 
 function CrearAdmin() {
-  // ESTADO PRINCIPAL (Todos los campos del formulario)
   const [formData, setFormData] = useState({
     nombres: "",
-    apellidos: "",
+    apellido_paterno: "",
+    apellido_materno: "",
     correo_personal: "",
     dni: "",
     telefono: "",
@@ -18,54 +18,42 @@ function CrearAdmin() {
     id_formacion: "",
     id_especialidad: "",
     escuela_id: "",
-    experiencia_lab: "",
+    experiencia_lab: ""
   });
 
-  // ESTADOS DE DATOS AUXILIARES Y JERARQUÍA DE UBICACIÓN
   const [escuelas, setEscuelas] = useState([]);
   const [formaciones, setFormaciones] = useState([]);
   const [especialidades, setEspecialidades] = useState([]);
-
   const [departamentos, setDepartamentos] = useState([]);
   const [provincias, setProvincias] = useState([]);
   const [distritos, setDistritos] = useState([]);
 
   const [departamentoSeleccionado, setDepartamentoSeleccionado] = useState("");
   const [provinciaSeleccionada, setProvinciaSeleccionada] = useState("");
-
   const [mensaje, setMensaje] = useState("");
   const [error, setError] = useState("");
 
   // ==========================================================
-  // 1. LÓGICA DE CARGA INICIAL Y JERARQUÍA GEOGRÁFICA
+  // 1️⃣ CARGA DE DATOS AUXILIARES
   // ==========================================================
-  // CrearAdmin.jsx (Reemplaza el bloque useCallback completo)
-
   const cargarDatosAuxiliares = useCallback(async () => {
     try {
-      // 🔑 CRÍTICO: Usamos AXIOS para todas las llamadas iniciales
-      // Axios devuelve el JSON directamente en .data
       const [resDptos, resEscuelas, resFormaciones, resEspecialidades] =
         await Promise.all([
           axios.get(`${BASE_URL}/departamentos-geo`),
           axios.get(`${BASE_URL}/escuelas`),
           axios.get(`${BASE_URL}/formaciones`),
-          axios.get(`${BASE_URL}/especialidades`),
+          axios.get(`${BASE_URL}/especialidades`)
         ]);
 
-      // NOTA: No necesitamos .json(), ya que Axios lo hizo. Accedemos a .data
       setDepartamentos(resDptos.data.departamentos || []);
       setEscuelas(resEscuelas.data.escuelas || []);
       setFormaciones(resFormaciones.data.formaciones || []);
       setEspecialidades(resEspecialidades.data.especialidades || []);
-
       setError("");
     } catch (err) {
       console.error("❌ Error al cargar datos iniciales (AXIOS):", err);
-      // Si hay un error, el mensaje viene en la respuesta del servidor o es un error de red.
-      setError(
-        err.response?.data?.error || "Error al cargar datos auxiliares."
-      );
+      setError(err.response?.data?.error || "Error al cargar datos auxiliares.");
     }
   }, []);
 
@@ -73,12 +61,15 @@ function CrearAdmin() {
     cargarDatosAuxiliares();
   }, [cargarDatosAuxiliares]);
 
-  // Cargar PROVINCIAS (usa axios)
+  // ==========================================================
+  // 2️⃣ JERARQUÍA DE UBICACIÓN (DEP → PROV → DIST)
+  // ==========================================================
   useEffect(() => {
     setProvincias([]);
     setProvinciaSeleccionada("");
     setDistritos([]);
     setFormData((prev) => ({ ...prev, distrito_id: "" }));
+
     if (departamentoSeleccionado) {
       axios
         .get(`${BASE_URL}/provincias/${departamentoSeleccionado}`)
@@ -87,10 +78,10 @@ function CrearAdmin() {
     }
   }, [departamentoSeleccionado]);
 
-  // Cargar DISTRITOS (usa axios)
   useEffect(() => {
     setDistritos([]);
     setFormData((prev) => ({ ...prev, distrito_id: "" }));
+
     if (provinciaSeleccionada) {
       axios
         .get(`${BASE_URL}/distritos/${provinciaSeleccionada}`)
@@ -100,7 +91,21 @@ function CrearAdmin() {
   }, [provinciaSeleccionada]);
 
   // ==========================================================
-  // 2. MANEJO DE ESTADO Y SUBMIT
+  // 3️⃣ VALIDACIÓN DE NOMBRES Y APELLIDOS
+  // ==========================================================
+  const validarTextoHumano = (texto) => {
+    if (!texto) return false;
+    const regexBasico =
+      /^(?=.{2,})([A-Za-zÁÉÍÓÚáéíóúÑñ]{2,})(\s[A-Za-zÁÉÍÓÚáéíóúÑñ]{2,})*$/;
+    if (!regexBasico.test(texto.trim())) return false;
+    if (/(.)\1{2,}/.test(texto)) return false;
+    if (/[aeiouAEIOU]{4,}/.test(texto) || /[^aeiouAEIOU\s]{4,}/.test(texto))
+      return false;
+    return true;
+  };
+
+  // ==========================================================
+  // 4️⃣ HANDLERS
   // ==========================================================
   const handleChange = (e) => {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -111,27 +116,37 @@ function CrearAdmin() {
     setMensaje("");
     setError("");
 
-    if (!formData.distrito_id) {
-      return setError(
-        "Por favor, complete la selección de ubicación hasta el Distrito."
-      );
-    }
+    // Validaciones básicas
+    if (!validarTextoHumano(formData.nombres))
+      return setError("Por favor, ingrese un nombre válido.");
+    if (!validarTextoHumano(formData.apellido_paterno))
+      return setError("Ingrese un apellido paterno válido.");
+    if (!validarTextoHumano(formData.apellido_materno))
+      return setError("Ingrese un apellido materno válido.");
+    if (!formData.distrito_id)
+      return setError("Seleccione un distrito antes de continuar.");
+
+    // 🔹 Unir los apellidos antes de enviarlos al backend
+    const datosAEnviar = {
+      ...formData,
+      apellidos: `${formData.apellido_paterno} ${formData.apellido_materno}`.trim(),
+    };
 
     try {
       const response = await fetch(`${BASE_URL}/crear-admin`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(datosAEnviar)
       });
 
       const data = await response.json();
 
       if (response.ok) {
         setMensaje(data.mensaje || "Administrador creado correctamente ✅");
-        // Reset del formulario después del éxito
         setFormData({
           nombres: "",
-          apellidos: "",
+          apellido_paterno: "",
+          apellido_materno: "",
           correo_personal: "",
           dni: "",
           telefono: "",
@@ -141,11 +156,12 @@ function CrearAdmin() {
           id_formacion: "",
           id_especialidad: "",
           escuela_id: "",
-          experiencia_lab: "",
+          experiencia_lab: ""
         });
         setDepartamentoSeleccionado("");
         setProvinciaSeleccionada("");
       } else {
+        // ⚠️ Mostrar error específico del backend
         setError(data.error || "Error al crear administrador");
       }
     } catch (err) {
@@ -155,7 +171,7 @@ function CrearAdmin() {
   };
 
   // ==========================================================
-  // 3. RENDERIZADO DEL FORMULARIO (JSX)
+  // 5️⃣ RENDER JSX
   // ==========================================================
   return (
     <div className="crear-admin-container">
@@ -176,15 +192,27 @@ function CrearAdmin() {
               placeholder="Nombres"
               required
             />
+          </div>
+
+          <div className="form-row">
             <input
               type="text"
-              name="apellidos"
-              value={formData.apellidos}
+              name="apellido_paterno"
+              value={formData.apellido_paterno}
               onChange={handleChange}
-              placeholder="Apellidos"
+              placeholder="Apellido paterno"
+              required
+            />
+            <input
+              type="text"
+              name="apellido_materno"
+              value={formData.apellido_materno}
+              onChange={handleChange}
+              placeholder="Apellido materno"
               required
             />
           </div>
+
           <div className="form-row">
             <input
               type="text"
@@ -224,10 +252,9 @@ function CrearAdmin() {
             />
           </div>
 
-          {/* UBICACIÓN (JERÁRQUICA) */}
+          {/* UBICACIÓN */}
           <h3>📍 Ubicación</h3>
           <div className="form-row">
-            {/* 1. SELECT DEPARTAMENTO */}
             <select
               value={departamentoSeleccionado}
               onChange={(e) => setDepartamentoSeleccionado(e.target.value)}
@@ -241,7 +268,6 @@ function CrearAdmin() {
               ))}
             </select>
 
-            {/* 2. SELECT PROVINCIA */}
             <select
               value={provinciaSeleccionada}
               onChange={(e) => setProvinciaSeleccionada(e.target.value)}
@@ -258,7 +284,6 @@ function CrearAdmin() {
           </div>
 
           <div className="form-row">
-            {/* 3. SELECT DISTRITO (Guarda el ID final) */}
             <select
               name="distrito_id"
               value={formData.distrito_id}
@@ -274,7 +299,6 @@ function CrearAdmin() {
               ))}
             </select>
 
-            {/* Dirección detallada */}
             <input
               type="text"
               name="direccion_detalle"
@@ -324,7 +348,6 @@ function CrearAdmin() {
               onChange={handleChange}
               placeholder="Tiempo - Experiencia laboral"
             />
-            <div></div>
           </div>
 
           {/* DATOS INSTITUCIONALES */}
@@ -343,7 +366,6 @@ function CrearAdmin() {
             ))}
           </select>
 
-          {/* BOTÓN */}
           <button type="submit" className="btn-submit">
             💾 Guardar Administrador
           </button>

@@ -6,15 +6,26 @@ import { FaEdit, FaTrash, FaSave, FaTimes } from "react-icons/fa";
 const GestionAdmins = () => {
   const [admins, setAdmins] = useState([]);
   const [escuelas, setEscuelas] = useState([]);
+  const [distritos, setDistritos] = useState([]);
+  const [formaciones, setFormaciones] = useState([]);
+  const [especialidades, setEspecialidades] = useState([]);
   const [editando, setEditando] = useState(null);
   const [form, setForm] = useState({});
+  const [formOriginal, setFormOriginal] = useState({});
   const [mensaje, setMensaje] = useState("");
   const [tipoMensaje, setTipoMensaje] = useState("");
 
   useEffect(() => {
     obtenerAdmins();
     obtenerEscuelas();
+    obtenerDistritos();
+    obtenerFormaciones();
+    obtenerEspecialidades();
   }, []);
+
+  // =============================
+  // 📋 Obtener datos del backend
+  // =============================
 
   const obtenerAdmins = async () => {
     try {
@@ -22,8 +33,7 @@ const GestionAdmins = () => {
       setAdmins(res.data.admins || []);
     } catch (error) {
       console.error("Error al obtener administradores:", error);
-      setMensaje("Error al cargar los administradores");
-      setTipoMensaje("error");
+      mostrarMensaje("Error al cargar los administradores", "error");
     }
   };
 
@@ -36,27 +46,78 @@ const GestionAdmins = () => {
     }
   };
 
-  const eliminarAdmin = async (id) => {
-    if (!window.confirm("¿Seguro que deseas eliminar este administrador?"))
-      return;
+  const obtenerDistritos = async () => {
     try {
-      await axios.delete(`http://localhost:5000/superadmin/admins/${id}`);
-      setMensaje("Administrador eliminado correctamente ✅");
-      setTipoMensaje("success");
-      obtenerAdmins();
+      const res = await axios.get("http://localhost:5000/superadmin/distritos");
+      setDistritos(res.data.distritos || []);
     } catch (error) {
-      console.error(error);
-      setMensaje("Error al eliminar el administrador ❌");
-      setTipoMensaje("error");
+      console.error("Error al cargar distritos:", error);
     }
   };
 
+  const obtenerFormaciones = async () => {
+    try {
+      const res = await axios.get("http://localhost:5000/superadmin/formaciones");
+      setFormaciones(res.data.formaciones || []);
+    } catch (error) {
+      console.error("Error al cargar formaciones:", error);
+    }
+  };
+
+  const obtenerEspecialidades = async () => {
+    try {
+      const res = await axios.get("http://localhost:5000/superadmin/especialidades");
+      setEspecialidades(res.data.especialidades || []);
+    } catch (error) {
+      console.error("Error al cargar especialidades:", error);
+    }
+  };
+
+  // =============================
+  // 🧠 Utilidades
+  // =============================
+
+  const mostrarMensaje = (texto, tipo) => {
+    setMensaje(texto);
+    setTipoMensaje(tipo);
+    setTimeout(() => setMensaje(""), 4000);
+  };
+
+  const ajustarFechaLocal = (fechaISO) => {
+    if (!fechaISO) return "";
+    const fecha = new Date(fechaISO);
+    const fechaLocal = new Date(fecha.getTime() + fecha.getTimezoneOffset() * 60000);
+    return fechaLocal.toISOString().split("T")[0];
+  };
+
+  const formatearFecha = (fechaISO) => {
+    if (!fechaISO) return "";
+    const fecha = new Date(fechaISO);
+    const dia = String(fecha.getUTCDate()).padStart(2, "0");
+    const mes = String(fecha.getUTCMonth() + 1).padStart(2, "0");
+    const anio = fecha.getUTCFullYear();
+    return `${dia}/${mes}/${anio}`;
+  };
+
+  // =============================
+  // ⚙️ CRUD - Editar / Guardar / Eliminar
+  // =============================
+
   const iniciarEdicion = (admin) => {
-    setEditando(admin.usuario_id);
-    setForm({
+    const [apellido_paterno = "", apellido_materno = ""] = (admin.apellidos || "").split(" ");
+    const datos = {
       ...admin,
-      fecha_nacimiento: admin.fecha_nacimiento || "",
-    });
+      apellido_paterno,
+      apellido_materno,
+      direccion_detalle: admin.direccion_detalle || "",
+      distrito_id: admin.distrito_id || "",
+      fecha_nacimiento: ajustarFechaLocal(admin.fecha_nacimiento),
+      id_formacion: admin.id_formacion || "",
+      id_especialidad: admin.id_especialidad || "",
+    };
+    setEditando(admin.usuario_id);
+    setForm(datos);
+    setFormOriginal(datos);
   };
 
   const cancelarEdicion = () => {
@@ -64,31 +125,121 @@ const GestionAdmins = () => {
     setForm({});
   };
 
-  const guardarCambios = async (id) => {
+  const eliminarAdmin = async (id) => {
+    if (!window.confirm("¿Seguro que deseas eliminar este administrador?")) return;
     try {
-      await axios.put(`http://localhost:5000/superadmin/admins/${id}`, {
-        ...form,
-      });
-      setMensaje("Administrador actualizado correctamente ✅");
-      setTipoMensaje("success");
-      cancelarEdicion();
+      await axios.delete(`http://localhost:5000/superadmin/admins/${id}`);
+      mostrarMensaje("Administrador eliminado correctamente ✅", "success");
       obtenerAdmins();
     } catch (error) {
       console.error(error);
-      setMensaje("Error al actualizar administrador ❌");
-      setTipoMensaje("error");
+      mostrarMensaje("Error al eliminar el administrador ❌", "error");
     }
   };
 
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+  // ✅ Verificación de cambios
+  const hayCambios = () => JSON.stringify(form) !== JSON.stringify(formOriginal);
+
+  // ✅ Validaciones mejoradas
+  const validarCampos = () => {
+    const errores = [];
+
+    const soloLetras = /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/;
+    const sinSentido = /^(.)\1+$/;
+
+    const validarNombre = (valor, campo) => {
+      if (!valor || !soloLetras.test(valor.trim())) {
+        errores.push(`El campo "${campo}" solo debe contener letras y espacios.`);
+      } else if (valor.trim().length < 2) {
+        errores.push(`El campo "${campo}" debe tener al menos 2 caracteres.`);
+      } else if (sinSentido.test(valor.trim().toLowerCase())) {
+        errores.push(`El campo "${campo}" no puede contener letras repetidas sin sentido.`);
+      } else if (/^[bcdfghjklmnpqrstvwxyz]$/i.test(valor.trim())) {
+        errores.push(`El campo "${campo}" no puede ser solo una consonante.`);
+      } else if (/^[aeiouáéíóú]$/i.test(valor.trim())) {
+        errores.push(`El campo "${campo}" no puede ser solo una vocal.`);
+      }
+    };
+
+    validarNombre(form.nombres, "Nombres");
+    validarNombre(form.apellido_paterno, "Apellido paterno");
+    validarNombre(form.apellido_materno, "Apellido materno");
+
+    if (!form.dni || !/^\d{8}$/.test(form.dni)) {
+      errores.push("El DNI debe tener exactamente 8 dígitos numéricos.");
+    }
+
+    if (!form.telefono || !/^\d{9}$/.test(form.telefono)) {
+      errores.push("El teléfono debe tener exactamente 9 dígitos numéricos.");
+    }
+
+    if (!form.correo || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.correo)) {
+      errores.push("El correo no tiene un formato válido.");
+    }
+
+    return errores;
   };
 
-  const formatearFecha = (fechaISO) => {
-    if (!fechaISO) return "";
-    const [year, month, day] = fechaISO.split("-");
-    return `${day}/${month}/${year}`;
+  const capitalizar = (texto) =>
+    texto
+      ? texto
+          .toLowerCase()
+          .trim()
+          .replace(/\b\w/g, (letra) => letra.toUpperCase())
+      : "";
+
+  const guardarCambios = async (id) => {
+    if (!hayCambios()) {
+      mostrarMensaje("No se detectaron cambios para guardar.", "error");
+      return;
+    }
+
+    const errores = validarCampos();
+    if (errores.length > 0) {
+      mostrarMensaje(errores.join(" "), "error");
+      return;
+    }
+
+    try {
+      const fechaUTC = form.fecha_nacimiento
+        ? new Date(form.fecha_nacimiento).toISOString().split("T")[0]
+        : null;
+
+      const apellidosCompletos = `${capitalizar(form.apellido_paterno)} ${capitalizar(
+        form.apellido_materno
+      )}`.trim();
+
+      const payload = {
+        nombres: capitalizar(form.nombres),
+        apellidos: apellidosCompletos,
+        dni: form.dni,
+        telefono: form.telefono,
+        fecha_nacimiento: fechaUTC,
+        correo: form.correo,
+        estado: form.estado,
+        direccion_detalle: form.direccion_detalle,
+        distrito_id: form.distrito_id || null,
+        id_formacion: form.id_formacion || null,
+        id_especialidad: form.id_especialidad || null,
+        experiencia_lab: form.experiencia_lab || null,
+        escuela_id: form.escuela_id,
+      };
+
+      await axios.put(`http://localhost:5000/superadmin/admins/${id}`, payload);
+      mostrarMensaje("Administrador actualizado correctamente ✅", "success");
+      cancelarEdicion();
+      obtenerAdmins();
+    } catch (error) {
+      console.error("Error al actualizar:", error);
+      mostrarMensaje("Error al actualizar administrador ❌", "error");
+    }
   };
+
+  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
+
+  // =============================
+  // 🧩 Renderizado
+  // =============================
 
   return (
     <div className="gestion-admin">
@@ -97,11 +248,7 @@ const GestionAdmins = () => {
       </div>
 
       {mensaje && (
-        <div
-          className={
-            tipoMensaje === "success" ? "alert-success" : "alert-error"
-          }
-        >
+        <div className={tipoMensaje === "success" ? "alert-success" : "alert-error"}>
           {mensaje}
         </div>
       )}
@@ -111,10 +258,12 @@ const GestionAdmins = () => {
           <thead>
             <tr>
               <th>Nombres</th>
-              <th>Apellidos</th>
+              <th>Apellido Paterno</th>
+              <th>Apellido Materno</th>
               <th>DNI</th>
               <th>Teléfono</th>
               <th>Dirección</th>
+              <th>Distrito</th>
               <th>Fecha Nacimiento</th>
               <th>Formación</th>
               <th>Cargo</th>
@@ -140,18 +289,21 @@ const GestionAdmins = () => {
                     <td>
                       <input
                         type="text"
-                        name="apellidos"
-                        value={form.apellidos || ""}
+                        name="apellido_paterno"
+                        value={form.apellido_paterno || ""}
                         onChange={handleChange}
                       />
                     </td>
                     <td>
                       <input
                         type="text"
-                        name="dni"
-                        value={form.dni || ""}
+                        name="apellido_materno"
+                        value={form.apellido_materno || ""}
                         onChange={handleChange}
                       />
+                    </td>
+                    <td>
+                      <input type="text" name="dni" value={form.dni || ""} onChange={handleChange} />
                     </td>
                     <td>
                       <input
@@ -164,10 +316,24 @@ const GestionAdmins = () => {
                     <td>
                       <input
                         type="text"
-                        name="direccion"
-                        value={form.direccion || ""}
+                        name="direccion_detalle"
+                        value={form.direccion_detalle || ""}
                         onChange={handleChange}
                       />
+                    </td>
+                    <td>
+                      <select
+                        name="distrito_id"
+                        value={form.distrito_id || ""}
+                        onChange={handleChange}
+                      >
+                        <option value="">Seleccione</option>
+                        {distritos.map((d) => (
+                          <option key={d.distrito_id} value={d.distrito_id}>
+                            {d.nombre_distrito}
+                          </option>
+                        ))}
+                      </select>
                     </td>
                     <td>
                       <input
@@ -179,28 +345,30 @@ const GestionAdmins = () => {
                     </td>
                     <td>
                       <select
-                        name="formacion"
-                        value={form.formacion || ""}
+                        name="id_formacion"
+                        value={form.id_formacion || ""}
                         onChange={handleChange}
                       >
                         <option value="">Seleccione</option>
-                        <option value="Licenciado">Licenciado</option>
-                        <option value="Ingeniero">Ingeniero</option>
-                        <option value="Magíster">Magíster</option>
-                        <option value="Doctor">Doctor</option>
-                        <option value="Técnico">Técnico</option>
+                        {formaciones.map((f) => (
+                          <option key={f.id_formacion} value={f.id_formacion}>
+                            {f.nombre_formacion}
+                          </option>
+                        ))}
                       </select>
                     </td>
                     <td>
                       <select
-                        name="cargo"
-                        value={form.cargo || ""}
+                        name="id_especialidad"
+                        value={form.id_especialidad || ""}
                         onChange={handleChange}
                       >
                         <option value="">Seleccione</option>
-                        <option value="Coordinador">Coordinador</option>
-                        <option value="Supervisor">Supervisor</option>
-                        <option value="Administrador">Administrador</option>
+                        {especialidades.map((e) => (
+                          <option key={e.id_especialidad} value={e.id_especialidad}>
+                            {e.nombre_especialidad}
+                          </option>
+                        ))}
                       </select>
                     </td>
                     <td>
@@ -226,20 +394,13 @@ const GestionAdmins = () => {
                       />
                     </td>
                     <td>
-                      <select
-                        name="estado"
-                        value={form.estado || ""}
-                        onChange={handleChange}
-                      >
+                      <select name="estado" value={form.estado || ""} onChange={handleChange}>
                         <option value="Activo">Activo</option>
                         <option value="Inactivo">Inactivo</option>
                       </select>
                     </td>
                     <td className="actions">
-                      <button
-                        className="btn-save"
-                        onClick={() => guardarCambios(admin.usuario_id)}
-                      >
+                      <button className="btn-save" onClick={() => guardarCambios(admin.usuario_id)}>
                         <FaSave />
                       </button>
                       <button className="btn-cancel" onClick={cancelarEdicion}>
@@ -250,35 +411,30 @@ const GestionAdmins = () => {
                 ) : (
                   <>
                     <td>{admin.nombres}</td>
-                    <td>{admin.apellidos}</td>
+                    <td>{(admin.apellidos || "").split(" ")[0] || ""}</td>
+                    <td>{(admin.apellidos || "").split(" ")[1] || ""}</td>
                     <td>{admin.dni}</td>
                     <td>{admin.telefono}</td>
-                    <td>{admin.direccion}</td>
+                    <td>{admin.direccion_detalle}</td>
+                    <td>{admin.nombre_distrito}</td>
                     <td>{formatearFecha(admin.fecha_nacimiento)}</td>
                     <td>{admin.formacion}</td>
                     <td>{admin.cargo}</td>
-                    <td>{admin.nombre_escuela}</td>
+                    <td>{admin.escuela}</td>
                     <td>{admin.correo}</td>
                     <td
                       style={{
-                        color:
-                          admin.estado === "Activo" ? "#16a34a" : "#dc2626",
+                        color: admin.estado === "Activo" ? "#16a34a" : "#dc2626",
                         fontWeight: 600,
                       }}
                     >
                       {admin.estado}
                     </td>
                     <td className="actions">
-                      <button
-                        className="btn-edit"
-                        onClick={() => iniciarEdicion(admin)}
-                      >
+                      <button className="btn-edit" onClick={() => iniciarEdicion(admin)}>
                         <FaEdit />
                       </button>
-                      <button
-                        className="btn-delete"
-                        onClick={() => eliminarAdmin(admin.usuario_id)}
-                      >
+                      <button className="btn-delete" onClick={() => eliminarAdmin(admin.usuario_id)}>
                         <FaTrash />
                       </button>
                     </td>
