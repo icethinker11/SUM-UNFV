@@ -18,6 +18,10 @@ import ActualizarCurso from "./roles/superadmin/pages/ActualizarCurso";
 import EliminarCurso from "./roles/superadmin/pages/EliminarCurso";
 import ConsultarCursos from "./roles/superadmin/pages/ConsultarCursos";
 import ConfigurarCursos from "./roles/superadmin/pages/ConfigurarCursos";
+import RegistrarHorario from "./roles/superadmin/pages/RegistrarHorario";
+import EditarHorario from "./roles/superadmin/pages/EditarHorario";
+import ListarHorario from "./roles/superadmin/pages/ListarHorario";
+import EliminarHorario from "./roles/superadmin/pages/EliminarHorario";
 
 // 🚨 CORRECCIÓN CLAVE: Usamos el nombre del archivo con el que estás trabajando.
 // El nombre del componente dentro del archivo es 'GestionPrerrequisitos', pero importamos el archivo.
@@ -97,6 +101,13 @@ function App() {
                         path="/superadmin/eliminar-prerrequisito" 
                         element={<GestionarPrerrequisitos />} 
                     />
+
+                    {/* Rutas de superadmin para la gestión de horarios*/}
+                    <Route path="/superadmin/registrar-horario" element={<RegistrarHorario />} />
+                    <Route path="/superadmin/listar-horario" element={<ListarHorario />} />
+                    <Route path="/superadmin/editar-horario" element={<EditarHorario />} />
+                    <Route path="/superadmin/eliminar-horario" element={<EliminarHorario/>} />
+
                 </>,
                 // Ruta por defecto (ejemplo)
                 "/superadmin/Crear-Admin" 

@@ -1,6 +1,7 @@
 /* styles/crear-alumno.css */
 .crear-alumno-container {
-  margin-left: 240px; /* Mismo ancho que el sidebar */
+  margin-left: 240px;
+  /* Mismo ancho que el sidebar */
   padding: 2rem;
   min-height: 100vh;
   background-color: #fcf1f1;

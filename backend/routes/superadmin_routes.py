@@ -652,5 +652,3 @@ def eliminar_prerrequisito(id_prerrequisito):
     finally:
         if cur: cur.close()
         if conn: conn.close()
-
-
