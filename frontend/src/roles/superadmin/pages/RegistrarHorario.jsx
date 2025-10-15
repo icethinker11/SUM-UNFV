@@ -13,76 +13,92 @@ export default function RegistrarHorario() {
   const [mensaje, setMensaje] = useState("");
   const [duracion, setDuracion] = useState("");
   const [turno, setTurno] = useState("");
-  const [contador, setContador] = useState(1); // número incremental local
 
-  const calcularDatos = (inicio, fin, dia) => {
+  // 🧠 Función auxiliar: abrevia día
+  const abreviarDia = (dia) => {
+    const map = {
+      Lunes: "LUN",
+      Martes: "MAR",
+      Miércoles: "MIÉ",
+      Jueves: "JUE",
+      Viernes: "VIE",
+      Sábado: "SAB",
+    };
+    return map[dia] || "";
+  };
+
+  // 🧠 Calcula el turno (M, T, N)
+  const obtenerTurnoLetra = (horaInicio) => {
+    if (!horaInicio) return "";
+    const [h] = horaInicio.split(":").map(Number);
+    if (h < 12) return "M";
+    if (h < 19) return "T";
+    return "N";
+  };
+
+  // 🧠 Calcula duración y turno textual
+  const calcularDatos = (inicio, fin) => {
     if (!inicio || !fin) {
       setDuracion("");
       setTurno("");
-      setBloque((prev) => ({ ...prev, codigo_bloque: "" }));
       return;
     }
 
     const [h1, m1] = inicio.split(":").map(Number);
     const [h2, m2] = fin.split(":").map(Number);
-    let totalMin = h2 * 60 + m2 - (h1 * 60 + m1);
+    const totalMin = h2 * 60 + m2 - (h1 * 60 + m1);
 
     if (totalMin <= 0) {
       setDuracion("⛔ Horario inválido");
-      setTurno("");
-      setBloque((prev) => ({ ...prev, codigo_bloque: "" }));
       return;
     }
-
     if (totalMin > 360) {
       setDuracion("⛔ Excede las 6 horas permitidas");
-      setTurno("");
-      setBloque((prev) => ({ ...prev, codigo_bloque: "" }));
       return;
     }
 
     const horas = Math.floor(totalMin / 60);
     const minutos = totalMin % 60;
-    const textoDuracion =
+    setDuracion(
       horas > 0
         ? `${horas} hora${horas > 1 ? "s" : ""}${
             minutos > 0 ? ` ${minutos} min` : ""
           }`
-        : `${minutos} min`;
-    setDuracion(textoDuracion);
+        : `${minutos} min`
+    );
 
-    // Detectar turno
-    let turnoLetra = "";
-    if (h1 < 12) {
-      setTurno("Mañana");
-      turnoLetra = "M";
-    } else if (h1 < 19) {
-      setTurno("Tarde");
-      turnoLetra = "T";
-    } else {
-      setTurno("Noche");
-      turnoLetra = "N";
-    }
-
-    // Generar código automático si hay día
-    if (dia) {
-      const codigo = `${dia.slice(0, 3).toUpperCase()}-${turnoLetra}-${String(
-        contador
-      ).padStart(3, "0")}`;
-      setBloque((prev) => ({ ...prev, codigo_bloque: codigo }));
-    }
+    if (h1 < 12) setTurno("Mañana");
+    else if (h1 < 19) setTurno("Tarde");
+    else setTurno("Noche");
   };
+
+  // 🧩 Genera código de bloque reactivo (simulación exacta de BD)
+  useEffect(() => {
+    const { dia, hora_inicio } = bloque;
+    if (!dia || !hora_inicio) {
+      setBloque((prev) => ({ ...prev, codigo_bloque: "" }));
+      return;
+    }
+
+    const prefijo = abreviarDia(dia);
+    const letraTurno = obtenerTurnoLetra(hora_inicio);
+
+    // Generamos un número pseudo incremental (solo visual)
+    const randomNum = Math.floor(Math.random() * 3) + 1; // 1 a 3
+
+    const codigo = `${prefijo}-${letraTurno}${randomNum}`;
+    setBloque((prev) => ({ ...prev, codigo_bloque: codigo }));
+  }, [bloque.dia, bloque.hora_inicio]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     const nuevoBloque = { ...bloque, [name]: value };
     setBloque(nuevoBloque);
 
-    if (name === "hora_inicio" || name === "hora_fin" || name === "dia") {
+    if (name === "hora_inicio" || name === "hora_fin") {
       calcularDatos(
         name === "hora_inicio" ? value : nuevoBloque.hora_inicio,
-        name === "hora_fin" ? value : nuevoBloque.hora_fin,
-        name === "dia" ? value : nuevoBloque.dia
+        name === "hora_fin" ? value : nuevoBloque.hora_fin
       );
     }
   };
@@ -109,16 +125,11 @@ export default function RegistrarHorario() {
 
       if (response.ok) {
         setMensaje("✅ Bloque horario registrado correctamente.");
-        setContador((prev) => prev + 1); // incrementar número de bloque
-        setBloque({
-          codigo_bloque: "",
-          dia: "",
-          hora_inicio: "",
-          hora_fin: "",
-          estado: "Activo",
-        });
-        setDuracion("");
-        setTurno("");
+        // Código real devuelto por BD (ya no cambia el mostrado)
+        setBloque((prev) => ({
+          ...prev,
+          codigo_bloque: data.codigo_bloque,
+        }));
       } else {
         setMensaje("❌ Error: " + (data.error || "Error desconocido."));
       }
@@ -177,19 +188,14 @@ export default function RegistrarHorario() {
         </label>
 
         <label>
-          Código del Bloque*:
+          Código del Bloque:
           <input
             type="text"
             name="codigo_bloque"
             value={bloque.codigo_bloque}
-            onChange={handleChange}
-            placeholder="Ejemplo: LUN-M1"
-            readOnly // 🔹 opcional si lo generas automáticamente desde el backend
+            readOnly
           />
-          <small>
-            Se genera automáticamente según el día y el turno. Ejemplo: LUN-M1,
-            MAR-T2, MIÉ-N3.
-          </small>
+          <small>Se genera automáticamente (ej: LUN-T1, MAR-M2, MIE-N3)</small>
         </label>
 
         <div className="info-automatica">
