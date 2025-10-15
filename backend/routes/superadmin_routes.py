@@ -15,7 +15,7 @@ from datetime import datetime
 superadmin_bp = Blueprint('superadmin_bp', __name__, url_prefix='/superadmin')
 
 # ======================================================
-# 🧩 FUNCIONES AUXILIARES
+# 🧩 FUNCIONES AUXILIARES ( LOY )
 # ======================================================
 
 def generar_correo_institucional(nombres, apellidos):
@@ -55,125 +55,139 @@ def enviar_credenciales(correo_destino, correo_institucional, contrasena):
         print("❌ Error al enviar correo:", str(e))
         return False
 
-# routes/superadmin_routes.py
 
 # ======================================================
-# 🧱 CREAR ADMINISTRADOR (FINAL CORRECCIÓN DE COLUMNAS)
+# 🧱 CREAR ADMINISTRADOR (FINAL, MEJORADO Y DETALLADO)
 # ======================================================
 @superadmin_bp.route("/crear-admin", methods=["POST"])
 def crear_admin():
     data = request.json
-    
-    # 1. Recolección de Datos (Ajuste de nombres para coincidir con el Frontend/BD)
-    nombres = data.get("nombres")
-    apellidos = data.get("apellidos")
-    dni = data.get("dni")
-    telefono = data.get("telefono")
-    correo_personal = data.get("correo_personal")
-    id_direccion = data.get("id_direccion")
-    
-    # 🔑 CORRECCIÓN 1: La variable que viene del frontend es 'direccion_detalle', no 'detalle'
-    direccion_detalle = data.get("direccion_detalle") 
-    
-    distrito_id = data.get("distrito_id") 
+
+    # === 1️⃣ VALIDACIONES DE CAMPOS OBLIGATORIOS ===
+    campos_obligatorios = [
+        "nombres", "apellidos", "dni", "telefono", "correo_personal",
+        "direccion_detalle", "distrito_id", "fecha_nacimiento",
+        "id_formacion", "id_especialidad", "escuela_id"
+    ]
+    for campo in campos_obligatorios:
+        if not data.get(campo):
+            return jsonify({"error": f"El campo '{campo}' es obligatorio."}), 400
+
+    # === 2️⃣ VALIDACIONES DE FORMATO ===
+    if not data["dni"].isdigit() or len(data["dni"]) != 8:
+        return jsonify({"error": "El DNI debe tener exactamente 8 dígitos numéricos."}), 400
+    if not data["telefono"].isdigit() or len(data["telefono"]) != 9:
+        return jsonify({"error": "El teléfono debe tener 9 dígitos numéricos."}), 400
+
+    # === 3️⃣ CONVERSIÓN DE FECHA ===
     fecha_nacimiento_str = data.get("fecha_nacimiento")
-    id_formacion = data.get("id_formacion")
-    id_especialidad = data.get("id_especialidad")
-    experiencia_lab = data.get("experiencia_lab")
-    escuela_id = data.get("escuela_id")
-    id_direccion = data.get("id_direccion")
+    try:
+        if "/" in fecha_nacimiento_str:
+            fecha_nacimiento_obj = datetime.strptime(fecha_nacimiento_str, "%d/%m/%Y").date()
+        else:
+            fecha_nacimiento_obj = datetime.strptime(fecha_nacimiento_str, "%Y-%m-%d").date()
+    except Exception:
+        return jsonify({"error": "Formato de fecha inválido. Use DD/MM/YYYY o YYYY-MM-DD."}), 400
 
-    # ... (Validaciones: se asume que las validaciones de DNI/Teléfono existen) ...
-    # ... (Generación de contraseñas y correos) ...
-
-    # Conversión de Fecha (Lógica de multi-formato, ya revisada)
-    fecha_nacimiento_obj = None
-    if fecha_nacimiento_str:
-        try:
-            fecha_nacimiento_obj = datetime.strptime(fecha_nacimiento_str, '%d/%m/%Y').date()
-        except ValueError:
-            try:
-                fecha_nacimiento_obj = datetime.strptime(fecha_nacimiento_str, '%Y-%m-%d').date()
-            except ValueError:
-                return jsonify({"error": "Formato de fecha de nacimiento inválido."}), 400
-        except TypeError:
-            pass
-    
-    correo_institucional = generar_correo_institucional(nombres, apellidos)
+    # === 4️⃣ CREACIÓN DE CREDENCIALES ===
+    correo_institucional = generar_correo_institucional(data["nombres"], data["apellidos"])
     contrasena_generada = generar_contrasena()
     contrasena_hash = hash_password(contrasena_generada)
 
     conn = None
     cur = None
+
     try:
         conn = get_db()
         cur = conn.cursor()
 
-        # PASO 1: Crear la DIRECCIÓN (Domicilio)
-        # 🔑 Si tu tabla usa id_distrito y retorna id_direccion, esta línea es CORRECTA.
-        cur.execute(
-            "INSERT INTO direccion (id_distrito, direccion_detalle) VALUES (%s, %s) RETURNING id_direccion",
-            (data.get("distrito_id"), data.get("direccion_detalle"))
-        )
-        direccion_id = cur.fetchone()[0] 
+        # === PASO 1: DIRECCIÓN ===
+        cur.execute("""
+            INSERT INTO direccion (id_distrito, direccion_detalle)
+            VALUES (%s, %s)
+            RETURNING id_direccion
+        """, (data["distrito_id"], data["direccion_detalle"]))
+        direccion_id = cur.fetchone()[0]
 
-        # PASO 2: Crear el USUARIO (Login)
-        cur.execute(
-            "INSERT INTO usuario (correo, contrasena, estado) VALUES (%s, %s, 'Activo') RETURNING usuario_id",
-            (correo_institucional, contrasena_hash),
-        )
+        # === PASO 2: USUARIO ===
+        cur.execute("""
+            INSERT INTO usuario (correo, contrasena, estado)
+            VALUES (%s, %s, 'Activo')
+            RETURNING usuario_id
+        """, (correo_institucional, contrasena_hash))
         usuario_id = cur.fetchone()[0]
-        
-        # PASO 3: Crear la PERSONA (Datos Personales Centralizados)
-        # 🔑 CORRECCIÓN CRÍTICA: Añadir direccion_id y usar la variable correcta
+
+        # === PASO 3: PERSONA ===
         cur.execute("""
             INSERT INTO persona (usuario_id, direccion_id, nombres, apellidos, dni, telefono, fecha_nacimiento)
-            VALUES (%s, %s, %s, %s, %s, %s, %s) RETURNING persona_id
+            VALUES (%s, %s, %s, %s, %s, %s, %s)
+            RETURNING persona_id
         """, (
-            usuario_id, direccion_id, data.get("nombres"), data.get("apellidos"), data.get("dni"), data.get("telefono"), fecha_nacimiento_obj
+            usuario_id, direccion_id, data["nombres"], data["apellidos"],
+            data["dni"], data["telefono"], fecha_nacimiento_obj
         ))
         persona_id = cur.fetchone()[0]
 
-        # PASO 4: Crear el ADMINISTRADOR (Perfil de Rol)
-        # 🔑 CORRECCIÓN: Eliminamos el campo redundante 'id_direccion'
+        # === PASO 4: ADMINISTRADOR ===
         cur.execute("""
-            INSERT INTO administrador (
-                persona_id, id_formacion, id_especialidad, experiencia_lab, escuela_id, estado
-            ) VALUES (%s,%s,%s,%s,%s,'Activo')
+            INSERT INTO administrador (persona_id, id_formacion, id_especialidad, experiencia_lab, escuela_id, estado)
+            VALUES (%s, %s, %s, %s, %s, 'Activo')
         """, (
-            persona_id, data.get("id_formacion"), data.get("id_especialidad"), data.get("experiencia_lab"), data.get("escuela_id")
+            persona_id, data["id_formacion"], data["id_especialidad"],
+            data.get("experiencia_lab"), data["escuela_id"]
         ))
 
-        # PASO 5: Asignar Rol 'Admin'
-        cur.execute(
-            "INSERT INTO usuario_rol (usuario_id, rol_id) VALUES (%s, (SELECT rol_id FROM rol WHERE nombre_rol='Admin'))",
-            (usuario_id,),
-        )
+        # === PASO 5: ROL ===
+        cur.execute("""
+            INSERT INTO usuario_rol (usuario_id, rol_id)
+            VALUES (%s, (SELECT rol_id FROM rol WHERE nombre_rol = 'Admin'))
+        """, (usuario_id,))
 
         conn.commit()
-        
-        # Enviar credenciales y devolver éxito
-        # Asumiendo que enviar_credenciales usa correo_personal, correo_institucional, contrasena_generada
-        return jsonify({"mensaje": f"Administrador creado exitosamente. Credenciales enviadas a {data.get('correo_personal')}."}), 201
 
+        return jsonify({
+            "mensaje": f"✅ Administrador creado exitosamente. Credenciales enviadas a {data['correo_personal']}."
+        }), 201
+
+    # === 6️⃣ ERRORES ESPECÍFICOS ===
     except psycopg2.IntegrityError as e:
-        if conn: conn.rollback()
-        # ... (Lógica de manejo de errores de DNI/Correo) ...
-        return jsonify({"error": "El DNI, correo o una clave foránea (Distrito, etc.) ya existe o es inválida."}), 400
+        if conn:
+            conn.rollback()
+        error_text = str(e).lower()
+
+        if "dni" in error_text:
+            msg = "❌ El DNI ingresado ya está registrado."
+        elif "correo" in error_text:
+            msg = "❌ El correo institucional generado ya existe."
+        elif "telefono" in error_text:
+            msg = "❌ El teléfono ingresado ya está registrado."
+        elif "id_distrito" in error_text:
+            msg = "❌ El distrito seleccionado no existe."
+        elif "id_formacion" in error_text:
+            msg = "❌ La formación seleccionada no existe."
+        elif "id_especialidad" in error_text:
+            msg = "❌ La especialidad seleccionada no existe."
+        elif "escuela_id" in error_text:
+            msg = "❌ La escuela seleccionada no existe."
+        else:
+            msg = "⚠️ Error de integridad en la base de datos. Revise los datos ingresados."
+        return jsonify({"error": msg}), 400
 
     except Exception as e:
-        if conn: conn.rollback()
-        print(f"❌ Error al crear administrador: {e}")
-        return jsonify({"error": "Error interno del servidor. No se pudo completar el registro."}), 500
-    
-    finally:
-        if cur: cur.close()
-        if conn: conn.close()
+        if conn:
+            conn.rollback()
+        print(f"🔥 Error inesperado al crear administrador: {e}")
+        return jsonify({"error": f"Error interno del servidor: {str(e)}"}), 500
 
-# routes/superadmin_routes.py
+    finally:
+        if cur:
+            cur.close()
+        if conn:
+            conn.close()
+
 
 # ======================================================
-# 📋 LISTAR ADMINISTRADORES (COMPATIBLE CON PERSONA)
+# 📋 LISTAR ADMINISTRADORES
 # ======================================================
 @superadmin_bp.route("/admins", methods=["GET"])
 def listar_admins():
@@ -182,55 +196,39 @@ def listar_admins():
     try:
         conn = get_db()
         cur = conn.cursor(cursor_factory=RealDictCursor)
-        
         cur.execute("""
         SELECT 
             u.usuario_id, 
             p.nombres, p.apellidos, p.dni, p.telefono, p.fecha_nacimiento, 
-            
-            -- 🔑 CRÍTICO: Concatenamos el domicilio y distrito en una columna 'direccion'
-            (d.direccion_detalle || ', ' || dist.nombre_distrito) AS direccion,
-            
+            d.direccion_detalle, dist.nombre_distrito, dist.distrito_id,
             a.id_formacion, f.nombre_formacion AS formacion,
             a.id_especialidad, e.nombre_especialidad AS cargo,
-            a.experiencia_lab, 
-            a.escuela_id, es.nombre_escuela AS escuela,
-            u.correo, 
-            a.estado
+            a.experiencia_lab, a.escuela_id, es.nombre_escuela AS escuela,
+            u.correo, a.estado
         FROM usuario u
         JOIN persona p ON u.usuario_id = p.usuario_id 
         JOIN administrador a ON p.persona_id = a.persona_id 
         JOIN usuario_rol ur ON u.usuario_id = ur.usuario_id
         JOIN rol r ON ur.rol_id = r.rol_id
-        
-        -- 🔑 1. JOIN a DIRECCION: persona.direccion_id (FK) = direccion.id_direccion (PK)
         LEFT JOIN direccion d ON p.direccion_id = d.id_direccion
-        
-        -- 🔑 2. JOIN a DISTRITO: direccion.id_distrito (FK) = distrito.distrito_id (PK)
         LEFT JOIN distrito dist ON d.id_distrito = dist.distrito_id 
-        
         LEFT JOIN formacion f ON a.id_formacion = f.id_formacion
         LEFT JOIN especialidad e ON a.id_especialidad = e.id_especialidad
         LEFT JOIN escuela es ON a.escuela_id = es.escuela_id
-        
         WHERE r.nombre_rol = 'Admin'
         ORDER BY p.nombres ASC
-    """)
-    
+        """)
         admins = cur.fetchall()
         return jsonify({"admins": admins})
-        
     except Exception as e:
-        print("Error al listar admins:", str(e))
-        return jsonify({"error": "Error al listar administradores. Verifique los JOINS."}), 500
-        
+        print("Error al listar admins:", e)
+        return jsonify({"error": str(e)}), 500
     finally:
         if cur: cur.close()
         if conn: conn.close()
-# routes/superadmin_routes.py
 
 # ======================================================
-# ✏️ MODIFICAR ADMINISTRADOR (ACTUALIZADO para 3 TABLAS)
+# ✏️ MODIFICAR ADMINISTRADOR
 # ======================================================
 @superadmin_bp.route("/admins/<int:usuario_id>", methods=["PUT"])
 def modificar_admin(usuario_id):
@@ -241,86 +239,122 @@ def modificar_admin(usuario_id):
         conn = get_db()
         cur = conn.cursor()
 
-        # 1. ACTUALIZAR USUARIO (Correo)
-        if "correo" in data and data["correo"]:
-             cur.execute("UPDATE usuario SET correo = %s WHERE usuario_id = %s", 
-                         (data["correo"], usuario_id))
+        # 1️⃣ ACTUALIZAR USUARIO
+        if data.get("correo"):
+            cur.execute("UPDATE usuario SET correo = %s WHERE usuario_id = %s", (data["correo"], usuario_id))
 
-        # 2. OBTENER persona_id y direccion_id asociados a este usuario
-        cur.execute("""
-            SELECT p.persona_id, p.direccion_id 
-            FROM persona p
-            WHERE p.usuario_id = %s
-        """, (usuario_id,))
-        resultado = cur.fetchone()
-        if not resultado:
-            return jsonify({"error": "Usuario o Persona no encontrado para modificar."}), 404
-        
-        persona_id = resultado[0]
-        direccion_id = resultado[1]
+        # 2️⃣ OBTENER persona_id y direccion_id
+        cur.execute("SELECT persona_id, direccion_id FROM persona WHERE usuario_id = %s", (usuario_id,))
+        persona = cur.fetchone()
+        if not persona:
+            return jsonify({"error": "Persona no encontrada"}), 404
+        persona_id, direccion_id = persona
 
-        # 3. ACTUALIZAR PERSONA (Datos Personales y Ubicación)
+        # 3️⃣ ACTUALIZAR PERSONA
         cur.execute("""
-            UPDATE persona
-            SET nombres = %s, apellidos = %s, dni = %s, telefono = %s, fecha_nacimiento = %s
+            UPDATE persona SET
+                nombres = %s, apellidos = %s, dni = %s,
+                telefono = %s, fecha_nacimiento = %s
             WHERE persona_id = %s
-        """, (
-            data.get("nombres"), data.get("apellidos"), data.get("dni"), data.get("telefono"),
-            data.get("fecha_nacimiento"), persona_id
-        ))
+        """, (data.get("nombres"), data.get("apellidos"), data.get("dni"),
+              data.get("telefono"), data.get("fecha_nacimiento"), persona_id))
 
-        # 4. ACTUALIZAR DIRECCION (Detalle de la dirección y distrito_id)
-        # Nota: Asume que el frontend envía 'direccion_detalle' y 'distrito_id'
-        if direccion_id: # Solo actualizamos si ya tiene una dirección registrada
-             cur.execute("""
-                 UPDATE direccion
-                 SET detalle = %s, distrito_id = %s
-                 WHERE direccion_id = %s
-             """, (
-                 data.get("direccion_detalle"), data.get("distrito_id"), direccion_id
-             ))
-        
-        # 5. ACTUALIZAR ADMINISTRADOR (Datos de Rol/Institucionales)
+        # 4️⃣ ACTUALIZAR DIRECCIÓN
+        if direccion_id:
+            cur.execute("""
+                UPDATE direccion SET direccion_detalle = %s, id_distrito = %s
+                WHERE id_direccion = %s
+            """, (data.get("direccion_detalle"), data.get("distrito_id"), direccion_id))
+        else:
+            cur.execute("""
+                INSERT INTO direccion (direccion_detalle, id_distrito)
+                VALUES (%s, %s) RETURNING id_direccion
+            """, (data.get("direccion_detalle"), data.get("distrito_id")))
+            nueva_direccion = cur.fetchone()[0]
+            cur.execute("UPDATE persona SET direccion_id = %s WHERE persona_id = %s",
+                        (nueva_direccion, persona_id))
+
+        # 5️⃣ ACTUALIZAR ADMINISTRADOR
         cur.execute("""
-            UPDATE administrador
-            SET id_formacion = %s, id_especialidad = %s, experiencia_lab = %s, 
-                escuela_id = %s, estado = %s
+            UPDATE administrador SET
+                id_formacion = %s, id_especialidad = %s,
+                experiencia_lab = %s, escuela_id = %s, estado = %s
             WHERE persona_id = %s
-        """, (
-            data.get("id_formacion"), data.get("id_especialidad"), data.get("experiencia_lab"), 
-            data.get("escuela_id"), data.get("estado"), persona_id
-        ))
+        """, (data.get("id_formacion"), data.get("id_especialidad"),
+              data.get("experiencia_lab"), data.get("escuela_id"),
+              data.get("estado"), persona_id))
 
         conn.commit()
         return jsonify({"mensaje": "Administrador actualizado correctamente ✅"})
-
     except Exception as e:
         if conn: conn.rollback()
-        print("❌ Error al modificar administrador:", str(e))
-        return jsonify({"error": "Error al actualizar administrador"}), 500
-    
+        print("❌ Error al modificar admin:", e)
+        return jsonify({"error": str(e)}), 500
     finally:
         if cur: cur.close()
         if conn: conn.close()
 
 # ======================================================
-# ❌ ELIMINAR ADMINISTRADOR
+# ❌ ELIMINAR ADMINISTRADOR (CORREGIDO)
 # ======================================================
 @superadmin_bp.route("/admins/<int:usuario_id>", methods=["DELETE"])
 def eliminar_admin(usuario_id):
+    conn = None
+    cur = None
     try:
         conn = get_db()
         cur = conn.cursor()
-        cur.execute("DELETE FROM administrador WHERE usuario_id = %s", (usuario_id,))
+
+        # 1️⃣ Obtener persona_id asociado al usuario
+        cur.execute("SELECT persona_id FROM persona WHERE usuario_id = %s", (usuario_id,))
+        persona = cur.fetchone()
+        if not persona:
+            return jsonify({"error": "No se encontró persona asociada a este usuario"}), 404
+
+        persona_id = persona[0]
+
+        # 2️⃣ Eliminar primero de administrador
+        cur.execute("DELETE FROM administrador WHERE persona_id = %s", (persona_id,))
+
+        # 3️⃣ Eliminar la persona
+        cur.execute("DELETE FROM persona WHERE persona_id = %s", (persona_id,))
+
+        # 4️⃣ Eliminar relaciones en usuario_rol y luego el usuario
         cur.execute("DELETE FROM usuario_rol WHERE usuario_id = %s", (usuario_id,))
         cur.execute("DELETE FROM usuario WHERE usuario_id = %s", (usuario_id,))
+
         conn.commit()
-        cur.close()
-        conn.close()
-        return jsonify({"mensaje": "Administrador eliminado correctamente"})
+        return jsonify({"mensaje": "Administrador eliminado correctamente ✅"})
+
     except Exception as e:
+        if conn:
+            conn.rollback()
         print("Error al eliminar admin:", e)
         return jsonify({"error": "Error al eliminar administrador"}), 500
+
+    finally:
+        if cur:
+            cur.close()
+        if conn:
+            conn.close()
+
+# ======================================================
+# 🌍 LISTAR DISTRITOS
+# ======================================================
+@superadmin_bp.route("/distritos", methods=["GET"])
+def listar_distritos():
+    try:
+        conn = get_db()
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+        cur.execute("SELECT distrito_id, nombre_distrito FROM distrito ORDER BY nombre_distrito ASC")
+        distritos = cur.fetchall()
+        return jsonify({"distritos": distritos})
+    except Exception as e:
+        print("Error al listar distritos:", e)
+        return jsonify({"error": str(e)}), 500
+    finally:
+        if cur: cur.close()
+        if conn: conn.close()
 
 # ======================================================
 # 🔄 CAMBIAR ESTADO (Activo/Inactivo)
