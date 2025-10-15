@@ -66,3 +66,23 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
+/* 🖨️ SOLO mostrar el contenido del área principal al imprimir */
+@media print {
+  /* Ocultar sidebar y otros elementos innecesarios */
+  .sidebar, .navbar, .footer, .no-print {
+    display: none !important;
+  }
+
+  /* Centrar el contenido impreso */
+  body {
+    background: white;
+    -webkit-print-color-adjust: exact !important;
+  }
+
+  .print-area {
+    margin: 0 auto;
+    width: 90%;
+  }
+}
+
+

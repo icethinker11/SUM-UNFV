@@ -40,3 +40,26 @@
 .read-the-docs {
   color: #888;
 }
+/* 🖨️ SOLO mostrar el contenido del área principal al imprimir */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+
+  .consultar-cursos, 
+  .consultar-cursos * {
+    visibility: visible;
+  }
+
+  .consultar-cursos {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+
+  /* oculta los botones y filtros */
+  .no-imprimir {
+    display: none !important;
+  }
+}

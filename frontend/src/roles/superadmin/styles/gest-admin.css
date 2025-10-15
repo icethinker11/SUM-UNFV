@@ -1,11 +1,13 @@
 .gestion-admin {
   margin-left: 240px; /* espacio del sidebar */
   padding: 30px;
-  background-color: #f9fafb;
+  background: linear-gradient(to bottom right, #f8fafc, #eef2ff);
   min-height: 100vh;
   transition: all 0.3s ease;
+  font-family: "Inter", system-ui, -apple-system, sans-serif;
 }
 
+/* ---------- ENCABEZADO ---------- */
 .header-admin {
   display: flex;
   justify-content: space-between;
@@ -14,73 +16,105 @@
 }
 
 .header-admin h2 {
-  font-size: 1.8rem;
+  font-size: 2rem;
   font-weight: 700;
-  color: #1f2937;
+  color: #1e293b;
+  letter-spacing: 0.5px;
 }
 
+/* ---------- ALERTAS ---------- */
 .alert-success,
 .alert-error {
-  padding: 12px 18px;
-  border-radius: 8px;
-  font-weight: 500;
-  margin-bottom: 15px;
+  padding: 14px 20px;
+  border-radius: 10px;
+  font-weight: 600;
+  margin-bottom: 20px;
   text-align: center;
+  font-size: 0.95rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
 
 .alert-success {
-  background-color: #dcfce7;
+  background: #dcfce7;
   color: #166534;
-  border: 1px solid #16a34a;
+  border-left: 5px solid #16a34a;
 }
 
 .alert-error {
-  background-color: #fee2e2;
+  background: #fee2e2;
   color: #b91c1c;
-  border: 1px solid #dc2626;
+  border-left: 5px solid #dc2626;
 }
 
+/* ---------- TABLA ---------- */
 .table-wrapper {
   background: white;
-  padding: 20px;
-  border-radius: 12px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-  overflow-x: auto;
+  padding: 25px;
+  border-radius: 14px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  overflow-x: auto; /* scroll horizontal */
+  scrollbar-width: thin;
+  scrollbar-color: #94a3b8 #f1f5f9;
 }
 
+.table-wrapper::-webkit-scrollbar {
+  height: 8px;
+}
+
+.table-wrapper::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 10px;
+}
+
+.table-wrapper::-webkit-scrollbar-thumb {
+  background-color: #94a3b8;
+  border-radius: 10px;
+}
+
+/* ---------- ESTILO DE TABLA ---------- */
 .admin-table {
-  width: 100%;
+  width: max-content; /* evita saltos de línea */
+  min-width: 100%;
   border-collapse: collapse;
-  font-size: 0.95rem;
+  font-size: 0.93rem;
 }
 
 .admin-table th {
-  background-color: #2563eb;
+  background: linear-gradient(90deg, #2563eb, #1d4ed8);
   color: white;
-  padding: 12px 10px;
+  padding: 12px 14px;
   text-align: left;
   font-weight: 600;
+  white-space: nowrap;
 }
 
 .admin-table td {
-  padding: 10px;
-  border-bottom: 1px solid #e5e7eb;
+  padding: 10px 14px;
+  border-bottom: 1px solid #e2e8f0;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.admin-table tr:nth-child(even) {
+  background: #f8fafc;
 }
 
 .admin-table tr:hover {
-  background-color: #f3f4f6;
-  transition: background 0.3s;
+  background: #eef2ff;
+  transition: background 0.3s ease;
 }
 
+/* ---------- INPUTS Y SELECTS ---------- */
 .admin-table input,
 .admin-table select {
   width: 100%;
-  padding: 6px 8px;
-  border: 1px solid #d1d5db;
+  padding: 7px 8px;
+  border: 1px solid #cbd5e1;
   border-radius: 6px;
   background-color: #fff;
   font-size: 0.9rem;
   outline: none;
+  color: #334155;
 }
 
 .admin-table input:focus,
@@ -89,6 +123,7 @@
   box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
 }
 
+/* ---------- BOTONES ---------- */
 .actions {
   display: flex;
   gap: 8px;
@@ -100,44 +135,54 @@
 .btn-cancel {
   border: none;
   cursor: pointer;
-  padding: 6px 9px;
-  border-radius: 6px;
+  padding: 7px 10px;
+  border-radius: 8px;
   font-size: 0.95rem;
   transition: all 0.2s ease-in-out;
   color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .btn-edit {
-  background-color: #3b82f6;
+  background: #3b82f6;
 }
 .btn-edit:hover {
-  background-color: #2563eb;
+  background: #1d4ed8;
 }
 
 .btn-delete {
-  background-color: #ef4444;
+  background: #ef4444;
 }
 .btn-delete:hover {
-  background-color: #dc2626;
+  background: #dc2626;
 }
 
 .btn-save {
-  background-color: #22c55e;
+  background: #22c55e;
 }
 .btn-save:hover {
-  background-color: #16a34a;
+  background: #16a34a;
 }
 
 .btn-cancel {
-  background-color: #6b7280;
+  background: #6b7280;
 }
 .btn-cancel:hover {
-  background-color: #4b5563;
+  background: #4b5563;
 }
 
+/* ---------- RESPONSIVE ---------- */
 @media (max-width: 1024px) {
   .gestion-admin {
     margin-left: 0;
     padding: 20px;
+  }
+  .table-wrapper {
+    padding: 15px;
+  }
+  .header-admin h2 {
+    font-size: 1.6rem;
   }
 }
