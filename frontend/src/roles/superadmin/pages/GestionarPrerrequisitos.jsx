@@ -1,219 +1,320 @@
-import React, { useEffect, useState } from "react";
-import axios from "axios";
-import "../styles/prerrequisitos.css"; 
-import { FaSave, FaTrash, FaBroom } from "react-icons/fa";
-import { ListChecks } from "lucide-react"; // AJUSTE: Usamos ListChecks para el título (como en el CSS)
+import React, { useState, useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import { toast } from 'react-toastify';
+import "react-toastify/dist/ReactToastify.css";
+import { Search, Plus, Trash2, X, BookOpen, Check, Edit } from 'lucide-react';
 
+// -----------------------------------------------------------------------------------
+// ¡ATENCIÓN! CORRECCIÓN DE RUTA
+//
+// El error indica que el archivo CSS no se encuentra. La ruta correcta, 
+// según tu estructura de carpetas, es DENTRO de la subcarpeta 'styles'.
+//
+// Estructura CORRECTA que debes tener:
+// └── pages/
+//     ├── GestionarPrerrequisitos.jsx (ESTE ARCHIVO)
+//     └── styles/
+//         └── prerrequisitos.css      (EL ARCHIVO CSS DEBE ESTAR AQUÍ DENTRO)
+//
+// -----------------------------------------------------------------------------------
+import '../styles/prerrequisitos.css';
 
-const GestionPrerrequisitos = () => {
-  const [cursos, setCursos] = useState([]);
-  const [cursoPrincipal, setCursoPrincipal] = useState("");
-  const [cursoRequisito, setCursoRequisito] = useState("");
-  const [prerrequisitos, setPrerrequisitos] = useState([]);
-  const [mensaje, setMensaje] = useState("");
+const API_URL = 'http://localhost:5000/superadmin';
 
-  // AJUSTE: Usar la ruta base sin el puerto si usas proxy en Vite (mejor práctica). 
-  // Mantendré el puerto por si ejecutas Flask y React sin proxy.
-  const BASE_URL = "http://localhost:5000"; 
+function GestionarPrerrequisitos() {
+    const location = useLocation();
+    const navigate = useNavigate();
 
-  // Cargar cursos al iniciar
-  useEffect(() => {
-    cargarCursos();
-  }, []);
-
-  const cargarCursos = async () => {
-    try {
-      // AJUSTE: La API para listar todos los cursos la definimos en /superadmin/cursos
-      // Si usaste la ruta /curso/ que enviaste antes, podría estar bien, pero la más limpia es la del SuperAdmin.
-      // Usaremos la ruta /curso/ que indicaste en el código original.
-      const res = await axios.get(`${BASE_URL}/curso/`); 
-      
-      // AJUSTE: Las propiedades de los cursos en el backend son 'curso_id', 'codigo', y 'nombre'.
-      // El backend de listar cursos retorna un ARRAY, no un objeto. No necesitamos res.data.cursos.
-      setCursos(res.data); 
-    } catch (err) {
-      console.error("Error al cargar cursos:", err);
-    }
-  };
-
-const cargarPrerrequisitos = async (idCurso) => {
-    // ❌ ELIMINAR ESTA LÍNEA: setMensaje(""); 
-    // Dejamos que los mensajes de éxito/error permanezcan hasta que una nueva acción los cambie.
-
-    try {
-      const res = await axios.get(`${BASE_URL}/superadmin/prerrequisitos/${idCurso}`);
-      setPrerrequisitos(res.data);
-    } catch (err) {
-      console.error("Error al cargar prerrequisitos:", err);
-      // Solo limpiamos si hay un error de carga, mostrando el mensaje de error.
-      setPrerrequisitos([]); 
-      setMensaje(err.response?.data?.error || "Error al cargar prerrequisitos ❌");
-    }
-};
-
-  const manejarCursoPrincipal = (id) => {
-    setCursoPrincipal(id);
-    if (id) cargarPrerrequisitos(id);
-    else setPrerrequisitos([]); // Limpiar la tabla si se selecciona la opción por defecto
-  };
-
-const guardarPrerrequisito = async () => {
-    // Limpiamos mensajes previos
-    setMensaje("");
+    const [view, setView] = useState('lista'); 
+    const [allCourses, setAllCourses] = useState([]);
+    const [coursesWithPrereqs, setCoursesWithPrereqs] = useState([]);
     
-    // 1. Validación de Frontend
-    if (!cursoPrincipal || !cursoRequisito) {
-        setMensaje("Selecciona ambos cursos ⚠️");
-        return;
-    }
+    const [selectedCourse, setSelectedCourse] = useState(null);
+    const [selectedPrereqs, setSelectedPrereqs] = useState([]);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [editingCourse, setEditingCourse] = useState(null);
 
-    try {
-        // Ejecutamos la petición POST a Flask
-        const res = await axios.post(`${BASE_URL}/superadmin/definir-prerrequisito`, {
-            // Aseguramos que los IDs sean números enteros (crucial para Flask/PostgreSQL)
-            id_curso: parseInt(cursoPrincipal), 
-            id_curso_requerido: parseInt(cursoRequisito),
-        });
-        
-        // 2. Manejo de Éxito (Status 201)
-        // Usamos el mensaje exacto para garantizar que la clase 'success' se active.
-        setMensaje(res.data.mensaje || "Prerrequisito ingresado satisfactoriamente ✅");
-        
-        // Recargamos la lista para actualizar la tabla inmediatamente
-        cargarPrerrequisitos(cursoPrincipal);
-        setCursoRequisito(""); // Limpiamos el selector de requisito
-        
-    } catch (err) {
-        // 3. Manejo de Errores (Status 400, 500 o Network Error)
-        const serverError = err.response?.data?.error;
-        
-        if (serverError) {
-             // Muestra el error amigable devuelto por Flask (ej: "Este prerrequisito ya se encuentra registrado...")
-             setMensaje(serverError); 
+    useEffect(() => {
+        if (location.pathname.includes('definir-prerrequisito')) {
+            setView('configurar');
         } else {
-             // Error de conexión, red o un fallo crítico del servidor (500)
-             setMensaje("Error al agregar prerrequisito ❌. Verifica la conexión o el servidor.");
-             console.error("Error POST (Conexión/Red):", err);
+            setView('lista');
         }
+    }, [location.pathname]);
+
+    const fetchAllCourses = async () => {
+        try {
+            const res = await axios.get(`${API_URL}/cursos`);
+            setAllCourses(res.data.cursos || []);
+        } catch (error) {
+            toast.error("Error al cargar la lista de cursos.");
+        }
+    };
+
+    const fetchCoursesWithPrereqs = async () => {
+        try {
+            const res = await axios.get(`${API_URL}/cursos-con-prerrequisitos`);
+            setCoursesWithPrereqs(res.data.cursos || []);
+        } catch (error) {
+            toast.error("Error al cargar los cursos configurados.");
+        }
+    };
+
+    useEffect(() => {
+        fetchAllCourses();
+        if (view === 'lista') {
+            fetchCoursesWithPrereqs();
+        }
+    }, [view]);
+    
+    const handleEdit = (courseToEdit) => {
+        const existingPrereqs = courseToEdit.prerrequisitos.map(prereq => {
+            return allCourses.find(c => c.id_curso === prereq.id_curso_requerido);
+        }).filter(Boolean);
+
+        setEditingCourse(courseToEdit);
+        setSelectedCourse(courseToEdit);
+        setSelectedPrereqs(existingPrereqs);
+        navigate('/superadmin/definir-prerrequisito');
+    };
+
+    const handleDeleteCoursePrereqs = async (courseId, courseName) => {
+        if (!window.confirm(`¿Está seguro de eliminar TODOS los prerrequisitos del curso "${courseName}"? Esta acción no se puede deshacer.`)) {
+            return;
+        }
+        try {
+            await axios.delete(`${API_URL}/prerrequisitos/curso/${courseId}`);
+            toast.success(`Prerrequisitos de "${courseName}" eliminados correctamente.`);
+            fetchCoursesWithPrereqs();
+        } catch (error) {
+            const errorMessage = error.response?.data?.error || "Error al eliminar los prerrequisitos.";
+            toast.error(errorMessage);
+        }
+    };
+
+    const handleSelectCourse = (course) => {
+        setSelectedCourse(course);
+        setSelectedPrereqs([]);
+    };
+
+    const handleAddPrereq = (prereq) => {
+        if (selectedCourse && selectedCourse.id_curso === prereq.id_curso) {
+            toast.warn("Un curso no puede ser prerrequisito de sí mismo.");
+            return;
+        }
+        if (!selectedPrereqs.some(p => p.id_curso === prereq.id_curso)) {
+            setSelectedPrereqs([...selectedPrereqs, prereq]);
+        }
+    };
+
+    const handleRemovePrereq = (prereqId) => {
+        setSelectedPrereqs(selectedPrereqs.filter(p => p.id_curso !== prereqId));
+    };
+
+    const handleSavePrerequisites = async () => {
+        if (!selectedCourse) {
+             toast.error("Debe seleccionar un curso.");
+             return;
+        }
+        
+        const courseId = selectedCourse.id_curso || selectedCourse.curso_id;
+
+        if (!courseId) {
+            toast.error("No se pudo identificar el curso seleccionado. Inténtelo de nuevo.");
+            return;
+        }
+
+        try {
+            await axios.delete(`${API_URL}/prerrequisitos/curso/${courseId}`);
+            
+            if (selectedPrereqs.length > 0) {
+                const savePromises = selectedPrereqs.map(prereq => 
+                    axios.post(`${API_URL}/definir-prerrequisito`, {
+                        id_curso: courseId,
+                        id_curso_requerido: prereq.id_curso
+                    })
+                );
+                await Promise.all(savePromises);
+            }
+            
+            toast.success(`Prerrequisitos ${editingCourse ? 'actualizados' : 'guardados'} exitosamente.`);
+            
+            handleCancelEdit();
+
+        } catch (error) {
+            const errorMessage = error.response?.data?.error || "Error al guardar los prerrequisitos.";
+            toast.error(errorMessage);
+        }
+    };
+    
+    const handleCancelEdit = () => {
+        setSelectedCourse(null);
+        setSelectedPrereqs([]);
+        setEditingCourse(null);
+        navigate('/superadmin/listar-prerrequisitos');
     }
-};
 
-  const eliminarPrerrequisito = async (id) => {
-    if (!window.confirm("¿Seguro que deseas eliminar este prerrequisito?")) return;
-    try {
-      await axios.delete(`${BASE_URL}/superadmin/prerrequisitos/${id}`);
-      setMensaje("Prerrequisito eliminado ✅");
-      // Mantenemos la lógica de recarga para asegurar que la lista esté actualizada.
-      cargarPrerrequisitos(cursoPrincipal); 
-    } catch (err) {
-      setMensaje("Error al eliminar prerrequisito ❌");
-    }
-  };
+    const filteredCourses = allCourses.filter(course =>
+        (course.nombre_curso.toLowerCase().includes(searchTerm.toLowerCase()) ||
+         course.codigo_curso.toLowerCase().includes(searchTerm.toLowerCase()))
+    );
 
-  const limpiarCampos = () => {
-    // AJUSTE: En lugar de limpiar todo, solo limpiamos los selectores de la acción POST.
-    setCursoRequisito("");
-    setMensaje("");
-  };
+    const renderConfigView = () => (
+        <div className="config-container">
+            <div className="card">
+                <h2 className="section-title">1. Seleccionar Curso</h2>
+                {editingCourse ? (
+                     <div className="selected-item-box">
+                        <div className="item-info">
+                            <span className="course-code">{editingCourse.codigo_curso}</span>
+                            <span className="course-name">{editingCourse.nombre_curso}</span>
+                        </div>
+                        <Edit size={18} className="icon-disabled" />
+                    </div>
+                ) : !selectedCourse ? (
+                    <>
+                        <div className="search-input-group">
+                            <Search size={18} />
+                            <input
+                                type="text"
+                                placeholder="Buscar por código o nombre..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                            />
+                        </div>
+                        <div className="course-list-selector">
+                            {filteredCourses.map(course => (
+                                <div key={course.id_curso} className="course-item" onClick={() => handleSelectCourse(course)}>
+                                    <span className="course-code">{course.codigo_curso}</span>
+                                    <span className="course-name">{course.nombre_curso}</span>
+                                </div>
+                            ))}
+                        </div>
+                    </>
+                ) : (
+                    <div className="selected-item-box">
+                        <div className="item-info">
+                            <span className="course-code">{selectedCourse.codigo_curso}</span>
+                            <span className="course-name">{selectedCourse.nombre_curso}</span>
+                        </div>
+                        <button onClick={() => setSelectedCourse(null)} className="btn-icon"><X size={18} /></button>
+                    </div>
+                )}
+            </div>
 
-  return (
-    <div className="contenedor-prerrequisitos">
-      {/* AJUSTE: Usamos ListChecks y tags HTML limpios */}
-      <h2 className="section-title-prerreq">
-        <ListChecks size={28} style={{ marginRight: '10px' }} /> 
-        Gestión de Prerrequisitos
-      </h2>
-
-      <div className="formulario-prerreq">
-        <div className="grupo">
-          <label>Curso Principal</label>
-          <select
-            value={cursoPrincipal}
-            onChange={(e) => manejarCursoPrincipal(e.target.value)}
-          >
-            <option value="">Seleccione curso principal</option>
-            {cursos.map((c) => (
-              <option key={c.curso_id} value={c.curso_id}>
-                {c.codigo} - {c.nombre}
-              </option>
-            ))}
-          </select>
+            <div className="card">
+                 <h2 className="section-title">2. Seleccionar Prerrequisitos</h2>
+                {!selectedCourse ? (
+                    <div className="placeholder-message">
+                        <BookOpen size={40} />
+                        <p>Primero selecciona un curso</p>
+                    </div>
+                ) : (
+                    <>
+                        <p className="available-courses-label">Cursos disponibles:</p>
+                        <div className="course-list-selector">
+                            {allCourses.map(course => {
+                                const isSelected = selectedPrereqs.some(p => p.id_curso === course.id_curso);
+                                const isSelf = selectedCourse.id_curso === course.id_curso;
+                                return (
+                                    <div 
+                                        key={course.id_curso} 
+                                        className={`course-item-prereq ${isSelected ? 'selected' : ''} ${isSelf ? 'disabled' : ''}`}
+                                        onClick={() => !isSelf && (isSelected ? handleRemovePrereq(course.id_curso) : handleAddPrereq(course))}
+                                    >
+                                        <div className="item-info">
+                                            <span className="course-code">{course.codigo_curso}</span>
+                                            <span className="course-name">{course.nombre_curso}</span>
+                                        </div>
+                                        {isSelected ? <Check size={20} /> : <Plus size={20} />}
+                                    </div>
+                                );
+                            })}
+                        </div>
+                        {selectedPrereqs.length > 0 && (
+                            <div className="selected-prereqs-section">
+                                <p className="selected-prereqs-label">Prerrequisitos seleccionados ({selectedPrereqs.length}):</p>
+                                {selectedPrereqs.map(prereq => (
+                                    <div key={prereq.id_curso} className="selected-item-box green">
+                                        <div className="item-info">
+                                            <span className="course-code">{prereq.codigo_curso}</span>
+                                            <span className="course-name">{prereq.nombre_curso}</span>
+                                        </div>
+                                        <button onClick={() => handleRemovePrereq(prereq.id_curso)} className="btn-icon danger"><Trash2 size={16} /></button>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                         <div className="config-actions">
+                            <button className="btn btn-secondary" onClick={handleCancelEdit}>Cancelar</button>
+                            <button className="btn btn-primary" onClick={handleSavePrerequisites}>
+                                {editingCourse ? "Actualizar Prerrequisitos" : "Guardar Prerrequisitos"}
+                            </button>
+                         </div>
+                    </>
+                )}
+            </div>
         </div>
-
-        <div className="grupo">
-          <label>Agregar Prerrequisito</label>
-          <select
-            value={cursoRequisito}
-            onChange={(e) => setCursoRequisito(e.target.value)}
-          >
-            <option value="">Seleccione curso prerrequisito</option>
-            {cursos
-              // Filtramos para evitar que el curso principal sea su propio requisito.
-              .filter((c) => c.curso_id !== parseInt(cursoPrincipal)) 
-              .map((c) => (
-                <option key={c.curso_id} value={c.curso_id}>
-                  {c.codigo} - {c.nombre}
-                </option>
-              ))}
-          </select>
+    );
+    
+    const renderListView = () => (
+        <div className="list-container">
+            <h2 className="section-title">Cursos con Prerrequisitos Configurados</h2>
+             {coursesWithPrereqs.length > 0 ? coursesWithPrereqs.map(course => (
+                <div key={course.curso_id} className="card course-prereq-card">
+                    <div className="course-header">
+                        <h3>{course.codigo_curso} - {course.nombre_curso}</h3>
+                        <div className="course-actions">
+                            <button className="btn-link" onClick={() => handleEdit(course)}>Editar</button>
+                            <button className="btn-link danger" onClick={() => handleDeleteCoursePrereqs(course.curso_id, course.nombre_curso)}>Eliminar</button>
+                        </div>
+                    </div>
+                    <div className="prereq-tags">
+                        <p>Prerrequisitos:</p>
+                        {course.prerrequisitos.map(prereq => (
+                             <span key={prereq.prerrequisito_id} className="prereq-tag">{prereq.codigo_requerido}</span>
+                        ))}
+                    </div>
+                </div>
+             )) : (
+                <div className="placeholder-message">
+                    <p>No hay cursos con prerrequisitos configurados.</p>
+                </div>
+             )}
         </div>
+    );
 
-        <div className="botones">
-          <button className="btn-guardar" onClick={guardarPrerrequisito}>
-            <FaSave /> Guardar
-          </button>
-          <button className="btn-limpiar" onClick={limpiarCampos}>
-            <FaBroom /> Limpiar
-          </button>
-        </div>
-      </div>
-
-      {/* Mensajes de feedback usando clases de tu CSS para éxito/error */}
-      {mensaje && (
-        <p className={`mensaje-box mensaje ${mensaje.includes("✅") ? "success" : "error"}`}>
-            {mensaje}
-        </p>
-      )}
-
-      <div className="tabla-prerreq">
-        {/* Usamos el estado del curso principal para decidir qué mostrar */}
-        {cursoPrincipal && prerrequisitos.length > 0 ? (
-          <table>
-            <thead>
-              <tr>
-                {/* Omitimos el ID si no es crucial, o lo mostramos para depuración */}
-                <th>Curso Requerido</th> 
-                <th>Acción</th>
-              </tr>
-            </thead>
-            <tbody>
-              {prerrequisitos.map((p) => (
-                // AJUSTE: La propiedad del ID se llama id_prerrequisito en tu backend
-                <tr key={p.id_prerrequisito}>
-                  {/* AJUSTE: La propiedad del nombre se llama curso_requerido en tu backend */}
-                  <td>{p.curso_requerido}</td> 
-                  <td>
-                    <button
-                      className="btn-eliminar"
-                      onClick={() => eliminarPrerrequisito(p.id_prerrequisito)}
-                    >
-                      <FaTrash /> Eliminar
+    return (
+        <div className="gestion-prerequisitos-container">
+            <div className="header-container">
+                <div className="title-section">
+                    <BookOpen size={32} />
+                    <div>
+                        <h1 className="main-title">Gestión de Prerrequisitos</h1>
+                        <p className="subtitle">Configurar cursos previos requeridos</p>
+                    </div>
+                </div>
+                <div className="actions-section">
+                    <button onClick={handleCancelEdit} className={`btn ${view === 'lista' ? 'btn-secondary-inactive' : 'btn-secondary'}`}>
+                        Ver Lista
                     </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        ) : cursoPrincipal ? (
-          // Mensaje si el curso tiene cero prerrequisitos
-          <p className="info">Este curso no tiene prerrequisitos.</p>
-        ) : (
-          // Mensaje inicial
-          <p className="info">Seleccione un curso para ver sus prerrequisitos.</p>
-        )}
-      </div>
-    </div>
-  );
-};
+                    <button
+                        onClick={() => {
+                            setEditingCourse(null);
+                            setSelectedCourse(null);
+                            setSelectedPrereqs([]);
+                            navigate('/superadmin/definir-prerrequisito');
+                        }}
+                        className={`btn ${view === 'configurar' ? 'btn-primary-inactive' : 'btn-primary'}`}
+                    >
+                        Configurar Nuevo
+                    </button>
+                </div>
+            </div>
+            {view === 'lista' ? renderListView() : renderConfigView()}
+        </div>
+    );
+}
 
-export default GestionPrerrequisitos;
+export default GestionarPrerrequisitos;

@@ -1,6 +1,10 @@
 import { useState } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 
+// ✨ 1. IMPORTACIONES PARA LAS NOTIFICACIONES
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 // 🧩 Login
 import Login from "./assets/components/Login";
 
@@ -22,6 +26,7 @@ import RegistrarHorario from "./roles/superadmin/pages/RegistrarHorario";
 import EditarHorario from "./roles/superadmin/pages/EditarHorario";
 import ListarHorario from "./roles/superadmin/pages/ListarHorario";
 import EliminarHorario from "./roles/superadmin/pages/EliminarHorario";
+import GestionAulas from "./roles/superadmin/pages/GestionAulas";
 
 // 🚨 CORRECCIÓN CLAVE: Usamos el nombre del archivo con el que estás trabajando.
 // El nombre del componente dentro del archivo es 'GestionPrerrequisitos', pero importamos el archivo.
@@ -107,6 +112,9 @@ function App() {
                     <Route path="/superadmin/listar-horario" element={<ListarHorario />} />
                     <Route path="/superadmin/editar-horario" element={<EditarHorario />} />
                     <Route path="/superadmin/eliminar-horario" element={<EliminarHorario/>} />
+                   
+                    {/* Rutas de superadmin para la gestión de aulas*/}
+                    <Route path="/superadmin/Gestion-Aulas" element={<GestionAulas />} />
 
                 </>,
                 // Ruta por defecto (ejemplo)

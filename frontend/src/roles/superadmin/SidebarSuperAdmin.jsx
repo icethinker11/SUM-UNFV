@@ -9,6 +9,7 @@ import {
   FileText,
   ListChecks,
   CalendarClock,
+  Home
 
 } from "lucide-react";
 import "./styles/sidebar-superadmin.css";
@@ -108,7 +109,7 @@ function SidebarSuperAdmin({ usuario }) {
               </Link>
               <Link to="/superadmin/listar-horario" className="submenu-link">
                 📋 Listar Horarios
-              </Link>
+              </Link> 
               <Link to="/superadmin/editar-horario" className="submenu-link">
                 ✏️ Editar Horario
               </Link>
@@ -119,32 +120,18 @@ function SidebarSuperAdmin({ usuario }) {
           )}
         </div>
 
+          <div className="sidebar-section">
+  <Link to="/superadmin/Gestion-Aulas" className="sidebar-link main-link">
+    <Home className="icon" /> Gestión de Aulas
+  </Link>
+</div>   
 
-        {/* 🔹 Sección: Gestión de Prerrequisitos */}
-        <div className="sidebar-section">
-          <button
-            className={`section-toggle ${isSectionOpen("prerrequisitos") ? "active" : ""}`}
-            onClick={() => toggleSection("prerrequisitos")}
-          >
-            <ListChecks className="icon" /> Gestión de Prerrequisitos
-            {isSectionOpen("prerrequisitos") ? (
-              <ChevronDown className="chevron" />
-            ) : (
-              <ChevronRight className="chevron" />
-            )}
-          </button>
+{/* 🔑 CORRECCIÓN: La sección de prerrequisitos ahora es un enlace directo */}
+                <Link to="/superadmin/listar-prerrequisitos" className="sidebar-link main-link">
+                    <ListChecks className="icon" /> Gestión de Prerrequisitos
+                </Link>
 
-          {isSectionOpen("prerrequisitos") && (
-            <div className="submenu">
-              <Link to="/superadmin/definir-prerrequisito" className="submenu-link">
-                🔗 Definir Prerrequisito
-              </Link>
-              <Link to="/superadmin/listar-prerrequisitos" className="submenu-link">
-                📋 Listar Prerrequisitos
-              </Link>
-            </div>
-          )}
-        </div>
+
       </nav>
     </div>
   );

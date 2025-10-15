@@ -1,9 +1,9 @@
 # routes/superadmin_routes.py
-# -*- coding: utf-8 -*-
+# -- coding: utf-8 --
 import re
 import random
 import string
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, current_app
 from psycopg2.extras import RealDictCursor
 import psycopg2 
 from database.db import get_db
@@ -15,7 +15,7 @@ from datetime import datetime
 superadmin_bp = Blueprint('superadmin_bp', __name__, url_prefix='/superadmin')
 
 # ======================================================
-# 🧩 FUNCIONES AUXILIARES ( LOY )
+# 🧩 FUNCIONES AUXILIARES
 # ======================================================
 
 def generar_correo_institucional(nombres, apellidos):
@@ -36,28 +36,58 @@ def validar_telefono(telefono):
 def validar_dni(dni):
     return bool(re.fullmatch(r"\d{8}", (dni or "")))
 
+# ======================================================
+# ✉️ ENVÍO DE CREDENCIALES CON HTML PROFESIONAL
+# ======================================================
 def enviar_credenciales(correo_destino, correo_institucional, contrasena):
     try:
+        html_body = f"""
+        <div style="font-family: Arial, sans-serif; padding: 20px; color: #333;">
+            <div style="text-align: center; border-bottom: 3px solid #004080; padding-bottom: 10px;">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/e/ef/Logo_UNFV.png" alt="UNFV" width="90"/>
+                <h2 style="color: #004080;">Universidad Nacional Federico Villarreal</h2>
+            </div>
+            <p>¡Bienvenido(a) al <strong>Sistema de Gestión UNFV</strong>!</p>
+            <p>Se han generado tus credenciales institucionales de acceso:</p>
+
+            <table style="border-collapse: collapse; margin-top: 10px;">
+                <tr>
+                    <td style="padding: 6px 10px; font-weight: bold;">Correo institucional:</td>
+                    <td style="padding: 6px 10px; background: #f4f4f4;">{correo_institucional}</td>
+                </tr>
+                <tr>
+                    <td style="padding: 6px 10px; font-weight: bold;">Contraseña:</td>
+                    <td style="padding: 6px 10px; background: #f4f4f4;">{contrasena}</td>
+                </tr>
+            </table>
+
+            <p style="margin-top: 20px;">Por favor, cambia tu contraseña después de iniciar sesión.</p>
+            <hr style="margin-top: 30px; border: 1px solid #ccc;"/>
+            <p style="font-size: 12px; text-align: center; color: #666;">
+                Este correo fue generado automáticamente por el sistema UNFV.<br/>
+                Si no solicitaste este acceso, ignora este mensaje.
+            </p>
+        </div>
+        """
+
         msg = Message(
-            subject="Credenciales de acceso - Sistema UNFV",
+            subject="🎓 Credenciales de acceso - Sistema UNFV",
             recipients=[correo_destino],
-            body=(
-                f"¡Bienvenido al sistema UNFV!\n\n"
-                f"Correo institucional: {correo_institucional}\n"
-                f"Contraseña: {contrasena}\n\n"
-                "Por favor cambia tu contraseña después de iniciar sesión."
-            )
+            html=html_body
         )
-        mail.send(msg)
+
+        # Aseguramos el contexto de la app Flask
+        with current_app.app_context():
+            mail.send(msg)
+
         print(f"✅ Correo enviado correctamente a {correo_destino}")
         return True
     except Exception as e:
         print("❌ Error al enviar correo:", str(e))
         return False
 
-
 # ======================================================
-# 🧱 CREAR ADMINISTRADOR (FINAL, MEJORADO Y DETALLADO)
+# 🧱 CREAR ADMINISTRADOR (FINAL, CORREGIDO Y MEJORADO)
 # ======================================================
 @superadmin_bp.route("/crear-admin", methods=["POST"])
 def crear_admin():
@@ -145,11 +175,16 @@ def crear_admin():
 
         conn.commit()
 
+        # === PASO 6: ENVÍO DE CREDENCIALES ===
+        enviado = enviar_credenciales(data['correo_personal'], correo_institucional, contrasena_generada)
+        if not enviado:
+            print(f"⚠️ No se pudo enviar el correo a {data['correo_personal']}")
+
         return jsonify({
             "mensaje": f"✅ Administrador creado exitosamente. Credenciales enviadas a {data['correo_personal']}."
         }), 201
 
-    # === 6️⃣ ERRORES ESPECÍFICOS ===
+    # === 7️⃣ ERRORES ESPECÍFICOS ===
     except psycopg2.IntegrityError as e:
         if conn:
             conn.rollback()
@@ -184,7 +219,6 @@ def crear_admin():
             cur.close()
         if conn:
             conn.close()
-
 
 # ======================================================
 # 📋 LISTAR ADMINISTRADORES
@@ -532,157 +566,339 @@ def obtener_especialidades():
     finally:
         if cur: cur.close()
         if conn: conn.close()
+
 # ======================================================
-# 📚 LISTAR TODOS LOS CURSOS (Necesaria para los Dropdowns de Prerrequisitos)
+# 📚 RUTAS DE CURSOS Y PRERREQUISITOS (CON MANEJO DE ERRORES MEJORADO)
 # ======================================================
 @superadmin_bp.route('/cursos', methods=['GET'])
 def obtener_cursos():
-    """Obtiene la lista de todos los cursos para ser usados en selectores."""
     conn = None
     cur = None
     try:
         conn = get_db()
         cur = conn.cursor(cursor_factory=RealDictCursor) 
-        
-        cur.execute("""
-            SELECT 
-                curso_id AS id_curso, 
-                nombre AS nombre_curso, 
-                codigo AS codigo_curso 
-            FROM curso 
-            ORDER BY nombre_curso ASC;
-        """)
-        
-        cursos = cur.fetchall()
-        return jsonify({"cursos": cursos}), 200
-
+        cur.execute("SELECT curso_id AS id_curso, nombre AS nombre_curso, codigo AS codigo_curso FROM curso ORDER BY nombre ASC;")
+        return jsonify({"cursos": cur.fetchall()}), 200
     except Exception as e:
-        print("❌ Error al obtener cursos:", str(e))
-        return jsonify({
-            "error": "Error interno al obtener cursos.",
-            "detalle": str(e)
-        }), 500
+        print(f"❌ Error al obtener cursos: {str(e)}")
+        return jsonify({"error": "Error interno al obtener cursos."}), 500
     finally:
         if cur: cur.close()
         if conn: conn.close()
 
-
-# ======================================================
-# DEFINIR PRERREQUISITOS (CORREGIDO Y SEGURO)
-# ======================================================
-@superadmin_bp.route("/definir-prerrequisito", methods=["POST"])
-def definir_prerrequisito():
-    """Permite al SuperAdmin registrar un prerrequisito de un curso."""
-    data = request.json
-    id_curso = data.get("id_curso")
-    id_curso_requerido = data.get("id_curso_requerido")
-
-    if not id_curso or not id_curso_requerido:
-        return jsonify({"error": "Debe indicar id_curso e id_curso_requerido"}), 400
-    if id_curso == id_curso_requerido:
-        return jsonify({"error": "Un curso no puede ser prerrequisito de sí mismo"}), 400
-
-    conn = None
-    cur = None
-    try:
-        conn = get_db()
-        cur = conn.cursor()
-
-        cur.execute("""
-            INSERT INTO prerrequisito (id_curso, id_curso_requerido)
-            VALUES (%s, %s);
-        """, (id_curso, id_curso_requerido))
-
-        
-        conn.commit()
-
-        # 🔑 RETORNO GARANTIZADO: Devuelve el mensaje exacto
-        return jsonify({
-            "mensaje": "Prerrequisito ingresado satisfactoriamente" 
-        }), 201
-        
-    # 🚨 MANEJO DE ERRORES DE INTEGRIDAD DE LA BASE DE DATOS 🚨
-    except psycopg2.IntegrityError as e:
-        if conn: conn.rollback() # 🔑 CRÍTICO: Revertir transacción fallida
-        
-        error_detail = str(e)
-        
-        if 'uq_prerrequisito' in error_detail:
-             error_msg = "Este prerrequisito ya se encuentra registrado para este curso."
-        elif 'violates foreign key' in error_detail:
-             error_msg = "Uno o ambos IDs de curso no son válidos (no existen)."
-        else:
-             error_msg = "Error de integridad de datos desconocido. Verifique el log."
-             
-        # Devolver el error 400 (Bad Request) con el mensaje amigable
-        return jsonify({"error": error_msg}), 400 
-        
-    except Exception as e:
-        if conn: conn.rollback()
-        print(f"❌ Error interno (500) al definir prerrequisito: {e}")
-        return jsonify({"error": "Error interno del servidor al guardar el prerrequisito."}), 500
-        
-    finally:
-        if cur: cur.close()
-        if conn: conn.close()
-
-
-# ======================================================
-# LISTAR PRERREQUISITOS
-# ======================================================
-@superadmin_bp.route("/prerrequisitos/<int:id_curso>", methods=["GET"])
-def listar_prerrequisitos(id_curso):
-    """Lista los prerrequisitos de un curso específico."""
+@superadmin_bp.route('/cursos-con-prerrequisitos', methods=['GET'])
+def obtener_cursos_con_prerrequisitos():
     conn = None
     cur = None
     try:
         conn = get_db()
         cur = conn.cursor(cursor_factory=RealDictCursor)
-
         cur.execute("""
-            SELECT p.id_prerrequisito, p.id_curso_requerido, c.nombre AS curso_requerido
+            SELECT 
+                c1.curso_id, c1.codigo AS codigo_curso, c1.nombre AS nombre_curso,
+                p.id_prerrequisito, c2.codigo AS codigo_requerido,
+                c2.curso_id AS id_curso_requerido, c2.nombre AS nombre_requerido
             FROM prerrequisito p
-            JOIN curso c ON p.id_curso_requerido = c.curso_id
-            WHERE p.id_curso = %s
-            ORDER BY c.nombre
-        """, (id_curso,))
+            JOIN curso c1 ON p.id_curso = c1.curso_id
+            JOIN curso c2 ON p.id_curso_requerido = c2.curso_id
+            ORDER BY c1.nombre, c2.codigo;
+        """)
+        results = cur.fetchall()
+        cursos_agrupados = {}
+        for row in results:
+            if row['curso_id'] not in cursos_agrupados:
+                cursos_agrupados[row['curso_id']] = {
+                    "curso_id": row['curso_id'], "codigo_curso": row['codigo_curso'],
+                    "nombre_curso": row['nombre_curso'], "prerrequisitos": []
+                }
+            cursos_agrupados[row['curso_id']]['prerrequisitos'].append({
+                "prerrequisito_id": row['id_prerrequisito'], "codigo_requerido": row['codigo_requerido'],
+                "id_curso_requerido": row['id_curso_requerido'], "nombre_requerido": row['nombre_requerido']
+            })
+        return jsonify({"cursos": list(cursos_agrupados.values())}), 200
+    except Exception as e:
+        print(f"❌ Error al obtener cursos con prerrequisitos: {e}")
+        return jsonify({"error": "Error interno al consultar los cursos."}), 500
+    finally:
+        if cur: cur.close()
+        if conn: conn.close()
 
-        prerrequisitos = cur.fetchall()
+@superadmin_bp.route("/definir-prerrequisito", methods=["POST"])
+def definir_prerrequisito():
+    data = request.json
+    id_curso = data.get("id_curso")
+    id_curso_requerido = data.get("id_curso_requerido")
 
-        return jsonify(prerrequisitos), 200
+    if not id_curso or not id_curso_requerido or id_curso == id_curso_requerido:
+        return jsonify({"error": "Datos de prerrequisito inválidos."}), 400
+    
+    conn = None
+    cur = None
+    try:
+        conn = get_db()
+        cur = conn.cursor()
+        print(f"✅ Intentando insertar: id_curso={id_curso}, id_curso_requerido={id_curso_requerido}")
+        cur.execute(
+            "INSERT INTO prerrequisito (id_curso, id_curso_requerido) VALUES (%s, %s);",
+            (id_curso, id_curso_requerido)
+        )
+        conn.commit()
+        print("✅ Inserción de prerrequisito exitosa.")
+        return jsonify({"mensaje": "Prerrequisito guardado correctamente."}), 201
+    except psycopg2.IntegrityError as e:
+        if conn: conn.rollback()
+        error_detail = str(e).lower()
+        print(f"🔥 Error de integridad al guardar prerrequisito: {error_detail}")
 
-    except psycopg2.Error as e:
-        print("❌ Error de DB:", str(e))
-        return jsonify({"error": str(e)}), 500
+        if "prerrequisito_pkey" in error_detail or "violates not-null constraint" in error_detail:
+             msg = "Error de BD: La columna 'id_prerrequisito' podría no ser autoincremental (SERIAL)."
+        elif "duplicate key value violates unique constraint" in error_detail:
+             msg = "Este prerrequisito ya se encuentra registrado para este curso."
+        elif "violates foreign key constraint" in error_detail:
+             msg = "Uno o ambos IDs de curso no son válidos (no existen)."
+        else:
+             msg = f"Error de integridad de datos. {str(e)}"
+        
+        return jsonify({"error": msg}), 400
+    except Exception as e:
+        if conn: conn.rollback()
+        print(f"❌ Error inesperado al definir prerrequisito: {e}")
+        return jsonify({"error": "Error interno del servidor al guardar el prerrequisito."}), 500
+    finally:
+        if cur: cur.close()
+        if conn: conn.close()
+
+@superadmin_bp.route("/prerrequisitos/<int:id_prerrequisito>", methods=["DELETE"])
+def eliminar_prerrequisito(id_prerrequisito):
+    conn = None
+    cur = None
+    try:
+        conn = get_db()
+        cur = conn.cursor()
+        cur.execute("DELETE FROM prerrequisito WHERE id_prerrequisito = %s", (id_prerrequisito,))
+        if cur.rowcount == 0:
+            return jsonify({"error": "El prerrequisito no fue encontrado."}), 404
+        conn.commit()
+        return jsonify({"mensaje": "Prerrequisito eliminado correctamente."}), 200
+    except Exception as e:
+        if conn: conn.rollback()
+        return jsonify({"error": "Error interno al eliminar el prerrequisito."}), 500
+    finally:
+        if cur: cur.close()
+        if conn: conn.close()
+
+@superadmin_bp.route('/prerrequisitos/curso/<int:id_curso>', methods=['DELETE'])
+def eliminar_prerrequisitos_por_curso(id_curso):
+    conn = None
+    cur = None
+    try:
+        conn = get_db()
+        cur = conn.cursor()
+        cur.execute("DELETE FROM prerrequisito WHERE id_curso = %s", (id_curso,))
+        conn.commit()
+        return jsonify({"mensaje": "Prerrequisitos eliminados."}), 200
+    except Exception as e:
+        if conn: conn.rollback()
+        return jsonify({"error": "Error interno al limpiar prerrequisitos."}), 500
+    finally:
+        if cur: cur.close()
+        if conn: conn.close()
+
+# ======================================================
+# 1. LISTAR AULAS (CORREGIDO SEGÚN LA ESTRUCTURA DE TU BD)
+# ======================================================
+@superadmin_bp.route('/aulas', methods=['GET'])
+def listar_aulas():
+    """Muestra el listado de todas las aulas con sus detalles de ubicación y tipo."""
+    conn = None
+    cur = None
+    try:
+        conn = get_db()
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+        
+        # 👇 ESTA CONSULTA HA SIDO CORREGIDA
+        cur.execute("""
+            SELECT 
+                a.aula_id, 
+                a.nombre_aula AS codigo, -- USAMOS 'nombre_aula' como el código principal
+                a.nombre_aula AS nombre, -- Y también como el nombre
+                a.capacidad, 
+                a.estado,
+                tac.nombre_tipo AS tipo,
+                -- 🔑 CORRECCIÓN: Eliminamos la columna 'piso' porque no existe en tu tabla 'aula'
+                pab.nombre_pabellon AS ubicacion 
+            FROM aula a
+            LEFT JOIN tipo_aula_cat tac ON a.tipo_aula_id = tac.tipo_aula_id
+            LEFT JOIN pabellon pab ON a.pabellon_id = pab.pabellon_id
+            -- 🔑 CORRECCIÓN: Ordenamos por 'nombre_aula'
+            ORDER BY a.nombre_aula ASC;
+        """)
+        aulas = cur.fetchall()
+        return jsonify(aulas), 200
+
+    except Exception as e:
+        print(f"❌ Error al listar aulas: {e}")
+        return jsonify({"error": "Error interno al listar las aulas."}), 500
     finally:
         if cur: cur.close()
         if conn: conn.close()
 
 
 # ======================================================
-# ELIMINAR PRERREQUISITO
+# 2. CREAR AULA (POST /superadmin/aulas) - VERSIÓN FINAL
 # ======================================================
-@superadmin_bp.route("/prerrequisitos/<int:id_prerrequisito>", methods=["DELETE"])
-def eliminar_prerrequisito(id_prerrequisito):
-    """Permite al SuperAdmin eliminar un prerrequisito registrado."""
+@superadmin_bp.route('/aulas', methods=['POST'])
+def crear_aula():
+    data = request.json
+    # Usamos los nombres de columna correctos de tu tabla 'aula'
+    nombre_aula = data.get('nombre_aula')
+    capacidad = data.get('capacidad')
+    estado = data.get('estado')
+    tipo_aula_id = data.get('tipo_aula_id')
+    pabellon_id = data.get('pabellon_id')
+    
+    if not all([nombre_aula, capacidad, tipo_aula_id, pabellon_id, estado]):
+        return jsonify({"error": "Faltan campos obligatorios."}), 400
+
+    conn = None
+    cur = None
+    try:
+        conn = get_db()
+        cur = conn.cursor()
+        cur.execute("""
+            INSERT INTO aula (nombre_aula, capacidad, estado, tipo_aula_id, pabellon_id)
+            VALUES (%s, %s, %s, %s, %s);
+        """, (nombre_aula, capacidad, estado, tipo_aula_id, pabellon_id))
+        
+        conn.commit()
+        return jsonify({"mensaje": "Aula registrada exitosamente."}), 201
+        
+    except psycopg2.IntegrityError:
+        if conn: conn.rollback()
+        return jsonify({"error": "El nombre del aula ya existe o un ID es inválido."}), 400
+    except Exception as e:
+        if conn: conn.rollback()
+        print(f"❌ Error al crear aula: {e}")
+        return jsonify({"error": "Error interno al registrar el aula."}), 500
+    finally:
+        if cur: cur.close()
+        if conn: conn.close()
+
+# ======================================================
+# 3. ACTUALIZAR AULA (PUT /superadmin/aulas/<id>) - VERSIÓN FINAL
+# ======================================================
+@superadmin_bp.route('/aulas/<int:aula_id>', methods=['PUT'])
+def actualizar_aula(aula_id):
+    data = request.json
+    nombre_aula = data.get('nombre_aula')
+    capacidad = data.get('capacidad')
+    estado = data.get('estado')
+    tipo_aula_id = data.get('tipo_aula_id')
+    pabellon_id = data.get('pabellon_id')
+
+    conn = None
+    cur = None
+    try:
+        conn = get_db()
+        cur = conn.cursor()
+        cur.execute("""
+            UPDATE aula
+            SET nombre_aula=%s, capacidad=%s, estado=%s, tipo_aula_id=%s, pabellon_id=%s
+            WHERE aula_id = %s;
+        """, (nombre_aula, capacidad, estado, tipo_aula_id, pabellon_id, aula_id))
+        
+        if cur.rowcount == 0:
+            return jsonify({"error": "Aula no encontrada."}), 404
+        
+        conn.commit()
+        return jsonify({"mensaje": "Aula actualizada exitosamente."}), 200
+        
+    except Exception as e:
+        if conn: conn.rollback()
+        print(f"❌ Error al actualizar aula: {e}")
+        return jsonify({"error": "Error interno al actualizar el aula."}), 500
+    finally:
+        if cur: cur.close()
+        if conn: conn.close()
+
+# ======================================================
+# 4. ELIMINAR AULA (DELETE /superadmin/aulas/<id>) - CORREGIDO
+# ======================================================
+@superadmin_bp.route('/aulas/<int:aula_id>', methods=['DELETE'])
+def eliminar_aula(aula_id):
     conn = None
     cur = None
     try:
         conn = get_db()
         cur = conn.cursor()
 
-        cur.execute("DELETE FROM prerrequisito WHERE id_prerrequisito = %s", (id_prerrequisito,))
+        # PRIMERO: Verificar si el aula está asignada en algún horario.
+        # 🔑 CORRECCIÓN: Se asume que la columna es 'estado' y no 'estado_vigencia'.
+        # Si tu columna tiene otro nombre (ej. 'vigencia'), ajústalo aquí.
+        cur.execute("""
+            SELECT COUNT(*) 
+            FROM horario h
+            JOIN seccion s ON h.seccion_id = s.seccion_id
+            WHERE h.aula_id = %s AND s.estado = 'Vigente';
+        """, (aula_id,))
+        
+        if cur.fetchone()[0] > 0:
+            # Si hay asignaciones, devuelve una advertencia (409 Conflict)
+            return jsonify({"error": "No se puede eliminar. El aula está asignada a uno o más horarios vigentes."}), 409
+
+        # SEGUNDO: Si no hay asignaciones, proceder con la eliminación
+        cur.execute("DELETE FROM aula WHERE aula_id = %s;", (aula_id,))
         
         if cur.rowcount == 0:
-            return jsonify({"error": "El prerrequisito no existe"}), 404
-
+            return jsonify({"error": "Aula no encontrada."}), 404
+            
         conn.commit()
+        return jsonify({"mensaje": "Aula eliminada correctamente."}), 200
 
-        return jsonify({"mensaje": "Prerrequisito eliminado correctamente"}), 200
+    except Exception as e:
+        if conn: conn.rollback()
+        # Imprimimos el error específico de la base de datos
+        print(f"❌ Error al eliminar aula: {e}")
+        return jsonify({"error": "Error interno al eliminar el aula."}), 500
+    finally:
+        if cur: cur.close()
+        if conn: conn.close()
+# ======================================================
+# 🏛️ LISTAR PABELLONES
+# ======================================================
+@superadmin_bp.route('/pabellones', methods=['GET'])
+def obtener_pabellones():
+    conn = None
+    cur = None
+    try:
+        conn = get_db()
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+        cur.execute("SELECT pabellon_id, nombre_pabellon FROM pabellon ORDER BY nombre_pabellon ASC;")
+        pabellones = cur.fetchall()
+        return jsonify(pabellones), 200
+    except Exception as e:
+        print(f"❌ Error al obtener pabellones: {e}")
+        return jsonify({"error": "Error interno al obtener pabellones."}), 500
+    finally:
+        if cur: cur.close()
+        if conn: conn.close()
 
-    except psycopg2.Error as e:
-        print("❌ Error de DB:", str(e))
-        return jsonify({"error": str(e)}), 500
+# ======================================================
+# 🏷️ LISTAR TIPOS DE AULA
+# ======================================================
+@superadmin_bp.route('/tipos-aula', methods=['GET'])
+def obtener_tipos_aula():
+    conn = None
+    cur = None
+    try:
+        conn = get_db()
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+        cur.execute("SELECT tipo_aula_id, nombre_tipo FROM tipo_aula_cat ORDER BY nombre_tipo ASC;")
+        tipos_aula = cur.fetchall()
+        return jsonify(tipos_aula), 200
+    except Exception as e:
+        print(f"❌ Error al obtener tipos de aula: {e}")
+        return jsonify({"error": "Error interno al obtener tipos de aula."}), 500
     finally:
         if cur: cur.close()
         if conn: conn.close()
