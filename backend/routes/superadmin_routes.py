@@ -690,7 +690,7 @@ def eliminar_prerrequisito(id_prerrequisito):
 # ======================================================
 # 🕒 GESTIONAR BLOQUE HORARIO
 # ======================================================
-
+# 1. registrar horario 
 from datetime import datetime
 from flask import Blueprint, request, jsonify
 
@@ -779,3 +779,56 @@ def crear_bloque_horario():
     finally:
         if cur: cur.close()
         if conn: conn.close()
+
+# ======================================================
+# 📋 LISTAR BLOQUES HORARIOS (versión corregida JSON)
+# ======================================================
+@superadmin_bp.route("/bloques-horarios", methods=["GET"])
+def listar_bloques_horarios():
+    try:
+        conn = get_db()
+        cur = conn.cursor()
+
+        cur.execute("""
+            SELECT 
+                bloque_id,
+                codigo_bloque,
+                dia,
+                hora_inicio,
+                hora_fin,
+                estado
+            FROM bloque_horario
+            ORDER BY bloque_id ASC;
+        """)
+
+        data = cur.fetchall()
+        columnas = [desc[0] for desc in cur.description]
+
+        bloques = []
+        for fila in data:
+            bloque = dict(zip(columnas, fila))
+
+            # ✅ Convertir los objetos time a string (HH:MM)
+            if isinstance(bloque["hora_inicio"], (bytes, bytearray)):
+                bloque["hora_inicio"] = bloque["hora_inicio"].decode("utf-8")
+            else:
+                bloque["hora_inicio"] = str(bloque["hora_inicio"])[:5]
+
+            if isinstance(bloque["hora_fin"], (bytes, bytearray)):
+                bloque["hora_fin"] = bloque["hora_fin"].decode("utf-8")
+            else:
+                bloque["hora_fin"] = str(bloque["hora_fin"])[:5]
+
+            bloques.append(bloque)
+
+        return jsonify(bloques), 200
+
+    except Exception as e:
+        print("❌ Error al listar bloques:", e)
+        return jsonify({"error": str(e)}), 500
+
+    finally:
+        if cur:
+            cur.close()
+        if conn:
+            conn.close()

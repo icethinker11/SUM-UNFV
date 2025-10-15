@@ -1,16 +1,20 @@
 import { useEffect, useState } from "react";
-import "../styles/registrar-horario.css";
+import "../styles/listar-horario.css";
 
 export default function ListarHorarios() {
   const [bloques, setBloques] = useState([]);
   const [mensaje, setMensaje] = useState("");
+  const [filtroDia, setFiltroDia] = useState("Todos");
   const [filtroEstado, setFiltroEstado] = useState("Todos");
+  const [busqueda, setBusqueda] = useState("");
 
-  // ✅ Cargar horarios al iniciar
+  // ✅ Cargar horarios desde el backend
   useEffect(() => {
     const fetchBloques = async () => {
       try {
-        const res = await fetch("http://localhost:5000/superadmin/bloques-horarios");
+        const res = await fetch(
+          "http://localhost:5000/superadmin/bloques-horarios"
+        );
         const data = await res.json();
 
         if (res.ok) {
@@ -26,37 +30,62 @@ export default function ListarHorarios() {
     fetchBloques();
   }, []);
 
-  // ✅ Filtrar por estado
-  const bloquesFiltrados =
-    filtroEstado === "Todos"
-      ? bloques
-      : bloques.filter((b) => b.estado === filtroEstado);
+  // ✅ Filtros combinados
+  const bloquesFiltrados = bloques.filter((b) => {
+    const coincideBusqueda =
+      b.codigo_bloque.toLowerCase().includes(busqueda.toLowerCase()) ||
+      b.dia.toLowerCase().includes(busqueda.toLowerCase()) ||
+      `${b.hora_inicio} - ${b.hora_fin}`.includes(busqueda);
+
+    const coincideDia = filtroDia === "Todos" || b.dia === filtroDia;
+    const coincideEstado =
+      filtroEstado === "Todos" || b.estado === filtroEstado;
+
+    return coincideBusqueda && coincideDia && coincideEstado;
+  });
 
   return (
-    <div className="registrar-horario">
+    <div className="listar-horarios">
       <h2>📋 Listado de Bloques Horarios</h2>
 
-      <div className="filtros">
-        <label>
-          Filtrar por Estado:
-          <select
-            value={filtroEstado}
-            onChange={(e) => setFiltroEstado(e.target.value)}
-          >
-            <option value="Todos">Todos</option>
-            <option value="Activo">Activo</option>
-            <option value="Inactivo">Inactivo</option>
-          </select>
-        </label>
+      {/* 🔎 Filtros */}
+      <div className="barra-filtros">
+        <input
+          type="text"
+          placeholder="Buscar por código, día u horario..."
+          value={busqueda}
+          onChange={(e) => setBusqueda(e.target.value)}
+        />
+        <select
+          value={filtroDia}
+          onChange={(e) => setFiltroDia(e.target.value)}
+        >
+          <option value="Todos">Todos los días</option>
+          <option value="Lunes">Lunes</option>
+          <option value="Martes">Martes</option>
+          <option value="Miércoles">Miércoles</option>
+          <option value="Jueves">Jueves</option>
+          <option value="Viernes">Viernes</option>
+          <option value="Sábado">Sábado</option>
+        </select>
+        <select
+          value={filtroEstado}
+          onChange={(e) => setFiltroEstado(e.target.value)}
+        >
+          <option value="Todos">Todos los estados</option>
+          <option value="Activo">Activo</option>
+          <option value="Inactivo">Inactivo</option>
+        </select>
       </div>
 
+      {/* 🧾 Tabla */}
       <table className="tabla-horarios">
         <thead>
           <tr>
             <th>ID</th>
+            <th>Código</th>
             <th>Día</th>
-            <th>Hora Inicio</th>
-            <th>Hora Fin</th>
+            <th>Horario</th>
             <th>Duración</th>
             <th>Turno</th>
             <th>Estado</th>
@@ -65,10 +94,9 @@ export default function ListarHorarios() {
         <tbody>
           {bloquesFiltrados.length > 0 ? (
             bloquesFiltrados.map((b) => {
-              // Calcular duración y turno al vuelo
               const [h1, m1] = b.hora_inicio.split(":").map(Number);
               const [h2, m2] = b.hora_fin.split(":").map(Number);
-              const totalMin = (h2 * 60 + m2) - (h1 * 60 + m1);
+              const totalMin = h2 * 60 + m2 - (h1 * 60 + m1);
               const horas = Math.floor(totalMin / 60);
               const minutos = totalMin % 60;
               const duracion =
@@ -77,23 +105,30 @@ export default function ListarHorarios() {
                     ? `${horas}h ${minutos > 0 ? minutos + "m" : ""}`
                     : `${minutos}m`
                   : "⛔ Inválido";
-              const turno =
-                h1 < 12 ? "Mañana" : h1 < 18 ? "Tarde" : "Noche";
+              const turno = h1 < 12 ? "Mañana" : h1 < 19 ? "Tarde" : "Noche";
 
               return (
-                <tr key={b.id_bloque}>
-                  <td>{b.id_bloque}</td>
+                <tr key={b.bloque_id}>
+                  <td>{b.bloque_id}</td>
+                  <td>{b.codigo_bloque}</td>
                   <td>{b.dia}</td>
-                  <td>{b.hora_inicio}</td>
-                  <td>{b.hora_fin}</td>
+                  <td>
+                    {b.hora_inicio} - {b.hora_fin}
+                  </td>
                   <td>{duracion}</td>
-                  <td>{turno}</td>
-                  <td
-                    className={
-                      b.estado === "Activo" ? "estado-activo" : "estado-inactivo"
-                    }
-                  >
-                    {b.estado}
+                  <td>
+                    <span className={`badge turno-${turno.toLowerCase()}`}>
+                      {turno}
+                    </span>
+                  </td>
+                  <td>
+                    <span
+                      className={`estado-badge ${
+                        b.estado === "Activo" ? "activo" : "inactivo"
+                      }`}
+                    >
+                      {b.estado}
+                    </span>
                   </td>
                 </tr>
               );
