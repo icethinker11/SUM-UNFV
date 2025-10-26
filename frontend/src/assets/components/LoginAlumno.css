@@ -1,0 +1,165 @@
+/* === RESET GLOBAL === */
+/* Se asume que este reset ya está en un archivo global o que LoginAdmin.css lo maneja, pero se mantiene por consistencia */
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  font-family: "Poppins", sans-serif;
+  background-color: #ffffff;
+}
+
+/* === CONTENEDOR PRINCIPAL CON FONDO === */
+.login-alumno__container {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: flex-start; /* CAMBIO CLAVE: Alinea el formulario a la IZQUIERDA para el alumno */
+  align-items: center;
+  /* CAMBIO: Se usa la nueva imagen para el portal de alumnos */
+  background-image: url("/images/PortalAlumno.jpg"); 
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+  overflow: hidden;
+}
+
+/* === ELIMINAMOS LA CAPA OSCURA === */
+.login-alumno__overlay {
+  display: none;
+}
+
+
+/* === TARJETA DEL FORMULARIO === */
+.login-alumno__card {
+  position: relative;
+  z-index: 3;
+  background-color: rgba(255, 255, 255, 0.96);
+  border: 2px solid #00569a; /* Color secundario para Alumnos, por ejemplo, azul */
+  border-radius: 18px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+  padding: 2rem;
+  width: 50%;
+  max-width: 420px;
+  margin-left: 10vw; /* CAMBIO CLAVE: Separación del borde IZQUIERDO */
+  margin-top: 58px;
+}
+
+/* === TÍTULOS === */
+.login-alumno__title {
+  color: #00569a; /* Color secundario */
+  font-size: 1.8rem;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 0.5rem;
+}
+
+.login-alumno__subtitle {
+  text-align: center;
+  color: #555;
+  font-size: 1rem;
+  margin-bottom: 2rem;
+}
+
+/* === CAMPOS DE FORMULARIO === */
+.login-alumno__field {
+  margin-bottom: 1.2rem;
+}
+
+.login-alumno__label {
+  font-size: 0.95rem;
+  color: #444;
+  margin-bottom: 0.4rem;
+  display: block;
+}
+
+.login-alumno__input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1.5px solid #ccc;
+  border-radius: 10px;
+  background-color: #fff;
+  transition: all 0.2s ease;
+  font-size: 1rem;
+}
+
+.login-alumno__input:focus {
+  outline: none;
+  border-color: #00569a; /* Color secundario */
+  box-shadow: 0 0 5px rgba(0, 86, 154, 0.3);
+}
+
+/* === BOTÓN === */
+.login-alumno__button {
+  width: 100%;
+  background-color: #00569a; /* Color secundario */
+  color: #fff;
+  border: none;
+  border-radius: 25px;
+  padding: 12px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.25s ease;
+}
+
+.login-alumno__button:hover {
+  background-color: #003e6d; /* Tono más oscuro */
+}
+
+.login-alumno__button:disabled {
+  background-color: #999;
+  cursor: not-allowed;
+}
+
+/* === MENSAJE DINÁMICO === */
+.login-alumno__message {
+  text-align: center;
+  margin-top: -0.5rem;
+  margin-bottom: 1rem;
+  padding: 8px;
+  border-radius: 5px;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.login-alumno__message.error {
+  color: #721c24;
+  background-color: #f8d7da;
+  border: 1px solid #f5c6cb;
+}
+
+.login-alumno__message.success {
+  color: #155724;
+  background-color: #d4edda;
+  border: 1px solid #c3e6cb;
+}
+
+/* === FOOTER === */
+.login-alumno__footer {
+  text-align: center;
+  margin-top: 1.2rem;
+  font-size: 0.85rem;
+  color: #555;
+}
+
+.login-alumno__ea {
+  color: #00569a; /* Color secundario */
+  font-weight: 500;
+  text-decoration: none;
+}
+
+/* === RESPONSIVE === */
+@media (max-width: 768px) {
+  .login-alumno__container {
+    justify-content: center; /* Centra la tarjeta en pantallas pequeñas */
+  }
+
+  .login-alumno__card {
+    margin-left: 0; /* Elimina el margen izquierdo fijo */
+    margin: 1rem;
+    padding: 2rem;
+  }
+}

@@ -13,7 +13,7 @@ import { Search, Plus, Edit, Trash2, ListChecks } from 'lucide-react';
 import ModalAula from './ModalAula.jsx'; 
 import '../styles/gestion-aula.css';
 
-const BASE_URL = 'http://localhost:5000/superadmin/aulas';
+const BASE_URL = 'http://localhost:5000/superadmin/aulas/aulas';
 
 const AULA_INICIAL = {
     nombre_aula: '',

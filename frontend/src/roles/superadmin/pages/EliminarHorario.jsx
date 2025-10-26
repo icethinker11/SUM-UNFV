@@ -5,7 +5,7 @@ const EliminarHorario = () => {
   const [horarios, setHorarios] = useState([]);
   const [busqueda, setBusqueda] = useState("");
 
-  const API_URL = "http://localhost:5000/superadmin/bloques-horarios"; // ✅ misma URL que listar
+  const API_URL = "http://localhost:5000/superadmin/bloques-horarios-listar"; // ✅ misma URL que listar
 
   useEffect(() => {
     const obtenerHorarios = async () => {

@@ -13,7 +13,7 @@ export default function ListarHorarios() {
     const fetchBloques = async () => {
       try {
         const res = await fetch(
-          "http://localhost:5000/superadmin/bloques-horarios"
+          "http://localhost:5000/superadmin/bloques-horarios-listar"
         );
         const data = await res.json();
 

@@ -40,11 +40,11 @@ function CrearAdmin() {
     try {
       const [resDptos, resEscuelas, resFormaciones, resEspecialidades] =
         await Promise.all([
-          axios.get(`${BASE_URL}/departamentos-geo`),
-          axios.get(`${BASE_URL}/escuelas`),
-          axios.get(`${BASE_URL}/formaciones`),
-          axios.get(`${BASE_URL}/especialidades`)
-        ]);
+        axios.get(`${BASE_URL}/ubicaciones/departamentos-geo`),
+        axios.get(`${BASE_URL}/academico/escuelas`),
+        axios.get(`${BASE_URL}/academico/formaciones`),
+        axios.get(`${BASE_URL}/academico/especialidades`)
+      ]);
 
       setDepartamentos(resDptos.data.departamentos || []);
       setEscuelas(resEscuelas.data.escuelas || []);
@@ -72,7 +72,7 @@ function CrearAdmin() {
 
     if (departamentoSeleccionado) {
       axios
-        .get(`${BASE_URL}/provincias/${departamentoSeleccionado}`)
+        .get(`${BASE_URL}/ubicaciones/provincias/${departamentoSeleccionado}`)
         .then((res) => setProvincias(res.data.provincias || []))
         .catch((err) => console.error("Error cargando provincias", err));
     }
@@ -84,7 +84,7 @@ function CrearAdmin() {
 
     if (provinciaSeleccionada) {
       axios
-        .get(`${BASE_URL}/distritos/${provinciaSeleccionada}`)
+        .get(`${BASE_URL}/ubicaciones/distritos/${provinciaSeleccionada}`)
         .then((res) => setDistritos(res.data.distritos || []))
         .catch((err) => console.error("Error cargando distritos", err));
     }
@@ -110,7 +110,7 @@ function CrearAdmin() {
   const handleChange = (e) => {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
-
+  console.log("Datos enviados:", formData);
   const handleSubmit = async (e) => {
     e.preventDefault();
     setMensaje("");
@@ -130,10 +130,10 @@ function CrearAdmin() {
     const datosAEnviar = {
       ...formData,
       apellidos: `${formData.apellido_paterno} ${formData.apellido_materno}`.trim(),
-    };
+    };  
 
     try {
-      const response = await fetch(`${BASE_URL}/crear-admin`, {
+      const response = await fetch(`${BASE_URL}/admins/crear-admin`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(datosAEnviar)

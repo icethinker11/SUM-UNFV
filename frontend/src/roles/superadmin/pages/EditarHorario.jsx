@@ -83,7 +83,7 @@ export default function EditarHorario() {
       try {
         setCargando(true);
         // Ajusta la url si tu backend está en otro puerto/ruta
-        const res = await fetch("http://localhost:5000/superadmin/bloques-horarios");
+        const res = await fetch("http://localhost:5000/superadmin/bloques-horarios-listar");
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || "Error al obtener bloques.");
         setBloques(data);

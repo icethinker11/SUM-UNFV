@@ -3,8 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
-const TIPOS_URL = 'http://localhost:5000/superadmin/tipos-aula';
-const PABELLONES_URL = 'http://localhost:5000/superadmin/pabellones';
+const TIPOS_URL = 'http://localhost:5000/superadmin/pabellones/tipos-aula';
+const PABELLONES_URL = 'http://localhost:5000/superadmin/pabellones/pabellones';
 
 const AULA_INICIAL = {
     nombre_aula: '',

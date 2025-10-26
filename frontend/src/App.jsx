@@ -5,8 +5,14 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-// 🧩 Login
-import Login from "./assets/components/Login";
+// 🧩 Login - IMPORTACIONES ACTUALIZADAS
+// 1. Importa el componente principal (tu antigua Login.jsx renombrada)
+import LoginPrincipal from "./assets/components/LoginPrincipal"; 
+// 2. Importa los nuevos formularios de login específicos
+import LoginAdmin from "./assets/components/LoginAdmin"; 
+import LoginDocente from "./assets/components/LoginDocente"; 
+import LoginAlumno from "./assets/components/LoginAlumno"; 
+import LoginAplicativo from "./assets/components/LoginAplicativo"; 
 
 // 🧭 Sidebars
 import SidebarSuperAdmin from "./roles/superadmin/SidebarSuperAdmin";
@@ -58,9 +64,22 @@ function App() {
         setUser(null);
     };
 
-    // 🔐 Si no está logueado, muestra login
+   // 🔐 Si no está logueado, DEBE RENDERIZAR RUTAS PÚBLICAS
     if (!user) {
-        return <Login onLoginSuccess={handleLoginSuccess} />;
+        return (
+            <Routes>
+                {/* 1. RUTA PRINCIPAL (Landing Page con selección de rol) */}
+                <Route path="/" element={<LoginPrincipal onLoginSuccess={handleLoginSuccess} />} />
+
+                {/* 2. RUTAS DE FORMULARIOS DE LOGIN ESPECÍFICOS */}
+                {/* Nota: En tu LoginPrincipal.jsx, debes navegar a estas rutas al hacer clic en los botones de rol */}
+                <Route path="/login/admin" element={<LoginAdmin onLoginSuccess={handleLoginSuccess} />} />
+                <Route path="/login/docente" element={<LoginDocente onLoginSuccess={handleLoginSuccess} />} />
+                <Route path="/login/alumno" element={<LoginAlumno onLoginSuccess={handleLoginSuccess} />} />
+                <Route path="/login/aplicativo" element={<LoginAplicativo onLoginSuccess={handleLoginSuccess} />} />
+                <Route path="*" element={<Navigate to="/" />} />
+            </Routes>
+        );
     }
 
     // 🔧 Función genérica para renderizar layout según el rol

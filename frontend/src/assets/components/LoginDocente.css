@@ -1,0 +1,165 @@
+/* === RESET GLOBAL === */
+html,
+body,
+#root {
+height: 100%;
+margin: 0;
+padding: 0;
+/* Usando una fuente genérica segura si Poppins no está disponible */
+font-family: 'Inter', "Poppins", sans-serif;
+background-color: #000;
+}
+
+/* === CONTENEDOR PRINCIPAL CON FONDO === */
+.login-docente__container {
+position: relative;
+width: 100vw;
+height: 100vh;
+display: flex;
+justify-content: flex-end; /* Alinea el formulario a la derecha */
+align-items: center;
+/*CAMBIO: Imagen específica para el portal de docentes */
+background-image: url("/images/PortalDocente.jpg");
+background-size: cover;
+background-repeat: no-repeat;
+background-position: center;
+overflow: hidden;
+}
+
+/* === ELIMINAMOS LA CAPA OSCURA === */
+.login-docente__overlay {
+display: none;
+}
+
+/* === TARJETA DEL FORMULARIO === */
+.login-docente__card {
+position: relative;
+z-index: 3;
+background-color: rgba(255, 255, 255, 0.96);
+border: 2px solid #11377a;
+border-radius: 18px;
+box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+padding: 2rem;
+width: 50%;
+max-width: 420px;
+margin-right: 10vw; /* Separación del borde derecho */
+margin-top: 58px;
+}
+
+/* === TÍTULOS === */
+.login-docente__title {
+color: #11377a;
+font-size: 1.8rem;
+font-weight: 700;
+text-align: center;
+margin-bottom: 0.5rem;
+}
+
+.login-docente__subtitle {
+text-align: center;
+color: #555;
+font-size: 1rem;
+margin-bottom: 2rem;
+}
+
+/* === CAMPOS DE FORMULARIO === */
+.login-docente__field {
+margin-bottom: 1.2rem;
+}
+
+.login-docente__label {
+font-size: 0.95rem;
+color: #444;
+margin-bottom: 0.4rem;
+display: block;
+}
+
+.login-docente__input {
+width: 100%;
+padding: 12px 16px;
+border: 1.5px solid #ccc;
+border-radius: 10px;
+background-color: #fff;
+transition: all 0.2s ease;
+font-size: 1rem;
+}
+
+.login-docente__input:focus {
+outline: none;
+border-color: #11377a;
+box-shadow: 0 0 5px rgba(124, 10, 2, 0.3);
+}
+
+/* === BOTÓN === */
+.login-docente__button {
+width: 100%;
+background-color: #11377a;
+color: #fff;
+border: none;
+border-radius: 25px;
+padding: 12px;
+font-weight: 600;
+font-size: 1rem;
+cursor: pointer;
+transition: background 0.25s ease;
+}
+
+.login-docente__button:hover {
+background-color: #11377a;
+}
+
+.login-docente__button:disabled {
+background-color: #999;
+cursor: not-allowed;
+}
+
+/* === FOOTER === */
+.login-docente__footer {
+text-align: center;
+margin-top: 1.2rem;
+font-size: 0.85rem;
+color: #555;
+}
+
+.login-docente__ea {
+color: #11377a;
+font-weight: 500;
+text-decoration: none;
+}
+
+
+/* === MENSAJES DE ESTADO === */
+.login-docente__message {
+text-align: center;
+margin-top: -0.5rem; /* Ajustar el margen superior */
+margin-bottom: 1rem; /* Espacio antes del botón */
+padding: 8px;
+border-radius: 5px;
+font-size: 0.9rem;
+font-weight: 500;
+}
+
+.login-docente__message.error {
+color: #721c24;
+background-color: #f8d7da;
+border: 1px solid #f5c6cb;
+}
+
+.login-docente__message.success {
+color: #155724;
+background-color: #d4edda;
+border: 1px solid #c3e6cb;
+}
+
+/* === RESPONSIVE === */
+@media (max-width: 768px) {
+.login-docente__container {
+justify-content: center;
+}
+
+.login-docente__card {
+margin-right: 0;
+margin: 1rem;
+padding: 2rem;
+}
+}

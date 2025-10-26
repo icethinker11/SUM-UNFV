@@ -29,17 +29,39 @@ const GestionAdmins = () => {
 
   const obtenerAdmins = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/superadmin/admins");
-      setAdmins(res.data.admins || []);
+      const res = await axios.get("http://localhost:5000/superadmin/admins/admins");
+
+      // Normalizamos los nombres de las claves
+      const lista = (res.data.admins || []).map((a) => ({
+        usuario_id: a.usuario_id,
+        nombres: a.nombres,
+        apellidos: a.apellidos,
+        dni: a.dni,
+        telefono: a.telefono,
+        direccion_detalle: a.direccion_detalle,
+        fecha_nacimiento: a.fecha_nacimiento,
+        correo: a.correo,
+        estado: a.estado,
+        nombre_distrito: a.nombre_distrito || a.distrito || "",
+        formacion: a.nombre_formacion || a.formacion || "",
+        cargo: a.cargo || "Administrador",
+        escuela: a.nombre_escuela || a.escuela || "",
+        distrito_id: a.distrito_id,
+        id_formacion: a.id_formacion,
+        id_especialidad: a.id_especialidad,
+        escuela_id: a.escuela_id,
+      }));
+
+      setAdmins(lista);
     } catch (error) {
       console.error("Error al obtener administradores:", error);
-      mostrarMensaje("Error al cargar los administradores", "error");
+      mostrarMensaje("Error al cargar los administradores ❌", "error");
     }
   };
 
   const obtenerEscuelas = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/superadmin/escuelas");
+      const res = await axios.get("http://localhost:5000/superadmin/academico/escuelas");
       setEscuelas(res.data.escuelas || []);
     } catch (error) {
       console.error("Error al cargar escuelas:", error);
@@ -48,7 +70,7 @@ const GestionAdmins = () => {
 
   const obtenerDistritos = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/superadmin/distritos");
+      const res = await axios.get("http://localhost:5000/superadmin/ubicaciones/distritos");
       setDistritos(res.data.distritos || []);
     } catch (error) {
       console.error("Error al cargar distritos:", error);
@@ -57,7 +79,7 @@ const GestionAdmins = () => {
 
   const obtenerFormaciones = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/superadmin/formaciones");
+      const res = await axios.get("http://localhost:5000/superadmin/academico/formaciones");
       setFormaciones(res.data.formaciones || []);
     } catch (error) {
       console.error("Error al cargar formaciones:", error);
@@ -66,7 +88,7 @@ const GestionAdmins = () => {
 
   const obtenerEspecialidades = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/superadmin/especialidades");
+      const res = await axios.get("http://localhost:5000/superadmin/academico/especialidades");
       setEspecialidades(res.data.especialidades || []);
     } catch (error) {
       console.error("Error al cargar especialidades:", error);
@@ -128,9 +150,12 @@ const GestionAdmins = () => {
   const eliminarAdmin = async (id) => {
     if (!window.confirm("¿Seguro que deseas eliminar este administrador?")) return;
     try {
-      await axios.delete(`http://localhost:5000/superadmin/admins/${id}`);
+      await axios.delete(`http://localhost:5000/superadmin/admins/admins/${id}`);
       mostrarMensaje("Administrador eliminado correctamente ✅", "success");
-      obtenerAdmins();
+
+      setTimeout(() => {
+        obtenerAdmins();
+      }, 400);
     } catch (error) {
       console.error(error);
       mostrarMensaje("Error al eliminar el administrador ❌", "error");
@@ -140,7 +165,7 @@ const GestionAdmins = () => {
   // ✅ Verificación de cambios
   const hayCambios = () => JSON.stringify(form) !== JSON.stringify(formOriginal);
 
-  // ✅ Validaciones mejoradas
+  // ✅ Validaciones
   const validarCampos = () => {
     const errores = [];
 
@@ -154,10 +179,6 @@ const GestionAdmins = () => {
         errores.push(`El campo "${campo}" debe tener al menos 2 caracteres.`);
       } else if (sinSentido.test(valor.trim().toLowerCase())) {
         errores.push(`El campo "${campo}" no puede contener letras repetidas sin sentido.`);
-      } else if (/^[bcdfghjklmnpqrstvwxyz]$/i.test(valor.trim())) {
-        errores.push(`El campo "${campo}" no puede ser solo una consonante.`);
-      } else if (/^[aeiouáéíóú]$/i.test(valor.trim())) {
-        errores.push(`El campo "${campo}" no puede ser solo una vocal.`);
       }
     };
 
@@ -225,10 +246,14 @@ const GestionAdmins = () => {
         escuela_id: form.escuela_id,
       };
 
-      await axios.put(`http://localhost:5000/superadmin/admins/${id}`, payload);
+      // ✅ Debe ser:
+      await axios.put(`http://localhost:5000/superadmin/admins/admins/${id}`, payload);
       mostrarMensaje("Administrador actualizado correctamente ✅", "success");
       cancelarEdicion();
-      obtenerAdmins();
+
+      setTimeout(() => {
+        obtenerAdmins();
+      }, 500);
     } catch (error) {
       console.error("Error al actualizar:", error);
       mostrarMensaje("Error al actualizar administrador ❌", "error");
@@ -278,6 +303,7 @@ const GestionAdmins = () => {
               <tr key={admin.usuario_id}>
                 {editando === admin.usuario_id ? (
                   <>
+                    {/* Campos en edición */}
                     <td>
                       <input
                         type="text"
@@ -410,6 +436,7 @@ const GestionAdmins = () => {
                   </>
                 ) : (
                   <>
+                    {/* Campos en vista */}
                     <td>{admin.nombres}</td>
                     <td>{(admin.apellidos || "").split(" ")[0] || ""}</td>
                     <td>{(admin.apellidos || "").split(" ")[1] || ""}</td>

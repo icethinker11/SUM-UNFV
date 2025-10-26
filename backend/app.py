@@ -7,7 +7,7 @@ from config import config_by_name
 
 # Importa tus rutas y extensiones
 from routes.auth_routes import auth_bp
-from routes.superadmin_routes import superadmin_bp
+from routes.superadmin import superadmin_bp  # ← CAMBIADO
 from routes.admin_routes import admin_bp
 from routes.curso_routes import curso_bp
 from database.db import init_db
@@ -40,5 +40,4 @@ def home():
     return {"mensaje": "API Flask SUM_UNFV_3.0 corriendo 🚀"}
 
 if __name__ == "__main__":
-    # El modo debug se controla desde la clase de configuración, no directamente aquí
     app.run(host="0.0.0.0", port=5000)
