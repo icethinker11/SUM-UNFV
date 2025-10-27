@@ -165,7 +165,7 @@ export default function ConsultarCursos() {
       {/* 🖨️ Contenido imprimible */}
       <div id="area-imprimir" className="tabla-container">
         <div className="encabezado-informe">
-          <img src="/logo-universidad.png" alt="Logo" className="logo-universidad" />
+          <img src="/images/LogoUNFV.jpg" alt="Logo" className="logo-universidad" />
           <div>
             <h3>Universidad Nacional Federico Villarreal</h3>
             <p>Facultad de Ingeniería de Sistemas e Informática</p>
