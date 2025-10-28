@@ -7,8 +7,8 @@ from config import config_by_name
 
 # Importa tus rutas y extensiones
 from routes.auth_routes import auth_bp
-from routes.superadmin import superadmin_bp  # ← CAMBIADO
-from routes.admin_routes import admin_bp
+from routes.superadmin import superadmin_bp
+from routes.admin import admin_bp  # 🆕 Importar desde routes.admin (usa el __init__.py)
 from routes.curso_routes import curso_bp
 from database.db import init_db
 from extensions import mail
@@ -32,7 +32,7 @@ init_db(app)
 # Registra los Blueprints (los diferentes módulos de tu API)
 app.register_blueprint(auth_bp, url_prefix="/auth")
 app.register_blueprint(superadmin_bp, url_prefix="/superadmin")
-app.register_blueprint(admin_bp, url_prefix="/admin")
+app.register_blueprint(admin_bp, url_prefix="/admin")  # 🆕 Ahora incluye todos los sub-blueprints
 app.register_blueprint(curso_bp, url_prefix="/curso")
 
 @app.route("/")

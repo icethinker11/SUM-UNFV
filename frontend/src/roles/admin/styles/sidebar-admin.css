@@ -1,91 +1,183 @@
-/* styles/sidebar-admin.css */
+/* ================================
+   SIDEBAR ADMIN - Red Glass Style
+================================ */
 .sidebar-admin {
-  width: 240px;
+  width: 260px;
   height: 100vh;
-  background: linear-gradient(to bottom, #9c1f1f, #d05126) !important;
-  color: white;
-  padding: 1.5rem 1rem;
+  position: fixed;
+  top: 0;
+  left: 0;
+  padding: 20px 15px;
   display: flex;
   flex-direction: column;
-  position: fixed;
-  left: 0;
-  top: 0;
-  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
+  justify-content: space-between;
+  background: rgba(139, 0, 0, 0.75); /* Borgoña translúcido */
+  backdrop-filter: blur(14px);
+  border-right: 2px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 4px 0 15px rgba(0, 0, 0, 0.3);
+  color: #fff;
+  font-family: "Inter", sans-serif;
+  transition: all 0.3s ease-in-out;
   z-index: 1000;
 }
 
+/* ======= BOTÓN COLAPSAR ======= */
+.collapse-btn {
+  position: absolute;
+  top: 15px;
+  right: -14px;
+  background: #c62828;
+  border: none;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: white;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
+  transition: background 0.3s;
+  z-index: 1001;
+}
+.collapse-btn:hover {
+  background: #e53935;
+}
+
+/* ======= HEADER ======= */
 .sidebar-header {
-  margin-bottom: 1.5rem;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  text-align: center;
+  margin-bottom: 25px;
 }
 
 .sidebar-header h2 {
-  font-size: 1.25rem;
-  font-weight: bold;
-  margin-bottom: 0.5rem;
-  color: white;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 4px;
 }
 
 .sidebar-header p {
-  color: rgba(255, 255, 255, 0.8);
-  font-size: 0.8rem;
+  font-size: 0.85rem;
+  color: #ffd6d6;
+  margin: 0;
 }
 
+/* ======= USER INFO ======= */
 .user-info {
-  margin-bottom: 1.5rem;
-  padding: 0.75rem;
-  background-color: rgba(0, 0, 0, 0.2);
-  border-radius: 0.5rem;
+  background: rgba(255, 255, 255, 0.08);
+  padding: 12px 10px;
+  border-radius: 12px;
+  text-align: center;
+  margin-bottom: 20px;
 }
 
 .user-id {
-  font-size: 0.75rem;
-  color: rgba(255, 255, 255, 0.8);
-  margin-bottom: 0.25rem;
+  font-size: 0.8rem;
+  color: #ffbaba;
 }
 
 .user-name {
+  font-size: 0.95rem;
   font-weight: 600;
-  color: white;
+  color: #fff;
 }
 
+/* ======= NAVIGATION ======= */
 .sidebar-nav {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
   flex-grow: 1;
+  overflow-y: auto;
+  padding-right: 5px;
+}
+
+.sidebar-section {
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #ffe6e6;
+  margin: 18px 0 8px 10px;
+  border-left: 3px solid #ff4d4d;
+  padding-left: 8px;
 }
 
 .sidebar-nav a {
-  color: rgba(255, 255, 255, 0.9);
-  text-decoration: none;
-  padding: 0.75rem 1rem;
-  border-radius: 0.5rem;
-  transition: all 0.2s ease;
   display: flex;
   align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: #fff5f5;
+  font-size: 0.95rem;
+  padding: 10px 12px;
+  border-radius: 8px;
+  margin: 3px 5px;
+  transition: all 0.25s ease;
 }
 
 .sidebar-nav a:hover {
-  color: white;
-  background-color: rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.15);
   transform: translateX(5px);
 }
 
+.sidebar-nav a.active {
+  background: rgba(255, 77, 77, 0.25);
+  border-left: 4px solid #ff4d4d;
+}
+
+/* ======= ICONOS ======= */
 .nav-icon {
-  margin-right: 0.75rem;
   font-size: 1.1rem;
 }
 
-.sidebar-footer {
-  margin-top: auto;
-  padding-top: 1rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.2);
-  text-align: center;
+/* ======= SCROLLBAR ======= */
+.sidebar-nav::-webkit-scrollbar {
+  width: 6px;
+}
+.sidebar-nav::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 3px;
+}
+.sidebar-nav::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.4);
 }
 
-.sidebar-footer p {
-  font-size: 0.75rem;
-  color: rgba(255, 255, 255, 0.7);
+/* ======= FOOTER ======= */
+.sidebar-footer {
+  text-align: center;
+  font-size: 0.8rem;
+  color: #ffb3b3;
+  margin-top: 15px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* ======= MODO COLAPSADO ======= */
+.sidebar-admin.collapsed {
+  width: 80px;
+  padding: 15px 10px;
+}
+
+.sidebar-admin.collapsed .sidebar-header h2,
+.sidebar-admin.collapsed .sidebar-header p,
+.sidebar-admin.collapsed .user-info,
+.sidebar-admin.collapsed .sidebar-section,
+.sidebar-admin.collapsed .nav-text,
+.sidebar-admin.collapsed .sidebar-footer {
+  display: none;
+}
+
+.sidebar-admin.collapsed .nav-icon {
+  font-size: 1.4rem;
+  margin: 0 auto;
+}
+
+.sidebar-admin.collapsed a {
+  justify-content: center;
+  padding: 12px 0;
+}
+
+/* ======= RESPONSIVE ======= */
+@media (max-width: 768px) {
+  .sidebar-admin {
+    width: 220px;
+  }
 }

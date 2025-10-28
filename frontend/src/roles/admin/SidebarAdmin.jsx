@@ -1,9 +1,22 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import "./styles/sidebar-admin.css";
 
 function SidebarAdmin({ usuario }) {
+  const [colapsado, setColapsado] = useState(false);
+
   return (
-    <div className="sidebar-admin">
+    <div className={`sidebar-admin ${colapsado ? "collapsed" : ""}`}>
+      {/* Botón de colapsar */}
+      <button
+        className="collapse-btn"
+        onClick={() => setColapsado(!colapsado)}
+        title={colapsado ? "Expandir menú" : "Colapsar menú"}
+      >
+        {colapsado ? <ChevronRight /> : <ChevronLeft />}
+      </button>
+
       {/* Encabezado */}
       <div className="sidebar-header">
         <h2>PORTAL ADMINISTRADOR</h2>
@@ -20,36 +33,44 @@ function SidebarAdmin({ usuario }) {
 
       {/* Navegación */}
       <nav className="sidebar-nav">
+        <h3 className="sidebar-section">Mi Cuenta</h3>
+        <Link to="/admin/mi-perfil">
+          <span className="nav-icon">👤</span>
+          <span className="nav-text">Mi Perfil</span>
+        </Link>
+
+        <h3 className="sidebar-section">Gestión de Personal</h3>
         <Link to="/admin/crear-docente">
-          <span className="nav-icon">🧑‍🏫</span>
-          Crear Docente
+          <span className="nav-icon">🧑</span>
+          <span className="nav-text">Crear Docente</span>
         </Link>
         <Link to="/admin/crear-estudiante">
           <span className="nav-icon">🎓</span>
-          Crear Estudiante
+          <span className="nav-text">Crear Estudiante</span>
         </Link>
-        <Link to="/admin/aprobar-matricula">
-          <span className="nav-icon">✅</span>
-          Aprobar Matrícula
-        </Link>
-        <Link to="/admin/rechazar-matricula">
-          <span className="nav-icon">❌</span>
-          Rechazar Matrícula
-        </Link>
-        <Link to="/admin/asignar-aula">
-          <span className="nav-icon">🏫</span>
-          Asignar Aula
-        </Link>
-
-        {/* 🔹 Nueva sección: Modificación de datos */}
-        <h3 className="sidebar-section">Gestión de Usuarios</h3>
         <Link to="/admin/gestion-docentes">
           <span className="nav-icon">✏️</span>
-          Modificar Datos Docente
+          <span className="nav-text">Modificar Datos Docente</span>
         </Link>
         <Link to="/admin/gestion-alumnos">
           <span className="nav-icon">📖</span>
-          Modificar Datos Estudiante
+          <span className="nav-text">Modificar Datos Estudiante</span>
+        </Link>
+
+        <h3 className="sidebar-section">Matrículas</h3>
+        <Link to="/admin/aprobar-matricula">
+          <span className="nav-icon">✅</span>
+          <span className="nav-text">Aprobar Matrícula</span>
+        </Link>
+        <Link to="/admin/rechazar-matricula">
+          <span className="nav-icon">❌</span>
+          <span className="nav-text">Rechazar Matrícula</span>
+        </Link>
+
+        <h3 className="sidebar-section">Infraestructura</h3>
+        <Link to="/admin/asignar-aula">
+          <span className="nav-icon">🏫</span>
+          <span className="nav-text">Asignar Aula</span>
         </Link>
       </nav>
 

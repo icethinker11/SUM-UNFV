@@ -6,9 +6,7 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 // 🧩 Login - IMPORTACIONES ACTUALIZADAS
-// 1. Importa el componente principal (tu antigua Login.jsx renombrada)
 import LoginPrincipal from "./assets/components/LoginPrincipal"; 
-// 2. Importa los nuevos formularios de login específicos
 import LoginAdmin from "./assets/components/LoginAdmin"; 
 import LoginDocente from "./assets/components/LoginDocente"; 
 import LoginAlumno from "./assets/components/LoginAlumno"; 
@@ -33,17 +31,14 @@ import EditarHorario from "./roles/superadmin/pages/EditarHorario";
 import ListarHorario from "./roles/superadmin/pages/ListarHorario";
 import EliminarHorario from "./roles/superadmin/pages/EliminarHorario";
 import GestionAulas from "./roles/superadmin/pages/GestionAulas";
-
-// 🚨 CORRECCIÓN CLAVE: Usamos el nombre del archivo con el que estás trabajando.
-// El nombre del componente dentro del archivo es 'GestionPrerrequisitos', pero importamos el archivo.
 import GestionarPrerrequisitos from "./roles/superadmin/pages/GestionarPrerrequisitos";
-
 
 // 🏫 Páginas Admin
 import CrearDocente from "./roles/admin/pages/CrearDocente";
 import CrearAlumno from "./roles/admin/pages/CrearAlumno";
 import GestionDocentes from "./roles/admin/pages/GestionDocentes";
 import GestionAlumnos from "./roles/admin/pages/GestionAlumnos";
+import PerfilAdmin from "./roles/admin/pages/PerfilAdmin";  // 🆕 NUEVO
 
 // 🧑‍🏫 Páginas Docente
 import RegistrarNota from "./roles/docente/pages/RegistrarNota";
@@ -64,36 +59,62 @@ function App() {
         setUser(null);
     };
 
-   // 🔐 Si no está logueado, DEBE RENDERIZAR RUTAS PÚBLICAS
+    // 🔐 Si no está logueado, DEBE RENDERIZAR RUTAS PÚBLICAS
     if (!user) {
         return (
-            <Routes>
-                {/* 1. RUTA PRINCIPAL (Landing Page con selección de rol) */}
-                <Route path="/" element={<LoginPrincipal onLoginSuccess={handleLoginSuccess} />} />
-
-                {/* 2. RUTAS DE FORMULARIOS DE LOGIN ESPECÍFICOS */}
-                {/* Nota: En tu LoginPrincipal.jsx, debes navegar a estas rutas al hacer clic en los botones de rol */}
-                <Route path="/login/admin" element={<LoginAdmin onLoginSuccess={handleLoginSuccess} />} />
-                <Route path="/login/docente" element={<LoginDocente onLoginSuccess={handleLoginSuccess} />} />
-                <Route path="/login/alumno" element={<LoginAlumno onLoginSuccess={handleLoginSuccess} />} />
-                <Route path="/login/aplicativo" element={<LoginAplicativo onLoginSuccess={handleLoginSuccess} />} />
-                <Route path="*" element={<Navigate to="/" />} />
-            </Routes>
+            <>
+                <Routes>
+                    <Route path="/" element={<LoginPrincipal onLoginSuccess={handleLoginSuccess} />} />
+                    <Route path="/login/admin" element={<LoginAdmin onLoginSuccess={handleLoginSuccess} />} />
+                    <Route path="/login/docente" element={<LoginDocente onLoginSuccess={handleLoginSuccess} />} />
+                    <Route path="/login/alumno" element={<LoginAlumno onLoginSuccess={handleLoginSuccess} />} />
+                    <Route path="/login/aplicativo" element={<LoginAplicativo onLoginSuccess={handleLoginSuccess} />} />
+                    <Route path="*" element={<Navigate to="/" />} />
+                </Routes>
+                {/* 🆕 ToastContainer para notificaciones globales */}
+                <ToastContainer 
+                    position="top-right"
+                    autoClose={3000}
+                    hideProgressBar={false}
+                    newestOnTop={false}
+                    closeOnClick
+                    rtl={false}
+                    pauseOnFocusLoss
+                    draggable
+                    pauseOnHover
+                    theme="light"
+                />
+            </>
         );
     }
 
     // 🔧 Función genérica para renderizar layout según el rol
     const renderRoleLayout = (SidebarComponent, routes, defaultPath) => {
         return (
-            <div className="flex">
-                <SidebarComponent usuario={user} onLogout={handleLogout} />
-                <div className="flex-1 p-6 bg-gray-50 min-h-screen overflow-x-auto">
-                    <Routes>
-                        {routes}
-                        <Route path="*" element={<Navigate to={defaultPath} />} />
-                    </Routes>
+            <>
+                <div className="flex">
+                    <SidebarComponent usuario={user} onLogout={handleLogout} />
+                    <div className="flex-1 p-6 bg-gray-50 min-h-screen overflow-x-auto">
+                        <Routes>
+                            {routes}
+                            <Route path="*" element={<Navigate to={defaultPath} />} />
+                        </Routes>
+                    </div>
                 </div>
-            </div>
+                {/* 🆕 ToastContainer para notificaciones globales */}
+                <ToastContainer 
+                    position="top-right"
+                    autoClose={3000}
+                    hideProgressBar={false}
+                    newestOnTop={false}
+                    closeOnClick
+                    rtl={false}
+                    pauseOnFocusLoss
+                    draggable
+                    pauseOnHover
+                    theme="light"
+                />
+            </>
         );
     };
 
@@ -103,7 +124,6 @@ function App() {
             return renderRoleLayout(
                 SidebarSuperAdmin,
                 <>
-                    {/* Rutas de cursos y administradores (Manteniendo el Case Sensitive que usas) */}
                     <Route path="/superadmin/Crear-Admin" element={<CrearAdmin />} />
                     <Route path="/superadmin/Gestion-Admins" element={<GestionAdmins />} />
                     <Route path="/superadmin/Crear-Curso" element={<CrearCurso />} />
@@ -111,32 +131,18 @@ function App() {
                     <Route path="/superadmin/Eliminar-Curso" element={<EliminarCurso />} />
                     <Route path="/superadmin/Consultar-Cursos" element={<ConsultarCursos />} />
                     <Route path="/superadmin/Configurar-Cursos" element={<ConfigurarCursos />} />
+                    
+                    <Route path="/superadmin/definir-prerrequisito" element={<GestionarPrerrequisitos />} />
+                    <Route path="/superadmin/listar-prerrequisitos" element={<GestionarPrerrequisitos />} />
+                    <Route path="/superadmin/eliminar-prerrequisito" element={<GestionarPrerrequisitos />} />
 
-                    {/* 🚨 CORRECCIÓN CLAVE: Rutas unificadas para Gestión de Prerrequisitos */}
-                    <Route 
-                        path="/superadmin/definir-prerrequisito" 
-                        element={<GestionarPrerrequisitos />} 
-                    />
-                    <Route 
-                        path="/superadmin/listar-prerrequisitos" 
-                        element={<GestionarPrerrequisitos />} 
-                    />
-                    <Route 
-                        path="/superadmin/eliminar-prerrequisito" 
-                        element={<GestionarPrerrequisitos />} 
-                    />
-
-                    {/* Rutas de superadmin para la gestión de horarios*/}
                     <Route path="/superadmin/registrar-horario" element={<RegistrarHorario />} />
                     <Route path="/superadmin/listar-horario" element={<ListarHorario />} />
                     <Route path="/superadmin/editar-horario" element={<EditarHorario />} />
                     <Route path="/superadmin/eliminar-horario" element={<EliminarHorario/>} />
                    
-                    {/* Rutas de superadmin para la gestión de aulas*/}
                     <Route path="/superadmin/Gestion-Aulas" element={<GestionAulas />} />
-
                 </>,
-                // Ruta por defecto (ejemplo)
                 "/superadmin/Crear-Admin" 
             );
 
@@ -148,6 +154,11 @@ function App() {
                     <Route path="/admin/crear-estudiante" element={<CrearAlumno />} />
                     <Route path="/admin/gestion-docentes" element={<GestionDocentes />} />
                     <Route path="/admin/gestion-alumnos" element={<GestionAlumnos />} />
+                    {/* 🆕 NUEVA RUTA: Mi Perfil del Administrador */}
+                    <Route 
+                        path="/admin/mi-perfil" 
+                        element={<PerfilAdmin usuarioId={user.usuario_id} />} 
+                    />
                 </>,
                 "/admin/crear-docente"
             );
