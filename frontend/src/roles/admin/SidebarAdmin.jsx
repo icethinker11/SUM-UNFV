@@ -67,6 +67,23 @@ function SidebarAdmin({ usuario }) {
           <span className="nav-text">Rechazar Matrícula</span>
         </Link>
 
+        <h3 className="sidebar-section">Asignaciones</h3>
+
+        <Link to="/admin/registrar-asignaciones">
+          <span className="nav-icon">🆕</span>
+          <span className="nav-text">Registrar Asignaciones</span>
+        </Link>
+
+        <Link to="/admin/listar-editar-asignaciones">
+          <span className="nav-icon">📋</span>
+          <span className="nav-text"> Listar y Editar Asignaciones</span>
+        </Link>
+
+        <Link to="/admin/eliminar-asignaciones">
+          <span className="nav-icon">🗑️</span>
+          <span className="nav-text">Eliminar Asignaciones</span>
+        </Link>
+
         <h3 className="sidebar-section">Infraestructura</h3>
         <Link to="/admin/asignar-aula">
           <span className="nav-icon">🏫</span>
