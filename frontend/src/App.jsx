@@ -42,6 +42,7 @@ import PerfilAdmin from "./roles/admin/pages/PerfilAdmin";
 import RegistrarAsignaciones from "./roles/admin/pages/RegistrarAsignaciones"; // 🆕 NUEVO -> ASIGNACIONES
 import ListneditAsignaciones from "./roles/admin/pages/ListneditAsignaciones"; // 🆕 NUEVO -> ASIGNACIONES
 import EliminarAsignaciones from "./roles/admin/pages/EliminarAsignaciones"; // 🆕 NUEVO -> ASIGNACIONES
+import GestionAlumnos from "./roles/admin/pages/GestionarAlumnos"; // 🆕 NUEVO -> ASIGNACIONES (cambios huanca)
 
 // 🧑‍🏫 Páginas Docente
 import RegistrarNota from "./roles/docente/pages/RegistrarNota";
