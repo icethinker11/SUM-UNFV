@@ -3,7 +3,8 @@ from psycopg2.extras import RealDictCursor
 import psycopg2
 from database.db import get_db
 from utils.security import hash_password
-from datetime import datetime
+from datetime import datetime, date
+from dateutil.relativedelta import relativedelta
 from routes.superadmin.helpers import (
     generar_contrasena,
     generar_correo_institucional,
@@ -11,6 +12,33 @@ from routes.superadmin.helpers import (
 )
 
 admins_bp = Blueprint('admins_bp', __name__)
+
+# ======================================================
+# 🔹 FUNCIÓN AUXILIAR: VALIDAR FECHA DE NACIMIENTO
+# ======================================================
+def validar_fecha_nacimiento(fecha_nacimiento_obj):
+    """
+    Valida que la fecha de nacimiento corresponda a una persona
+    con al menos 25 años de edad y no sea una fecha futura.
+    """
+    hoy = date.today()
+    
+    # Validar que no sea fecha futura
+    if fecha_nacimiento_obj > hoy:
+        return False, "La fecha de nacimiento no puede ser futura."
+    
+    # Calcular edad usando relativedelta para mayor precisión
+    edad = relativedelta(hoy, fecha_nacimiento_obj).years
+    
+    # Validar edad mínima
+    if edad < 25:
+        return False, f"El administrador debe tener al menos 25 años. Edad actual: {edad} años."
+    
+    # Validar edad máxima razonable (120 años)
+    if edad > 120:
+        return False, "La fecha de nacimiento no es válida (edad excede límite razonable)."
+    
+    return True, None
 
 # ======================================================
 # 🧱 CREAR ADMINISTRADOR (FINAL, CORREGIDO Y MEJORADO)
@@ -38,7 +66,7 @@ def crear_admin():
     if not data["telefono"].isdigit() or len(data["telefono"]) != 9:
         return jsonify({"error": "El teléfono debe tener 9 dígitos numéricos."}), 400
 
-    # === 3️⃣ CONVERSIÓN DE FECHA ===
+    # === 3️⃣ CONVERSIÓN Y VALIDACIÓN DE FECHA ===
     fecha_nacimiento_str = data.get("fecha_nacimiento")
     try:
         if "/" in fecha_nacimiento_str:
@@ -47,6 +75,11 @@ def crear_admin():
             fecha_nacimiento_obj = datetime.strptime(fecha_nacimiento_str, "%Y-%m-%d").date()
     except Exception:
         return jsonify({"error": "Formato de fecha inválido. Use DD/MM/YYYY o YYYY-MM-DD."}), 400
+
+    # 🔹 VALIDAR EDAD MÍNIMA DE 25 AÑOS
+    es_valida, mensaje_error = validar_fecha_nacimiento(fecha_nacimiento_obj)
+    if not es_valida:
+        return jsonify({"error": mensaje_error}), 400
 
     # === 4️⃣ CREACIÓN DE CREDENCIALES ===
     correo_institucional = generar_correo_institucional(data["nombres"], data["apellidos"])
@@ -107,7 +140,7 @@ def crear_admin():
         # === PASO 6: ENVÍO DE CREDENCIALES ===
         enviado = enviar_credenciales(data['correo_personal'], correo_institucional, contrasena_generada)
         if not enviado:
-            print(f"⚠️ No se pudo enviar el correo a {data['correo_personal']}")
+            print(f"⚠ No se pudo enviar el correo a {data['correo_personal']}")
 
         return jsonify({
             "mensaje": f"✅ Administrador creado exitosamente. Credenciales enviadas a {data['correo_personal']}."
@@ -134,7 +167,7 @@ def crear_admin():
         elif "escuela_id" in error_text:
             msg = "❌ La escuela seleccionada no existe."
         else:
-            msg = "⚠️ Error de integridad en la base de datos. Revise los datos ingresados."
+            msg = "⚠ Error de integridad en la base de datos. Revise los datos ingresados."
         return jsonify({"error": msg}), 400
 
     except Exception as e:
@@ -191,7 +224,7 @@ def listar_admins():
         if conn: conn.close()
 
 # ======================================================
-# ✏️ MODIFICAR ADMINISTRADOR
+# ✏ MODIFICAR ADMINISTRADOR
 # ======================================================
 @admins_bp.route("/admins/<int:usuario_id>", methods=["PUT"])
 def modificar_admin(usuario_id):
@@ -201,6 +234,21 @@ def modificar_admin(usuario_id):
     try:
         conn = get_db()
         cur = conn.cursor()
+
+        # 🔹 VALIDAR FECHA DE NACIMIENTO SI SE ESTÁ ACTUALIZANDO
+        if data.get("fecha_nacimiento"):
+            try:
+                if "/" in data["fecha_nacimiento"]:
+                    fecha_obj = datetime.strptime(data["fecha_nacimiento"], "%d/%m/%Y").date()
+                else:
+                    fecha_obj = datetime.strptime(data["fecha_nacimiento"], "%Y-%m-%d").date()
+                
+                es_valida, mensaje_error = validar_fecha_nacimiento(fecha_obj)
+                if not es_valida:
+                    return jsonify({"error": mensaje_error}), 400
+                    
+            except Exception:
+                return jsonify({"error": "Formato de fecha inválido."}), 400
 
         # 1️⃣ ACTUALIZAR USUARIO
         if data.get("correo"):

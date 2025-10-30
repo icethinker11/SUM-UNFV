@@ -90,8 +90,8 @@ function CrearAdmin() {
     }
   }, [provinciaSeleccionada]);
 
-  // ==========================================================
-  // 3️⃣ VALIDACIÓN DE NOMBRES Y APELLIDOS
+// ==========================================================
+  // ⿣ VALIDACIÓN DE NOMBRES Y APELLIDOS
   // ==========================================================
   const validarTextoHumano = (texto) => {
     if (!texto) return false;
@@ -103,6 +103,39 @@ function CrearAdmin() {
       return false;
     return true;
   };
+
+  // ==========================================================
+  // ⿣.1 VALIDACIÓN DE FECHA DE NACIMIENTO
+  // ==========================================================
+  const validarFechaNacimiento = (fecha) => {
+    if (!fecha) return { valido: false, mensaje: "La fecha de nacimiento es obligatoria." };
+    
+    const fechaNacimiento = new Date(fecha);
+    const hoy = new Date();
+    
+    // Validar que no sea una fecha futura
+    if (fechaNacimiento > hoy) {
+      return { valido: false, mensaje: "La fecha de nacimiento no puede ser futura." };
+    }
+    
+    // Calcular edad
+    let edad = hoy.getFullYear() - fechaNacimiento.getFullYear();
+    const mesActual = hoy.getMonth();
+    const mesNacimiento = fechaNacimiento.getMonth();
+    
+    // Ajustar edad si aún no ha cumplido años este año
+    if (mesActual < mesNacimiento || 
+        (mesActual === mesNacimiento && hoy.getDate() < fechaNacimiento.getDate())) {
+      edad--;
+    }
+    
+    // Validar edad mínima de 25 años
+    if (edad < 25) {
+      return { valido: false, mensaje: "El administrador debe tener al menos 25 años de edad." };
+    }
+    
+    return { valido: true, mensaje: "" };
+  };
 
   // ==========================================================
   // 4️⃣ HANDLERS
