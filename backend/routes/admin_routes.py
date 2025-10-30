@@ -25,52 +25,6 @@ def validar_dni(dni):
     return bool(re.fullmatch(r'\d{8}', dni))
 
 # ===========================
-# CREAR DOCENTE
-# ===========================
-@admin_bp.route("/crear-docente", methods=["POST"])
-def crear_docente():
-    data = request.json
-    correo = data.get("correo")
-    contrasena = hash_password(data.get("contrasena"))
-    nombres = data.get("nombres")
-    apellidos = data.get("apellidos")
-    dni = data.get("dni")
-    telefono = data.get("telefono")
-    escuela_id = data.get("escuela_id")
-
-    # Validaciones
-    if not validar_correo(correo, "Docente"):
-        return jsonify({"error": "El correo debe terminar en @docenteunfv.edu.pe"}), 400
-    if not validar_telefono(telefono):
-        return jsonify({"error": "El teléfono debe tener exactamente 9 dígitos"}), 400
-    if not validar_dni(dni):
-        return jsonify({"error": "El DNI debe tener exactamente 8 dígitos"}), 400
-
-    conn = get_db()
-    cur = conn.cursor()
-
-    cur.execute("""
-        INSERT INTO usuario (correo, contrasena) 
-        VALUES (%s, %s) RETURNING usuario_id
-    """, (correo, contrasena))
-    usuario_id = cur.fetchone()[0]
-
-    cur.execute("""
-        INSERT INTO usuario_rol (usuario_id, rol_id)
-        VALUES (%s, (SELECT rol_id FROM rol WHERE nombre_rol='Docente'))
-    """, (usuario_id,))
-
-    cur.execute("""
-        INSERT INTO docente (usuario_id, nombres, apellidos, dni, telefono, escuela_id)
-        VALUES (%s, %s, %s, %s, %s, %s)
-    """, (usuario_id, nombres, apellidos, dni, telefono, escuela_id))
-
-    conn.commit()
-    cur.close()
-    return jsonify({"mensaje": "Docente creado con éxito", "usuario_id": usuario_id})
-
-
-# ===========================
 # CREAR ALUMNO
 # ===========================
 @admin_bp.route("/crear-alumno", methods=["POST"])
@@ -141,26 +95,6 @@ def obtener_escuelas():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-# ==========================
-# LISTAR DOCENTES
-# ==========================
-@admin_bp.route("/docentes", methods=["GET"])
-def listar_docentes():
-    conn = get_db()
-    cur = conn.cursor(cursor_factory=RealDictCursor)
-    cur.execute("""
-    SELECT d.usuario_id, d.nombres, d.apellidos, u.correo, d.telefono, e.nombre_escuela
-    FROM docente d
-    JOIN usuario u ON d.usuario_id = u.usuario_id
-    JOIN usuario_rol ur ON u.usuario_id = ur.usuario_id
-    JOIN rol r ON ur.rol_id = r.rol_id
-    JOIN escuela e ON d.escuela_id = e.escuela_id
-    WHERE r.nombre_rol = 'Docente'
-""")
-    docentes = cur.fetchall()
-    cur.close()
-    conn.close()
-    return jsonify(docentes)
 
 
 # ==========================
@@ -184,57 +118,6 @@ def listar_alumnos():
     conn.close()
     return jsonify(alumnos)
 
-
-# ===========================
-# MODIFICAR DOCENTE
-# ===========================
-@admin_bp.route("/docentes/<int:docente_id>", methods=["PUT"])
-def modificar_docente(docente_id):
-    data = request.json
-    nombres = data.get("nombres")
-    apellidos = data.get("apellidos", "")  # si no viene, por defecto vacío
-    correo = data.get("correo")
-    contrasena = data.get("contrasena")
-
-    conn = get_db()
-    cur = conn.cursor(cursor_factory=RealDictCursor)
-
-    if contrasena:  # si mandan nueva contraseña, la hasheamos
-        hashed = bcrypt.hashpw(contrasena.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
-        cur.execute("""
-            UPDATE docente 
-            SET nombres=%s, apellidos=%s, correo=%s, contrasena=%s
-            WHERE usuario_id=%s
-            RETURNING *;
-        """, (nombres, apellidos, correo, hashed, docente_id))
-    else:  # si no cambian contraseña, no tocarla
-        cur.execute("""
-            UPDATE docente 
-            SET nombres=%s, apellidos=%s, correo=%s
-            WHERE usuario_id=%s
-            RETURNING *;
-        """, (nombres, apellidos, correo, docente_id))
-
-    updated = cur.fetchone()
-    conn.commit()
-    cur.close()
-    conn.close()
-
-    return jsonify(updated), 200
-
-
-# ===========================
-# ELIMINAR DOCENTE
-# ===========================
-@admin_bp.route("/docentes/<int:usuario_id>", methods=["DELETE"])
-def eliminar_docente(usuario_id):
-    conn = get_db()
-    cur = conn.cursor()
-    cur.execute("DELETE FROM docente WHERE usuario_id=%s", (usuario_id,))
-    cur.execute("DELETE FROM usuario WHERE usuario_id=%s", (usuario_id,))
-    conn.commit()
-    cur.close()
-    return jsonify({"mensaje": "Docente eliminado con éxito"})
 
 
 # ===========================
@@ -278,3 +161,271 @@ def eliminar_alumno(usuario_id):
     cur.close()
     return jsonify({"mensaje": "Alumno eliminado con éxito"})
 
+# ===========================
+# ENDPOINT DE ESCUELAS (Corregido: Cierre de conexión)
+# ===========================
+@admin_bp.route("/escuelas", methods=["GET"])
+def obtener_escuelas():
+    conn = None
+    cur = None
+    try:
+        conn = get_db()
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+        cur.execute("SELECT escuela_id, nombre_escuela, facultad FROM escuela ORDER BY nombre_escuela")
+        escuelas = cur.fetchall()
+        return jsonify({"escuelas": escuelas})
+    except (Exception, psycopg2.Error) as e:
+        print(f"Error en obtener_escuelas: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+    finally:
+        if cur: cur.close()
+        if conn: conn.close()
+
+# ===========================
+# CREAR DOCENTE (Corregido: Cierre de conexión)
+# ===========================
+@admin_bp.route("/crear-docente", methods=["POST"])
+def crear_docente():
+    data = request.json
+    correo = data.get("correo"); contrasena = hash_password(data.get("contrasena"))
+    nombres = data.get("nombres"); apellidos = data.get("apellidos")
+    dni = data.get("dni"); telefono = data.get("telefono")
+    fecha_nacimiento_str = data.get("fecha_nacimiento")
+    direccion_detalle = data.get("direccion_desc"); id_distrito = data.get("id_distrito")
+    escuela_id = data.get("escuela_id")
+    estado_docente = True
+
+    # --- VALIDACIONES ---
+    if not all([correo, contrasena, nombres, apellidos, dni, telefono, escuela_id, fecha_nacimiento_str, direccion_detalle, id_distrito]):
+        return jsonify({"error": "Todos los campos son obligatorios"}), 400
+    if not validar_correo(correo, "Docente"): return jsonify({"error": "Correo inválido para docente"}), 400
+    if not validar_telefono(telefono): return jsonify({"error": "Teléfono inválido (9 dígitos)"}), 400
+    if not validar_dni(dni): return jsonify({"error": "DNI inválido (8 dígitos)"}), 400
+
+    try:
+        fecha_nacimiento = datetime.strptime(fecha_nacimiento_str, '%Y-%m-%d').date()
+        hoy = date.today()
+        edad = hoy.year - fecha_nacimiento.year - ((hoy.month, hoy.day) < (fecha_nacimiento.month, fecha_nacimiento.day))
+        if fecha_nacimiento > hoy: return jsonify({"error": "Fecha de nacimiento futura inválida."}), 400
+        EDAD_MINIMA_DOCENTE = 28
+        if edad < EDAD_MINIMA_DOCENTE: return jsonify({"error": f"Edad mínima {EDAD_MINIMA_DOCENTE} años (edad: {edad})."}), 400
+        if edad > 100: return jsonify({"error": "Edad (>100 años) no razonable."}), 400
+    except ValueError:
+        return jsonify({"error": "Formato de fecha inválido (Use YYYY-MM-DD)."}), 400
+
+    conn = None
+    cur = None
+    try:
+        conn = get_db()
+        cur = conn.cursor()
+        
+        cur.execute("INSERT INTO usuario (correo, contrasena, estado) VALUES (%s, %s, %s) RETURNING usuario_id", (correo, contrasena, True))
+        usuario_id = cur.fetchone()[0]
+        
+        cur.execute("INSERT INTO direccion (direccion_detalle, id_distrito) VALUES (%s, %s) RETURNING id_direccion", (direccion_detalle, id_distrito))
+        id_direccion = cur.fetchone()[0]
+        
+        cur.execute("INSERT INTO persona (usuario_id, nombres, apellidos, dni, telefono, fecha_nacimiento) VALUES (%s, %s, %s, %s, %s, %s) RETURNING persona_id", (usuario_id, nombres, apellidos, dni, telefono, fecha_nacimiento))
+        persona_id = cur.fetchone()[0]
+        
+        cur.execute("INSERT INTO usuario_rol (usuario_id, rol_id) VALUES (%s, (SELECT rol_id FROM rol WHERE nombre_rol='Docente'))", (usuario_id,))
+
+        cur.execute("""
+            INSERT INTO docente (persona_id, escuela_id, id_direccion, estado, codigo_docente)
+            VALUES (%s, %s, %s, %s, generar_codigo_docente()) 
+            RETURNING codigo_docente
+        """, (persona_id, escuela_id, id_direccion, estado_docente))
+        
+        codigo_generado = cur.fetchone()[0] 
+
+        conn.commit()
+        return jsonify({"mensaje": "Docente creado con éxito", "usuario_id": usuario_id, "codigo_docente": codigo_generado}), 201
+
+    except errors.UniqueViolation as e:
+        if conn: conn.rollback()
+        error_msg = str(e)
+        if "persona_dni_key" in error_msg: return jsonify({"error": "El DNI ya existe."}), 400
+        if "usuario_correo_key" in error_msg: return jsonify({"error": "El correo ya existe."}), 400
+        return jsonify({"error": "Valor duplicado (DNI o correo)."}), 400
+    except (Exception, psycopg2.Error) as e:
+        if conn: conn.rollback()
+        print(f"Error en crear_docente: {str(e)}")
+        db_error_msg = str(getattr(e, 'pgerror', repr(e)))
+        if "generar_codigo_docente" in db_error_msg:
+             return jsonify({"error": "Error en la función de la BD para generar código. ¿La creaste?"}), 500
+        if "codigo_docente" in db_error_msg and ("no existe" in db_error_msg or "does not exist" in db_error_msg) :
+             return jsonify({"error": "Falta la columna 'codigo_docente' en la tabla 'docente'."}), 500
+        return jsonify({"error": "Error interno del servidor"}), 500
+    finally:
+        if cur: cur.close()
+        if conn: conn.close()
+
+# ==========================
+# LISTAR DOCENTES (Corregido: Cierre de conexión)
+# ==========================
+@admin_bp.route("/docentes", methods=["GET"])
+def listar_docentes():
+    conn = None
+    cur = None
+    try:
+        conn = get_db()
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+        cur.execute("""
+        SELECT 
+            doc.docente_id,
+            u.usuario_id, 
+            p.nombres, p.apellidos, p.dni, p.telefono, p.fecha_nacimiento,
+            u.correo, 
+            doc.estado,
+            e.nombre_escuela, e.escuela_id,
+            d.direccion_detalle AS direccion_desc, d.id_direccion,
+            dist.distrito_id AS id_distrito, dist.nombre_distrito AS distrito,
+            prov.provincia_id AS id_provincia, prov.nombre_provincia AS provincia,
+            dep.departamento_id AS id_departamento, dep.nombre_departamento AS departamento
+        FROM docente doc
+        LEFT JOIN persona p ON doc.persona_id = p.persona_id
+        LEFT JOIN usuario u ON p.usuario_id = u.usuario_id 
+        LEFT JOIN escuela e ON doc.escuela_id = e.escuela_id
+        LEFT JOIN direccion d ON doc.id_direccion = d.id_direccion
+        LEFT JOIN distrito dist ON d.id_distrito = dist.distrito_id
+        LEFT JOIN provincia prov ON dist.provincia_id = prov.provincia_id
+        LEFT JOIN departamento_geo dep ON prov.departamento_id = dep.departamento_id
+        LEFT JOIN usuario_rol ur ON u.usuario_id = ur.usuario_id
+        LEFT JOIN rol r ON ur.rol_id = r.rol_id
+        WHERE r.nombre_rol = 'Docente' 
+        ORDER BY p.apellidos, p.nombres
+        """)
+        docentes = cur.fetchall()
+        
+        for docente in docentes:
+            if docente.get('fecha_nacimiento'):
+                if hasattr(docente['fecha_nacimiento'], 'isoformat'):
+                    docente['fecha_nacimiento'] = docente['fecha_nacimiento'].isoformat()
+                else:
+                    docente['fecha_nacimiento'] = None 
+            if 'estado' in docente:
+                   docente['estado'] = docente['estado'] is True
+
+        return jsonify(docentes)
+        
+    except (Exception, psycopg2.Error) as e:
+        print(f"Error en listar_docentes: {str(e)}")
+        db_error_msg = str(getattr(e, 'pgerror', repr(e)))
+        return jsonify({"error": f"Error al listar docentes: {db_error_msg}"}), 500
+    finally:
+        if cur: cur.close()
+        if conn: conn.close()
+
+# ===========================
+# MODIFICAR DOCENTE (Corregido: Cierre de conexión)
+# ===========================
+@admin_bp.route("/docentes/<int:usuario_id>", methods=["PUT"])
+def modificar_docente(usuario_id):
+    data = request.json
+    nombres = data.get("nombres"); apellidos = data.get("apellidos")
+    dni = data.get("dni"); telefono = data.get("telefono"); fecha_nacimiento = data.get("fecha_nacimiento")
+    correo = data.get("correo")
+    estado_docente = data.get("estado")
+    escuela_id = data.get("escuela_id")
+    direccion_detalle = data.get("direccion_desc"); id_distrito = data.get("id_distrito")
+
+    # (Falta validación completa aquí, la abrevié como en tu código original)
+    if estado_docente is None:
+         return jsonify({"error": "Faltan datos obligatorios"}), 400
+    if not isinstance(estado_docente, bool):
+         return jsonify({"error": "El estado debe ser booleano (true/false)"}), 400
+
+    conn = None
+    cur = None
+    try:
+        conn = get_db()
+        cur = conn.cursor()
+        
+        cur.execute("UPDATE persona SET nombres=%s, apellidos=%s, dni=%s, telefono=%s, fecha_nacimiento=%s WHERE usuario_id = %s", (nombres, apellidos, dni, telefono, fecha_nacimiento, usuario_id))
+        if cur.rowcount == 0: 
+            conn.rollback()
+            return jsonify({"error": "Persona no encontrada"}), 404
+
+        cur.execute("UPDATE usuario SET correo=%s WHERE usuario_id = %s", (correo, usuario_id))
+
+        cur.execute("""
+            UPDATE docente SET escuela_id=%s, estado=%s
+            WHERE persona_id = (SELECT persona_id FROM persona WHERE usuario_id=%s)
+            RETURNING id_direccion
+        """, (escuela_id, estado_docente, usuario_id))
+
+        res = cur.fetchone()
+        if not res: 
+            conn.rollback()
+            return jsonify({"error": "Registro de Docente no encontrado"}), 404
+        id_direccion = res[0]
+
+        if id_direccion:
+             cur.execute("UPDATE direccion SET direccion_detalle=%s, id_distrito=%s WHERE id_direccion = %s", (direccion_detalle, id_distrito, id_direccion))
+        else:
+             cur.execute("INSERT INTO direccion (direccion_detalle, id_distrito) VALUES (%s, %s) RETURNING id_direccion", (direccion_detalle, id_distrito))
+             id_direccion_new = cur.fetchone()[0]
+             cur.execute("UPDATE docente SET id_direccion = %s WHERE persona_id = (SELECT persona_id FROM persona WHERE usuario_id=%s)", (id_direccion_new, usuario_id))
+        
+        conn.commit()
+        return jsonify({"mensaje": "Docente actualizado con éxito"}), 200
+        
+    except errors.UniqueViolation as e:
+        if conn: conn.rollback()
+        error_msg = str(e)
+        if "persona_dni_key" in error_msg: return jsonify({"error": "El DNI ya existe."}), 400
+        if "usuario_correo_key" in error_msg: return jsonify({"error": "El correo ya existe."}), 400
+        return jsonify({"error": "Valor duplicado (DNI o correo)."}), 400
+    except (Exception, psycopg2.Error) as e:
+        if conn: conn.rollback()
+        print(f"Error en modificar_docente: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+    finally:
+        if cur: cur.close()
+        if conn: conn.close()
+
+# ===========================
+# ELIMINAR DOCENTE (Corregido: Orden y Cierre de conexión)
+# ===========================
+@admin_bp.route("/docentes/<int:usuario_id>", methods=["DELETE"])
+def eliminar_docente(usuario_id):
+    conn = None
+    cur = None
+    try:
+        conn = get_db()
+        cur = conn.cursor()
+        
+        # 1. Obtener IDs dependientes
+        cur.execute("SELECT persona_id FROM persona WHERE usuario_id=%s", (usuario_id,))
+        res_persona = cur.fetchone()
+        if not res_persona:
+            return jsonify({"error": "No encontrado"}), 404
+        persona_id = res_persona[0]
+        
+        cur.execute("SELECT id_direccion FROM docente WHERE persona_id=%s", (persona_id,))
+        res_docente = cur.fetchone()
+        id_direccion = res_docente[0] if res_docente else None
+        
+        # 2. Eliminar en orden INVERSO a la dependencia (hijos primero)
+        cur.execute("DELETE FROM usuario_rol WHERE usuario_id=%s", (usuario_id,))
+        cur.execute("DELETE FROM docente WHERE persona_id=%s", (persona_id,))
+        
+        # <<< ORDEN CORREGIDO >>>
+        cur.execute("DELETE FROM persona WHERE persona_id=%s", (persona_id,))
+        cur.execute("DELETE FROM usuario WHERE usuario_id=%s", (usuario_id,))
+        
+        if id_direccion:
+            cur.execute("DELETE FROM direccion WHERE id_direccion=%s", (id_direccion,))
+        
+        conn.commit()
+        return jsonify({"mensaje": "Docente eliminado con éxito"})
+
+    except (Exception, psycopg2.Error) as e:
+        if conn: conn.rollback()
+        print(f"Error en eliminar_docente: {str(e)}")
+        if isinstance(e, errors.ForeignKeyViolation):
+             return jsonify({"error": "No se puede eliminar: El usuario tiene otros datos asociados (ej. cursos)."}), 409
+        return jsonify({"error": "Error interno al eliminar docente."}), 500
+    finally:
+        if cur: cur.close()
+        if conn: conn.close()

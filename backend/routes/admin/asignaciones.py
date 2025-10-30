@@ -1,13 +1,22 @@
-from flask import Blueprint
+# En: backend/routes/admin/asignaciones.py
 
-# Blueprint principal del módulo Admin
-admin_bp = Blueprint('admin', __name__)
+from flask import Blueprint, jsonify
 
-# ====== Importar todos los submódulos ======
-from .perfil import perfil_bp
+# --- ESTA ES LA CORRECCIÓN ---
+# Importa 'perfiladmin_bp' (el nombre de variable correcto) 
+# desde 'perfiladmin.py' (el archivo correcto) usando una importación relativa (el punto).
+from .perfiladmin import perfiladmin_bp 
 
-# ====== Registrar los blueprints internos ======
-admin_bp.register_blueprint(perfil_bp, url_prefix="")
+# --- ESTO RESUELVE EL ERROR DE app.py ---
+# Define el blueprint que tu app principal está intentando importar.
+asignaciones_bp = Blueprint('asignaciones', __name__, url_prefix='/asignaciones')
 
-# 👇 Añade esto al final (import explícito)
-__all__ = ["admin_bp"]
+
+# Ruta de ejemplo para verificar que funciona
+@asignaciones_bp.route('/')
+def index():
+    return jsonify({"mensaje": "Bienvenido a la sección de asignaciones"})
+
+#
+# Aquí puedes añadir tus rutas CRUD para asignaciones
+#

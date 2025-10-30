@@ -1,106 +1,115 @@
-/* styles/crear-docente.css */
+/* Contenedor principal para el formulario */
 .crear-docente-container {
-  margin-left: 240px;
-  /* Mismo ancho que el sidebar */
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica,
+    Arial, sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
   padding: 2rem;
+  background-color: #f4f7f6; /* Un fondo gris muy claro */
   min-height: 100vh;
-  background-color: #fef7ff;
 }
 
+/* El formulario en sí */
 .crear-docente-form {
-  max-width: 650px;
-  margin: 0 auto;
-  background: white;
-  padding: 3rem;
-  border-radius: 15px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  width: 100%;
+  max-width: 600px;
+  background-color: #ffffff;
+  padding: 2rem 2.5rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  border-top: 4px solid #007bff; /* Un borde superior azul */
 }
 
-.crear-docente-form h2 {
-  font-size: 1.8rem;
-  font-weight: bold;
-  color: #ce2222;
+/* Título del formulario */
+.form-title {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 1.75rem;
+  color: #2d3748;
+  margin-top: 0;
   margin-bottom: 1.5rem;
-  text-align: center;
-  padding-bottom: 0.5rem;
-  border-bottom: 2px solid #f76055;
+  border-bottom: 1px solid #e0e0e0;
+  padding-bottom: 1rem;
 }
 
+.form-title svg {
+  color: #007bff;
+}
+
+/* Estilo para cada grupo de input/select */
 .form-group {
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.25rem;
 }
 
-.form-group label {
-  display: block;
-  margin-bottom: 0.5rem;
-  font-weight: 500;
-  color: #374151;
-}
-
+/* Estilo para inputs y selects */
 .form-group input,
 .form-group select {
   width: 100%;
-  padding: 0.75rem 1rem;
-  border: 2px solid #e5e7eb;
-  border-radius: 8px;
-  font-size: 1rem;
-  transition: border-color 0.3s ease;
+  padding: 0.85rem 1rem;
+  font-size: 0.95rem;
+  border: 1px solid #cbd5e0;
+  border-radius: 6px;
+  background-color: #f7fafc;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  
+  /* Arreglo para que el select no sea más pequeño */
+  box-sizing: border-box; 
 }
 
 .form-group input:focus,
 .form-group select:focus {
   outline: none;
-  border-color: #f75555;
-  box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.1);
+  border-color: #007bff;
+  background-color: #ffffff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.2);
 }
 
+/* Estilo para placeholders */
 .form-group input::placeholder {
-  color: #9ca3af;
+  color: #a0aec0;
 }
 
+/* Botón de envío */
 .btn-submit {
   width: 100%;
-  background-color: #ce3622;
-  color: white;
-  border: none;
-  padding: 0.875rem;
-  border-radius: 8px;
+  padding: 0.85rem 1rem;
   font-size: 1rem;
   font-weight: 600;
+  border: none;
+  border-radius: 6px;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  background-color: #d9534f; /* Rojo (como en tu imagen) */
+  color: white;
+  transition: background-color 0.2s, transform 0.1s;
 }
 
 .btn-submit:hover {
-  background-color: #f75555;
+  background-color: #c9302c; /* Rojo más oscuro */
+}
+
+.btn-submit:active {
+  transform: scale(0.99);
+}
+
+/* Alertas de éxito y error */
+.alert-success,
+.alert-error {
+  padding: 0.85rem 1rem;
+  margin-bottom: 1.25rem;
+  border-radius: 6px;
+  font-weight: 500;
 }
 
 .alert-success {
-  background-color: #dcfce7;
-  color: #166534;
-  padding: 1rem;
-  border-radius: 8px;
-  margin-bottom: 1.5rem;
-  border-left: 4px solid #22c55e;
+  background-color: #e6f7ec;
+  color: #006400;
+  border: 1px solid #b7e4c7;
 }
 
 .alert-error {
-  background-color: #fee2e2;
-  color: #991b1b;
-  padding: 1rem;
-  border-radius: 8px;
-  margin-bottom: 1.5rem;
-  border-left: 4px solid #ef4444;
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-  .crear-docente-container {
-    margin-left: 0;
-    padding: 1rem;
-  }
-
-  .crear-docente-form {
-    padding: 1.5rem;
-  }
+  background-color: #feedeb;
+  color: #c53030;
+  border: 1px solid #f9c6c0;
 }
