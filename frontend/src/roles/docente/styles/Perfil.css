@@ -1,0 +1,144 @@
+/* 🎓 Contenedor principal */
+.perfil-docente-container {
+  background: linear-gradient(180deg, #ffffff, #f8fafc);
+  border-radius: 20px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  padding: 2rem;
+  max-width: 800px;
+  margin: 2rem auto;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.perfil-docente-container:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* 🧑‍🏫 Header con avatar */
+.perfil-docente-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+/* 🟦 Avatar iniciales */
+.perfil-docente-avatar {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  background: #2563eb;
+  color: white;
+  font-weight: 700;
+  font-size: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1rem;
+  box-shadow: 0 0 10px rgba(37, 99, 235, 0.4);
+  text-transform: uppercase;
+}
+
+/* Título */
+.perfil-docente-titulo {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #1e40af;
+  text-align: center;
+}
+
+/* 📋 Grid de formulario */
+.perfil-docente-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.2rem 1.5rem;
+}
+
+.perfil-docente-grid .col-span-2 {
+  grid-column: span 2;
+}
+
+/* 🏷️ Etiquetas */
+.perfil-docente-label {
+  font-weight: 600;
+  color: #374151;
+  display: block;
+  margin-bottom: 0.3rem;
+}
+
+/* ✏️ Inputs */
+.perfil-docente-input {
+  width: 100%;
+  border: 1.5px solid #d1d5db;
+  border-radius: 8px;
+  padding: 0.6rem 0.8rem;
+  font-size: 0.95rem;
+  color: #111827;
+  background-color: #fff;
+  transition: all 0.2s ease;
+}
+
+.perfil-docente-input:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+/* Campos deshabilitados */
+.perfil-docente-disabled {
+  background-color: #f3f4f6 !important;
+  color: #6b7280 !important;
+  cursor: not-allowed;
+}
+
+/* 🧭 Botones */
+.perfil-docente-botones {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.8rem;
+  margin-top: 1.8rem;
+}
+
+.perfil-docente-btn {
+  padding: 0.6rem 1.4rem;
+  border: none;
+  border-radius: 10px;
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.perfil-docente-btn-guardar {
+  background-color: #16a34a;
+}
+
+.perfil-docente-btn-guardar:hover {
+  background-color: #15803d;
+}
+
+.perfil-docente-btn-cancelar {
+  background-color: #9ca3af;
+}
+
+.perfil-docente-btn-cancelar:hover {
+  background-color: #6b7280;
+}
+
+.perfil-docente-btn-editar {
+  background-color: #2563eb;
+}
+
+.perfil-docente-btn-editar:hover {
+  background-color: #1e40af;
+}
+
+/* 🌀 Loader o error */
+.perfil-docente-loader,
+.perfil-docente-error {
+  text-align: center;
+  color: #4b5563;
+  font-size: 1rem;
+  padding: 2rem 0;
+}

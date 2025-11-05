@@ -4,7 +4,7 @@ import "../styles/Registrar-calificaciones.css"; // 👈 Importamos el CSS perso
 
 const API_URL = "http://127.0.0.1:5000/api/docentes";
 
-export default function RegistrarNota() {
+export default function RegistrarCalificaciones() {
   const [cursos, setCursos] = useState([]);
   const [cursoSeleccionado, setCursoSeleccionado] = useState("");
   const [estudiantes, setEstudiantes] = useState([]);

@@ -280,60 +280,7 @@ def listar_docentes():
         if cur: cur.close()
         if conn: conn.close()
 
-# ==========================
-# LISTAR ALUMNOS (Corregido: Cierre de conexión)
-# ==========================
-@docentes_bp.route("/alumnos", methods=["GET"])
-def listar_alumnos():
-    conn = None
-    cur = None
-    try:
-        conn = get_db()
-        cur = conn.cursor(cursor_factory=RealDictCursor)
-        cur.execute("""
-        SELECT 
-            u.usuario_id, 
-            p.nombres, 
-            p.apellidos, 
-            p.dni,
-            p.telefono,
-            est.codigo_estudiante AS codigo_universitario,
-            u.correo,
-            u.estado,
-            e.nombre_escuela,
-            e.escuela_id,
-            p.fecha_nacimiento,
-            d.direccion_detalle AS direccion_desc,
-            d.id_direccion,
-            dist.distrito_id AS id_distrito,
-            dist.nombre_distrito AS distrito,
-            prov.provincia_id AS id_provincia,
-            prov.nombre_provincia AS provincia,
-            dep.departamento_id AS id_departamento,
-            dep.nombre_departamento AS departamento
-        FROM estudiante est
-        LEFT JOIN persona p ON est.persona_id = p.persona_id
-        LEFT JOIN usuario u ON p.usuario_id = u.usuario_id 
-        LEFT JOIN escuela e ON est.escuela_id = e.escuela_id
-        LEFT JOIN direccion d ON est.id_direccion = d.id_direccion
-        LEFT JOIN distrito dist ON d.id_distrito = dist.distrito_id
-        LEFT JOIN provincia prov ON dist.provincia_id = prov.provincia_id
-        LEFT JOIN departamento_geo dep ON prov.departamento_id = dep.departamento_id
-        LEFT JOIN usuario_rol ur ON u.usuario_id = ur.usuario_id
-        LEFT JOIN rol r ON ur.rol_id = r.rol_id
-        WHERE r.nombre_rol = 'Alumno'
-        """)
-        alumnos = cur.fetchall()
-        
-        # (Aquí deberías añadir la misma normalización de fecha que en listar_docentes)
-        
-        return jsonify(alumnos)
-    except (Exception, psycopg2.Error) as e:
-        print(f"Error en listar_alumnos: {str(e)}")
-        return jsonify({"error": str(e)}), 500
-    finally:
-        if cur: cur.close()
-        if conn: conn.close()
+
 
 # ===========================
 # MODIFICAR DOCENTE (Corregido: Cierre de conexión)

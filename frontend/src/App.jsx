@@ -46,6 +46,7 @@ import EliminarAsignaciones from "./roles/admin/pages/EliminarAsignaciones"; // 
 // 🧑‍🏫 Páginas Docente
 import RegistrarNota from "./roles/docente/pages/RegistrarNota";
 import SubirMaterial from "./roles/docente/pages/SubirMaterial";
+import PerfilDocente from "./roles/docente/pages/PerfilDocente";
 
 // 🎓 Páginas Alumno
 import SolicitarMatricula from "./roles/alumno/pages/SolicitarMatricula";
@@ -240,12 +241,15 @@ function App() {
       return renderRoleLayout(
         SidebarDocente,
         <>
-          <Route path="/docente/registrar-nota" element={<RegistrarNota />} />
-          <Route path="/docente/subir-material" element={<SubirMaterial />} />
+        <Route
+            path="/docente/perfil"
+            element={<PerfilDocente usuarioId={user.usuario_id} />}
+        />
+        <Route path="/docente/registrar-nota" element={<RegistrarNota />} />
+        <Route path="/docente/subir-material" element={<SubirMaterial />} />
         </>,
-        "/docente/registrar-nota"
-      );
-
+        "/docente/perfil" // 🧭 Ruta por defecto al iniciar sesión
+    );
     case "Alumno":
       return renderRoleLayout(
         SidebarAlumno,

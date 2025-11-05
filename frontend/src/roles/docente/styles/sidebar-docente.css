@@ -1,68 +1,118 @@
-/* styles/sidebar-docente.css */
 .sidebar-docente {
-  width: 240px;
-  height: 100vh;
-  background: linear-gradient(to bottom, #1d4ed8, #3b82f6) !important;
+  width: 280px;
+  background: linear-gradient(180deg, #1e3a8a 0%, #1e40af 100%);
   color: white;
-  padding: 1.5rem 1rem;
+  height: 100vh;
   display: flex;
   flex-direction: column;
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
   position: fixed;
   left: 0;
   top: 0;
-  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
-  z-index: 1000;
+  overflow-y: auto;
 }
 
-.sidebar-docente h2 {
-  font-size: 1.25rem;
-  font-weight: bold;
-  margin-bottom: 1.5rem;
+.sidebar-header {
+  padding: 24px 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sidebar-header h2 {
+  margin: 0 0 16px 0;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.user-info {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 12px;
+  border-radius: 8px;
+}
+
+.user-name {
+  margin: 0 0 4px 0;
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.user-id {
+  margin: 0;
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+.sidebar-nav {
+  flex: 1;
+  padding: 16px 0;
+}
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  padding: 14px 20px;
   color: white;
-  padding-bottom: 0.75rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.sidebar-docente p {
-  margin-bottom: 1rem;
-  color: rgba(255, 255, 255, 0.9);
-  font-size: 0.875rem;
-  padding: 0.5rem;
-  background-color: rgba(0, 0, 0, 0.2);
-  border-radius: 0.375rem;
-}
-
-.sidebar-docente nav {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.sidebar-docente a {
-  color: rgba(255, 255, 255, 0.9);
   text-decoration: none;
-  padding: 0.75rem;
-  border-radius: 0.5rem;
-  transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.sidebar-docente a:hover {
-  color: #fff !important;
-  background-color: rgba(255, 255, 255, 0.15);
-  transform: translateX(5px);
-}
-
-/* Efectos adicionales para mejorar la apariencia */
-.sidebar-docente a {
+  transition: all 0.3s ease;
   border-left: 3px solid transparent;
 }
 
-.sidebar-docente a:hover {
-  border-left: 3px solid #fff;
+.nav-link:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-left-color: #60a5fa;
+}
+
+.nav-link.active {
+  background: rgba(255, 255, 255, 0.15);
+  border-left-color: #60a5fa;
+  font-weight: 500;
+}
+
+.nav-link .icon {
+  font-size: 20px;
+  margin-right: 12px;
+  width: 24px;
+  text-align: center;
+}
+
+.nav-link .text {
+  font-size: 14px;
+}
+
+.sidebar-footer {
+  padding: 16px 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.logout-link {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  color: #fca5a5;
+  text-decoration: none;
+  background: rgba(239, 68, 68, 0.1);
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.logout-link:hover {
+  background: rgba(239, 68, 68, 0.2);
+  color: #fee2e2;
+}
+
+/* Scrollbar personalizado */
+.sidebar-docente::-webkit-scrollbar {
+  width: 6px;
+}
+
+.sidebar-docente::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.sidebar-docente::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+}
+
+.sidebar-docente::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
 }

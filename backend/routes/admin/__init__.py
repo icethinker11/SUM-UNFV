@@ -1,9 +1,12 @@
+# routes/admin/__init__.py
 from flask import Blueprint
 
 # Blueprint principal del módulo Admin
 admin_bp = Blueprint('admin', __name__)
 
-# ====== Importar todos los sub-blueprints ======
+# ====== Importar y registrar sub-blueprints ======
+
+# 1. PERFIL ADMIN
 try:
     from .perfiladmin import perfiladmin_bp
     admin_bp.register_blueprint(perfiladmin_bp, url_prefix="")
@@ -11,6 +14,7 @@ try:
 except ImportError as e:
     print(f"⚠️ Warning: No se pudo importar perfiladmin_bp - {e}")
 
+# 2. DOCENTES
 try:
     from .docentes import docentes_bp
     admin_bp.register_blueprint(docentes_bp, url_prefix="")
@@ -18,6 +22,7 @@ try:
 except ImportError as e:
     print(f"⚠️ Warning: No se pudo importar docentes_bp - {e}")
 
+# 3. ALUMNOS
 try:
     from .alumnos import alumnos_bp
     admin_bp.register_blueprint(alumnos_bp, url_prefix="")
@@ -25,6 +30,7 @@ try:
 except ImportError as e:
     print(f"⚠️ Warning: No se pudo importar alumnos_bp - {e}")
 
+# 4. ESCUELAS
 try:
     from .escuelas import escuelas_bp
     admin_bp.register_blueprint(escuelas_bp, url_prefix="")
@@ -32,6 +38,7 @@ try:
 except ImportError as e:
     print(f"⚠️ Warning: No se pudo importar escuelas_bp - {e}")
 
+# 5. ASIGNACIONES
 try:
     from .asignaciones import asignaciones_bp
     admin_bp.register_blueprint(asignaciones_bp, url_prefix="")
@@ -39,6 +46,7 @@ try:
 except ImportError as e:
     print(f"⚠️ Warning: No se pudo importar asignaciones_bp - {e}")
 
+# 6. HORARIOS
 try:
     from .horarios import horarios_bp
     admin_bp.register_blueprint(horarios_bp, url_prefix="")
