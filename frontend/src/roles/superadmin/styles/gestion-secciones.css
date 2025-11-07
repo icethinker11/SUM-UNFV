@@ -1,0 +1,327 @@
+/* src/roles/superadmin/pages/styles/gestion-secciones.css */
+
+/* --- 🎨 Variables de Color y Estilo Base --- */
+:root {
+  --primary-color: #007bff;
+  --primary-hover-color: #0056b3;
+  --light-blue-bg: #f0f7ff;
+  --border-color: #eef2f7;
+  --text-color: #1a202c;
+  --text-secondary-color: #6c757d;
+  --status-activo-bg: #e7f7ef;
+  --status-activo-text: #28a745;
+  --status-inactivo-bg: #fbe9eb;
+  --status-inactivo-text: #dc3545;
+  --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+/* --- 📦 Contenedor Principal --- */
+.gestion-secciones-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+  font-family: "Poppins", sans-serif;
+}
+
+/* --- 🧭 Encabezado --- */
+.header-container {
+  background-color: #fff;
+  border: 1px solid var(--border-color);
+  padding: 1.5rem;
+  border-radius: 12px;
+  margin-bottom: 2rem;
+}
+
+.main-title {
+  display: flex;
+  align-items: center;
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: var(--text-color);
+  margin: 0;
+}
+
+.subtitle {
+  font-size: 1rem;
+  color: var(--text-secondary-color);
+  margin-top: 0.25rem;
+}
+
+/* --- 🔍 Barra de Búsqueda y Botón --- */
+.search-bar-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.search-input-group {
+  display: flex;
+  align-items: center;
+  background-color: #fff;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 0.6rem 0.8rem;
+  flex-grow: 1;
+  margin-right: 1rem;
+  max-width: 400px;
+}
+
+.search-input-group svg {
+  color: var(--text-secondary-color);
+  margin-right: 0.5rem;
+}
+
+.search-input-group input {
+  border: none;
+  background: transparent;
+  outline: none;
+  width: 100%;
+  font-size: 0.95rem;
+}
+
+.btn-primary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.btn-primary:hover {
+  background-color: var(--primary-hover-color);
+}
+
+.btn-primary svg {
+  margin-right: 0.5rem;
+}
+
+/* --- 📋 Tabla de Secciones --- */
+.secciones-table-container {
+  background-color: #fff;
+  border-radius: 12px;
+  box-shadow: var(--box-shadow);
+  border: 1px solid var(--border-color);
+  overflow: hidden;
+}
+
+.secciones-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.secciones-table th,
+.secciones-table td {
+  padding: 1rem 1.5rem;
+  text-align: left;
+  border-bottom: 1px solid var(--border-color);
+  vertical-align: middle;
+}
+
+.secciones-table th {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-secondary-color);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  background-color: #f9fafb;
+}
+
+.secciones-table tr:last-child td {
+  border-bottom: none;
+}
+
+/* --- 🟢 Estado (Etiquetas) --- */
+.status-tag {
+  padding: 0.3rem 0.8rem;
+  border-radius: 16px;
+  font-weight: 600;
+  font-size: 0.75rem;
+  display: inline-block;
+  text-align: center;
+}
+
+.status-disponible {
+  background-color: var(--status-activo-bg);
+  color: var(--status-activo-text);
+}
+
+.status-mantenimiento {
+  background-color: var(--status-inactivo-bg);
+  color: var(--status-inactivo-text);
+}
+
+/* --- ⚙️ Botones de Acción --- */
+.action-buttons {
+  text-align: right;
+}
+
+.btn-icon {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 50%;
+  color: var(--text-secondary-color);
+  transition: all 0.2s ease;
+}
+
+.btn-icon:hover {
+  color: var(--primary-color);
+  background-color: #f0f7ff;
+}
+
+/* --- 💬 Mensaje informativo --- */
+.info-message {
+  text-align: center;
+  color: var(--text-secondary-color);
+  padding: 2rem;
+  font-size: 0.95rem;
+}
+
+/* --- ⏳ Estado de carga --- */
+.loading-state {
+  text-align: center;
+  color: var(--text-secondary-color);
+  font-size: 1.1rem;
+  margin-top: 2rem;
+}
+
+/* --- 🪟 Modal --- */
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background-color: white;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  width: 95%;
+  max-width: 460px;
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* --- 🧾 Cabecera del Modal --- */
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.25rem;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 0.75rem;
+}
+
+.modal-header h2 {
+  margin: 0;
+  font-size: 1.4rem;
+  font-weight: 600;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  font-size: 1.8rem;
+  line-height: 1;
+  color: #aaa;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.close-button:hover {
+  color: #333;
+}
+
+/* --- 🧍 Formulario dentro del Modal --- */
+.form-group {
+  margin-bottom: 1rem;
+  text-align: left;
+}
+
+.form-group label {
+  display: block;
+  font-weight: 500;
+  margin-bottom: 0.4rem;
+  font-size: 0.88rem;
+  color: var(--text-color);
+  padding-left: 0.25rem;
+}
+
+/* 🔹 Campos más estrechos y alineados */
+.form-group input,
+.form-group select {
+  width: 90%;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.15);
+}
+
+/* --- ⚠️ Validación --- */
+.input-error {
+  border-color: #dc3545;
+}
+
+.error-text {
+  color: #dc3545;
+  font-size: 0.8rem;
+  margin-top: 0.25rem;
+}
+
+/* --- 🔘 Botones del Modal --- */
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 1.5rem;
+  padding-right: 0.5rem;
+}
+
+.btn-secondary {
+  background-color: #f0f0f0;
+  color: #333;
+  border: 1px solid #ccc;
+  padding: 0.6rem 1.2rem;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.btn-secondary:hover {
+  background-color: #e0e0e0;
+}

@@ -9,8 +9,7 @@ import {
   FileText,
   ListChecks,
   CalendarClock,
-  Home
-
+  Home,
 } from "lucide-react";
 import "./styles/sidebar-superadmin.css";
 
@@ -37,7 +36,9 @@ function SidebarSuperAdmin({ usuario }) {
         {/* 🔹 Sección: Gestión de Usuarios */}
         <div className="sidebar-section">
           <button
-            className={`section-toggle ${isSectionOpen("usuarios") ? "active" : ""}`}
+            className={`section-toggle ${
+              isSectionOpen("usuarios") ? "active" : ""
+            }`}
             onClick={() => toggleSection("usuarios")}
           >
             <UserCog className="icon" /> Gestión de Usuarios
@@ -59,7 +60,9 @@ function SidebarSuperAdmin({ usuario }) {
         {/* 🔹 Sección: Gestión de Cursos */}
         <div className="sidebar-section">
           <button
-            className={`section-toggle ${isSectionOpen("cursos") ? "active" : ""}`}
+            className={`section-toggle ${
+              isSectionOpen("cursos") ? "active" : ""
+            }`}
             onClick={() => toggleSection("cursos")}
           >
             <BookOpen className="icon" /> Gestión de Cursos
@@ -91,7 +94,9 @@ function SidebarSuperAdmin({ usuario }) {
         {/* 🔹 Sección: Gestión de Horarios */}
         <div className="sidebar-section">
           <button
-            className={`section-toggle ${isSectionOpen("horarios") ? "active" : ""}`}
+            className={`section-toggle ${
+              isSectionOpen("horarios") ? "active" : ""
+            }`}
             onClick={() => toggleSection("horarios")}
           >
             <CalendarClock className="icon" /> Gestión de Horarios
@@ -109,7 +114,7 @@ function SidebarSuperAdmin({ usuario }) {
               </Link>
               <Link to="/superadmin/listar-horario" className="submenu-link">
                 📋 Listar Horarios
-              </Link> 
+              </Link>
               <Link to="/superadmin/editar-horario" className="submenu-link">
                 ✏️ Editar Horario
               </Link>
@@ -120,18 +125,30 @@ function SidebarSuperAdmin({ usuario }) {
           )}
         </div>
 
-          <div className="sidebar-section">
-  <Link to="/superadmin/Gestion-Aulas" className="sidebar-link main-link">
-    <Home className="icon" /> Gestión de Aulas
-  </Link>
-</div>   
+        <div className="sidebar-section">
+          <Link
+            to="/superadmin/Gestion-Aulas"
+            className="sidebar-link main-link"
+          >
+            <Home className="icon" /> Gestión de Aulas
+          </Link>
+        </div>
 
-{/* 🔑 CORRECCIÓN: La sección de prerrequisitos ahora es un enlace directo */}
-                <Link to="/superadmin/listar-prerrequisitos" className="sidebar-link main-link">
-                    <ListChecks className="icon" /> Gestión de Prerrequisitos
-                </Link>
+        {/* 🔑 CORRECCIÓN: La sección de prerrequisitos ahora es un enlace directo */}
+        <Link
+          to="/superadmin/listar-prerrequisitos"
+          className="sidebar-link main-link"
+        >
+          <ListChecks className="icon" /> Gestión de Prerrequisitos
+        </Link>
 
-
+        {/* 🔑 NUEVO LIST-CHECK: Secciones disponibles durante el ciclo, tambien para la tabla de auditorias */}
+        <Link
+          to="/superadmin/gestionar-secciones"
+          className="sidebar-link main-link"
+        >
+          <ListChecks className="icon" /> Gestión de Secciones
+        </Link>
       </nav>
     </div>
   );
