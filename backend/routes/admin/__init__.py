@@ -41,6 +41,7 @@ except ImportError as e:
 # 5. ASIGNACIONES
 try:
     from .asignaciones import asignaciones_bp
+    # Important: registrar sin colocar otro prefijo para que queden como /admin/...
     admin_bp.register_blueprint(asignaciones_bp, url_prefix="")
     print("✅ asignaciones_bp registrado correctamente")
 except ImportError as e:
