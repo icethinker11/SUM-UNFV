@@ -32,6 +32,7 @@ import ListarHorario from "./roles/superadmin/pages/ListarHorario";
 import EliminarHorario from "./roles/superadmin/pages/EliminarHorario";
 import GestionAulas from "./roles/superadmin/pages/GestionAulas";
 import GestionarPrerrequisitos from "./roles/superadmin/pages/GestionarPrerrequisitos";
+import GestionSecciones from "./roles/superadmin/pages/GestionSecciones";
 
 // 🏫 Páginas Admin
 import CrearDocente from "./roles/admin/pages/CrearDocente";
@@ -194,6 +195,10 @@ function App() {
           <Route
             path="/superadmin/eliminar-horario"
             element={<EliminarHorario />}
+          />
+          <Route
+            path="/superadmin/gestionar-secciones"
+            element={<GestionSecciones />}
           />
 
           <Route path="/superadmin/Gestion-Aulas" element={<GestionAulas />} />

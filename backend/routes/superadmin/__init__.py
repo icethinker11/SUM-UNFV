@@ -12,6 +12,7 @@ from .bloques_horarios import bloques_horarios_bp
 from .prerrequisitos import prerrequisitos_bp
 from .pabellones import pabellones_bp
 from .aulas import aulas_bp
+from .secciones import secciones_bp  # 👈 Agrega esta línea
 
 # ====== Registrar los blueprints internos ======
 superadmin_bp.register_blueprint(admins_bp, url_prefix="/admins")
@@ -22,6 +23,7 @@ superadmin_bp.register_blueprint(bloques_horarios_bp, url_prefix="")
 superadmin_bp.register_blueprint(prerrequisitos_bp, url_prefix="")
 superadmin_bp.register_blueprint(pabellones_bp, url_prefix="/pabellones")
 superadmin_bp.register_blueprint(aulas_bp, url_prefix="/aulas")
+superadmin_bp.register_blueprint(secciones_bp)
 
 # 👇 Añade esto al final (import explícito)
 __all__ = ["superadmin_bp"]
