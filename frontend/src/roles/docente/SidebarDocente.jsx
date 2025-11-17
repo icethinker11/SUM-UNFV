@@ -44,6 +44,14 @@ function SidebarDocente({ usuario }) {
         </Link>
 
         <Link 
+          to="/docente/calendario" 
+          className={`nav-link ${isActive('/docente/calendario')}`}
+        >
+          <span className="icon">📆</span>
+          <span className="text">Mi Calendario</span>
+        </Link>
+
+        <Link 
           to="/docente/asistencia" 
           className={`nav-link ${isActive('/docente/asistencia')}`}
         >

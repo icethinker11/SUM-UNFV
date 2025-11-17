@@ -1,8 +1,8 @@
 # ============================================
-# perfil_routes.py – Rutas del perfil docente (versión integrada con docentes_bp)
+# perfil_routes.py – Rutas del perfil docente (versión con su propio Blueprint)
 # ============================================
 
-from flask import jsonify, request
+from flask import Blueprint, jsonify, request
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from werkzeug.security import generate_password_hash, check_password_hash
 from database.db import get_db
@@ -10,15 +10,16 @@ from .models import AuditoriaDocente
 import traceback
 from psycopg2.extras import RealDictCursor
 
+# 👇 CREACIÓN DEL NUEVO BLUEPRINT PARA PERFIL
+perfil_bp = Blueprint('perfil', __name__)
 
-# 👇 Importa el blueprint principal del módulo docentes
-from . import docentes_bp
 
 # =========================================================
 # 🔹 Función auxiliar: registrar auditoría
 # =========================================================
 def registrar_auditoria(docente_id, accion, tabla_afectada, registro_id=None, detalles=None):
     try:
+        # En un entorno de producción, X-Forwarded-For es común si usas un proxy/load balancer
         ip = request.headers.get('X-Forwarded-For', request.remote_addr)
         AuditoriaDocente.registrar(
             docente_id=docente_id,
@@ -35,7 +36,8 @@ def registrar_auditoria(docente_id, accion, tabla_afectada, registro_id=None, de
 # =========================================================
 # 🔹 [GET] Obtener perfil del docente (versión corregida)
 # =========================================================
-@docentes_bp.route("/perfil/<int:usuario_id>", methods=["GET"])
+# Se cambia @docentes_bp.route por @perfil_bp.route y se ajusta la ruta.
+@perfil_bp.route("/<int:usuario_id>", methods=["GET"])
 def obtener_perfil_docente(usuario_id):
     conn = None
     cur = None
@@ -86,10 +88,13 @@ def obtener_perfil_docente(usuario_id):
 # =========================================================
 # 🔹 [PUT] Actualizar perfil del docente
 # =========================================================
-@docentes_bp.route("/perfil/<int:usuario_id>", methods=["PUT"])
+# Se cambia @docentes_bp.route por @perfil_bp.route y se ajusta la ruta.
+@perfil_bp.route("/<int:usuario_id>", methods=["PUT"])
 def actualizar_perfil_docente(usuario_id):
     print(f"\n✏️ Actualizando perfil del docente ID: {usuario_id}")
     data = request.get_json()
+    conn = None
+    cur = None
 
     try:
         nombres = data.get("nombres")
@@ -100,7 +105,7 @@ def actualizar_perfil_docente(usuario_id):
         id_distrito = data.get("id_distrito")
 
         if not all([nombres, apellidos, correo, telefono, direccion]):
-            return jsonify({"error": "Todos los campos son obligatorios"}), 400
+            return jsonify({"error": "Todos los campos principales son obligatorios"}), 400
 
         conn = get_db()
         cur = conn.cursor()
@@ -119,53 +124,57 @@ def actualizar_perfil_docente(usuario_id):
             WHERE usuario_id=%s
         """, (correo, usuario_id))
 
-        # Actualizar dirección
-        if id_distrito:
-            cur.execute("""
-                UPDATE direccion 
-                SET direccion_detalle=%s, id_distrito=%s
-                WHERE id_direccion = (
-                    SELECT doc.id_direccion 
-                    FROM docente doc
-                    JOIN persona p ON doc.persona_id = p.persona_id
-                    WHERE p.usuario_id = %s
-                )
-            """, (direccion, id_distrito, usuario_id))
-        else:
-            cur.execute("""
-                UPDATE direccion 
-                SET direccion_detalle=%s
-                WHERE id_direccion = (
-                    SELECT doc.id_direccion 
-                    FROM docente doc
-                    JOIN persona p ON doc.persona_id = p.persona_id
-                    WHERE p.usuario_id = %s
-                )
-            """, (direccion, usuario_id))
+        # Lógica para Actualizar dirección (se mantiene)
+        # ------------------------------------------------
+        update_direccion_query = """
+            UPDATE direccion 
+            SET direccion_detalle=%s {}
+            WHERE id_direccion = (
+                SELECT doc.id_direccion 
+                FROM docente doc
+                JOIN persona p ON doc.persona_id = p.persona_id
+                WHERE p.usuario_id = %s
+            )
+        """
 
+        if id_distrito:
+            sql = update_direccion_query.format(", id_distrito=%s")
+            cur.execute(sql, (direccion, id_distrito, usuario_id))
+        else:
+            sql = update_direccion_query.format("")
+            cur.execute(sql, (direccion, usuario_id))
+        # ------------------------------------------------
+        
         conn.commit()
-        registrar_auditoria(usuario_id, "actualizar_perfil", "usuario", usuario_id)
+        # Se asume que usuario_id es suficiente para registrar la auditoría
+        registrar_auditoria(usuario_id, "actualizar_perfil", "usuario", usuario_id, detalles=data)
         return jsonify({"mensaje": "Perfil actualizado correctamente"}), 200
 
     except Exception:
-        if 'conn' in locals():
+        if conn:
             conn.rollback()
         print("❌ ERROR al actualizar perfil:")
         print(traceback.format_exc())
         return jsonify({"error": "Error interno al actualizar perfil"}), 500
 
     finally:
-        if 'cur' in locals():
+        if cur:
             cur.close()
+        if conn:
+            conn.close()
         print("🔚 Conexión cerrada.\n")
 
 # =========================================================
 # 🔹 [PUT] Cambiar contraseña del docente
 # =========================================================
-@docentes_bp.route("/perfil/cambiar-password", methods=["PUT"])
+# Se cambia @docentes_bp.route por @perfil_bp.route.
+@perfil_bp.route("/cambiar-password", methods=["PUT"])
 @jwt_required()
 def cambiar_password():
     print("\n🔐 Solicitud para cambiar contraseña.")
+    conn = None
+    cur = None
+    
     try:
         usuario_id = get_jwt_identity()
         data = request.get_json()
@@ -202,13 +211,15 @@ def cambiar_password():
         return jsonify({"mensaje": "Contraseña actualizada correctamente"}), 200
 
     except Exception:
-        if 'conn' in locals():
+        if conn:
             conn.rollback()
         print("❌ ERROR al cambiar contraseña:")
         print(traceback.format_exc())
         return jsonify({"error": "Error interno al cambiar contraseña"}), 500
 
     finally:
-        if 'cur' in locals():
+        if cur:
             cur.close()
+        if conn:
+            conn.close()
         print("🔚 Conexión cerrada.\n")

@@ -1,0 +1,123 @@
+/* --- Contenedor Principal --- */
+.subir-material-container {
+    max-width: 800px; /* Limita el ancho del formulario en pantallas grandes */
+    margin: 40px auto; /* Centra el contenedor y agrega margen superior/inferior */
+    padding: 40px;
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    font-family: 'Inter', sans-serif;
+}
+
+/* --- Título --- */
+.title {
+    font-size: 2.25rem; /* 36px */
+    font-weight: 800; /* Extra bold */
+    margin-bottom: 1.5rem; /* 24px */
+    text-align: center;
+    color: #4338CA; /* Color índigo */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.title span:first-child {
+    font-size: 2.5rem; /* Icono un poco más grande */
+}
+
+/* --- Mensaje de Error/Carga --- */
+.error-message {
+    padding: 1rem;
+    background-color: #fee2e2; /* Red 100 */
+    color: #991b1b; /* Red 800 */
+    border: 1px solid #fca5a5; /* Red 300 */
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    margin-bottom: 1rem;
+}
+
+/* --- Formulario y Grupos de Control --- */
+.subir-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem; /* Espaciado entre grupos */
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group label {
+    display: block;
+    font-size: 0.875rem; /* sm */
+    font-weight: 600; /* Semibold */
+    color: #374151; /* Gray 700 */
+    margin-bottom: 0.25rem;
+}
+
+.form-control {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #d1d5db; /* Gray 300 */
+    border-radius: 0.5rem;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    background-color: #f9fafb; /* Gray 50 para select */
+}
+
+.form-control:focus {
+    border-color: #6366f1; /* Indigo 500 */
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+}
+
+.form-control:disabled {
+    background-color: #e5e7eb; /* Gray 200 */
+    cursor: not-allowed;
+}
+
+/* Estilos específicos para el input de archivo */
+.file-input {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
+    background-color: #f9fafb;
+}
+
+/* --- Botón de Envio --- */
+.btn-submit {
+    width: 100%;
+    padding: 0.75rem;
+    background-color: #4f46e5; /* Indigo 600 */
+    color: white;
+    font-weight: 700; /* Bold */
+    border-radius: 0.5rem;
+    transition: background-color 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.btn-submit:hover {
+    background-color: #4338ca; /* Indigo 700 */
+    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
+}
+
+.btn-submit:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background-color: #4f46e5;
+}
+
+/* --- Responsive (Ajustes para móviles) --- */
+@media (max-width: 640px) {
+    .subir-material-container {
+        padding: 20px;
+        margin: 20px auto;
+    }
+
+    .title {
+        font-size: 1.75rem; /* 28px */
+    }
+}

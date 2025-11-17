@@ -64,7 +64,7 @@ function CrearAlumno() {
   setIsSubmitting(true);
 
   try {
-    const response = await fetch("http://localhost:5000/admin/crear-alumno", {
+    const response = await fetch("http://localhost:5000/admin/alumnos/crear-alumno", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

@@ -247,6 +247,8 @@ def modificar_admin(usuario_id):
                 if not es_valida:
                     return jsonify({"error": mensaje_error}), 400
                     
+                data["fecha_nacimiento"] = fecha_obj  # ✅ usar el objeto ya validado
+                
             except Exception:
                 return jsonify({"error": "Formato de fecha inválido."}), 400
 
@@ -304,6 +306,7 @@ def modificar_admin(usuario_id):
     finally:
         if cur: cur.close()
         if conn: conn.close()
+
 
 # ======================================================
 # ❌ ELIMINAR ADMINISTRADOR (CORREGIDO)

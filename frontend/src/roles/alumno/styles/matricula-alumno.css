@@ -1,0 +1,91 @@
+.matricula-container {
+  margin-left: 240px; /* espacio para el sidebar */
+  padding: 30px;
+  background: #f9fafc;
+  min-height: 100vh;
+  color: #222;
+  font-family: "Segoe UI", sans-serif;
+}
+
+.titulo-seccion {
+  font-size: 1.8rem;
+  font-weight: 600;
+  margin-bottom: 20px;
+  color: #004aad;
+}
+
+.seccion {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  margin-bottom: 30px;
+}
+
+.seccion h2 {
+  font-size: 1.3rem;
+  margin-bottom: 10px;
+  color: #333;
+}
+
+.tabla {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+.tabla th,
+.tabla td {
+  padding: 12px;
+  border-bottom: 1px solid #ddd;
+  text-align: left;
+}
+
+.tabla th {
+  background-color: #f1f5ff;
+  color: #004aad;
+  font-weight: 600;
+}
+
+.tabla tr:hover {
+  background-color: #f9f9f9;
+}
+
+.btn-matricular {
+  background-color: #004aad;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.btn-matricular:hover {
+  background-color: #0062ff;
+}
+
+.loading {
+  margin-left: 240px;
+  font-size: 1.2rem;
+  padding: 40px;
+}
+
+.vacio {
+  color: #666;
+  font-style: italic;
+  padding: 10px;
+}
+.btn-eliminar {
+  background-color: #dc2626;
+  color: white;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.btn-eliminar:hover {
+  background-color: #b91c1c;
+}

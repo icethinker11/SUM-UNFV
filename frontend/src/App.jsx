@@ -45,13 +45,17 @@ import ListneditAsignaciones from "./roles/admin/pages/ListneditAsignaciones"; /
 import EliminarAsignaciones from "./roles/admin/pages/EliminarAsignaciones"; // 🆕 NUEVO -> ASIGNACIONES
 
 // 🧑‍🏫 Páginas Docente
-import RegistrarNota from "./roles/docente/pages/RegistrarNota";
+import RegistrarNotasDocente from "./roles/docente/pages/RegistrarNotasDocente";
 import SubirMaterial from "./roles/docente/pages/SubirMaterial";
 import PerfilDocente from "./roles/docente/pages/PerfilDocente";
+import CalendarioDocente from "./roles/docente/pages/CalendarioDocente";
+
 
 // 🎓 Páginas Alumno
 import SolicitarMatricula from "./roles/alumno/pages/SolicitarMatricula";
 import VerHorario from "./roles/alumno/pages/VerHorario";
+import VerMisAsignaciones from "./roles/alumno/pages/VerMisAsignaciones";
+import MatriculaAlumno from "./roles/alumno/pages/MatriculaAlumno";
 
 function App() {
   const [user, setUser] = useState(null);
@@ -239,31 +243,51 @@ function App() {
             element={<PerfilAdmin usuarioId={user.usuario_id} />}
           />
         </>,
-        "/admin/crear-docente"
+        "/admin/mi-perfil"
       );
 
     case "Docente":
-      return renderRoleLayout(
-        SidebarDocente,
-        <>
-        <Route
-            path="/docente/perfil"
-            element={<PerfilDocente usuarioId={user.usuario_id} />}
-        />
-        <Route path="/docente/registrar-nota" element={<RegistrarNota />} />
-        <Route path="/docente/subir-material" element={<SubirMaterial />} />
-        </>,
-        "/docente/perfil" // 🧭 Ruta por defecto al iniciar sesión
-    );
+  return renderRoleLayout(
+    SidebarDocente,
+    <>
+      <Route
+        path="/docente/perfil"
+        element={<PerfilDocente usuarioId={user.usuario_id} />}
+      />
+
+      {/* 🔹 Pasa el docente_id correctamente al componente */}
+      <Route
+        path="/docente/registrar-nota"
+        element={<RegistrarNotasDocente docenteId={user.usuario_id} />}
+      />
+{/* 🔹 Subir Material */}
+      <Route 
+        path="/docente/subir-material" 
+        element={<SubirMaterial docenteId={user.usuario_id} />} 
+        
+      />
+
+      {/* 🔹 NUEVO — Calendario del docente */}
+      <Route 
+        path="/docente/calendario" 
+        element={<CalendarioDocente usuarioId={user.usuario_id} />} 
+      />
+    </>,
+    "/docente/perfil" // 🧭 Ruta por defecto al iniciar sesión
+  );
+
     case "Alumno":
       return renderRoleLayout(
         SidebarAlumno,
         <>
+
+          <Route path="/alumno/horario" element={<VerHorario />} />
+          <Route
+            path="/alumno/mis-asignaciones"
+            element={<VerMisAsignaciones usuario={user} />}/>
           <Route
             path="/alumno/solicitar-matricula"
-            element={<SolicitarMatricula />}
-          />
-          <Route path="/alumno/horario" element={<VerHorario />} />
+            element={<MatriculaAlumno usuario={user} />}/>
         </>,
         "/alumno/solicitar-matricula"
       );

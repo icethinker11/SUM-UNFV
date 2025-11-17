@@ -35,21 +35,22 @@ body,
 /* === TARJETA DEL FORMULARIO === */
 .login-alumno__card {
   position: relative;
+  
   z-index: 3;
   background-color: rgba(255, 255, 255, 0.96);
-  border: 2px solid #00569a; /* Color secundario para Alumnos, por ejemplo, azul */
+  border: 2px solid #ff7c01; /* Color secundario para Alumnos, por ejemplo, azul */
   border-radius: 18px;
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
   padding: 2rem;
   width: 50%;
   max-width: 420px;
-  margin-left: 10vw; /* CAMBIO CLAVE: Separación del borde IZQUIERDO */
+  margin-left: 68vw; /* CAMBIO CLAVE: Separación del borde IZQUIERDO */
   margin-top: 58px;
 }
 
 /* === TÍTULOS === */
 .login-alumno__title {
-  color: #00569a; /* Color secundario */
+  color: #ff7c01; /* Color secundario */
   font-size: 1.8rem;
   font-weight: 700;
   text-align: center;
@@ -87,14 +88,14 @@ body,
 
 .login-alumno__input:focus {
   outline: none;
-  border-color: #00569a; /* Color secundario */
+  border-color: #9a0064; /* Color secundario */
   box-shadow: 0 0 5px rgba(0, 86, 154, 0.3);
 }
 
 /* === BOTÓN === */
 .login-alumno__button {
   width: 100%;
-  background-color: #00569a; /* Color secundario */
+  background-color: #ff7c01; /* Color secundario */
   color: #fff;
   border: none;
   border-radius: 25px;
@@ -106,7 +107,7 @@ body,
 }
 
 .login-alumno__button:hover {
-  background-color: #003e6d; /* Tono más oscuro */
+  background-color: #b65a04 /* Tono más oscuro */
 }
 
 .login-alumno__button:disabled {
@@ -146,7 +147,7 @@ body,
 }
 
 .login-alumno__ea {
-  color: #00569a; /* Color secundario */
+  color: #ff7c01; /* Color secundario */
   font-weight: 500;
   text-decoration: none;
 }

@@ -21,62 +21,61 @@ function GestionarAlumno() {
     telefono: "",
     codigo_universitario: "",
     correo_institucional: "",
-    correo_personal: ""
+    correo_personal: "",
+    ciclo_actual: "",
   });
 
-  // Cargar lista de estudiantes
   useEffect(() => {
     cargarEstudiantes();
   }, []);
 
   const cargarEstudiantes = async () => {
     try {
-      const response = await fetch("http://localhost:5000/admin/alumnos");
+      const response = await fetch("http://localhost:5000/admin/alumnos/alumnos");
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
       const data = await response.json();
-      
-      if (response.ok) {
-        setEstudiantes(data.alumnos);
-      } else {
-        setError("Error al cargar estudiantes");
-      }
+      console.log("Datos recibidos:", data);
+      setEstudiantes(data.alumnos);
+      setCargando(false);
     } catch (error) {
       console.error("Error:", error);
-      setError("Error de conexión con el servidor");
-    } finally {
       setCargando(false);
     }
   };
 
   const handleSeleccionarEstudiante = async (estudiante) => {
     try {
-      // Obtener detalles completos del estudiante
-      const response = await fetch(`http://localhost:5000/admin/alumnos/${estudiante.estudiante_id}`);
+      const response = await fetch(
+        `http://localhost:5000/admin/alumnos/alumnos/${estudiante.estudiante_id}`
+      );
       const data = await response.json();
 
       if (response.ok) {
-        // Separar apellidos
-        const apellidos = data.apellidos.split(" ");
-        const apellido_paterno = apellidos[0] || "";
-        const apellido_materno = apellidos.slice(1).join(" ") || "";
+        const apellido_paterno = data.apellidos.split(" ")[0] || "";
+        const apellido_materno = data.apellidos.split(" ").slice(1).join(" ") || "";
 
         setEstudianteSeleccionado(data);
         setFormData({
-          nombres: data.nombres,
+          nombres: data.nombres || "",
           apellido_paterno: apellido_paterno,
           apellido_materno: apellido_materno,
-          dni: data.dni,
-          telefono: data.telefono,
-          codigo_universitario: data.codigo_universitario,
-          correo_institucional: data.correo_institucional,
-          correo_personal: "" // No se almacena en BD, dejar vacío
+          dni: data.dni || "",
+          telefono: data.telefono || "",
+          codigo_universitario: data.codigo_universitario || "",
+          correo_institucional: data.correo_institucional || "",
+          correo_personal: "",
+          ciclo_actual: data.ciclo_actual || "",
+          escuela_id: data.escuela_id || 1,
         });
         setModoEdicion(false);
         setMensaje("");
         setError("");
+      } else {
+        setError(data.error || "Error al cargar detalles del estudiante");
       }
     } catch (error) {
       console.error("Error:", error);
-      setError("Error al cargar detalles del estudiante");
+      setError("Error de conexión con el servidor");
     }
   };
 
@@ -84,7 +83,7 @@ function GestionarAlumno() {
     const { name, value } = e.target;
     setFormData({
       ...formData,
-      [name]: value
+      [name]: value,
     });
   };
 
@@ -100,7 +99,6 @@ function GestionarAlumno() {
 
   const handleCancelar = () => {
     setModoEdicion(false);
-    // Restaurar datos originales
     if (estudianteSeleccionado) {
       const apellidos = estudianteSeleccionado.apellidos.split(" ");
       setFormData({
@@ -111,54 +109,54 @@ function GestionarAlumno() {
         telefono: estudianteSeleccionado.telefono,
         codigo_universitario: estudianteSeleccionado.codigo_universitario,
         correo_institucional: estudianteSeleccionado.correo_institucional,
-        correo_personal: ""
+        correo_personal: "",
+        ciclo_actual: estudianteSeleccionado.ciclo_actual || "",
       });
     }
     setMensaje("");
     setError("");
   };
+
   const handleEliminar = async () => {
-  try {
-    const response = await fetch(
-      `http://localhost:5000/admin/alumnos/${estudianteSeleccionado.estudiante_id}`,
-      { method: "DELETE" }
-    );
+    try {
+      const response = await fetch(
+        `http://localhost:5000/admin/alumnos/alumnos/${estudianteSeleccionado.estudiante_id}`,
+        { method: "DELETE" }
+      );
 
-    const data = await response.json();
+      const data = await response.json();
 
-    if (response.ok) {
-      setMensaje("Estudiante eliminado correctamente ✅");
-      setMostrarModalEliminar(false);
-      setEstudianteSeleccionado(null);
-      setFormData({
-        nombres: "",
-        apellido_paterno: "",
-        apellido_materno: "",
-        dni: "",
-        telefono: "",
-        codigo_universitario: "",
-        correo_institucional: "",
-        correo_personal: ""
-      });
-      
-      // Recargar lista
-      await cargarEstudiantes();
-    } else {
-      setError(data.error || "Error al eliminar estudiante");
+      if (response.ok) {
+        setMensaje("Estudiante eliminado correctamente ✅");
+        setMostrarModalEliminar(false);
+        setEstudianteSeleccionado(null);
+        setFormData({
+          nombres: "",
+          apellido_paterno: "",
+          apellido_materno: "",
+          dni: "",
+          telefono: "",
+          codigo_universitario: "",
+          correo_institucional: "",
+          correo_personal: "",
+        });
+        await cargarEstudiantes();
+      } else {
+        setError(data.error || "Error al eliminar estudiante");
+        setMostrarModalEliminar(false);
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      setError("Error de conexión con el servidor");
       setMostrarModalEliminar(false);
     }
-  } catch (error) {
-    console.error("Error:", error);
-    setError("Error de conexión con el servidor");
-    setMostrarModalEliminar(false);
-  }
-  };  
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setMensaje("");
     setError("");
 
-    // Validar correo institucional
     if (!validarCorreoInstitucional(formData.correo_institucional)) {
       setError("El correo institucional debe pertenecer al dominio @alumnounfv.edu.pe");
       return;
@@ -168,13 +166,15 @@ function GestionarAlumno() {
 
     try {
       const response = await fetch(
-        `http://localhost:5000/admin/alumnos/${estudianteSeleccionado.estudiante_id}`,
+        `http://localhost:5000/admin/alumnos/alumnos/${estudianteSeleccionado.estudiante_id}`,
         {
           method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(formData)
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            ...formData,
+            ciclo_actual: formData.ciclo_actual || "",
+            escuela_id: formData.escuela_id || 1,
+          }),
         }
       );
 
@@ -183,14 +183,12 @@ function GestionarAlumno() {
       if (response.ok) {
         setMensaje("Estudiante actualizado correctamente ✅");
         setModoEdicion(false);
-        
-        // Recargar lista de estudiantes
         await cargarEstudiantes();
-        
-        // Recargar detalles del estudiante actualizado
         setTimeout(() => {
-          handleSeleccionarEstudiante({ estudiante_id: estudianteSeleccionado.estudiante_id });
-        }, 1000);
+          handleSeleccionarEstudiante({
+            estudiante_id: estudianteSeleccionado.estudiante_id,
+          });
+        }, 500);
       } else {
         setError(data.error || "Error al actualizar estudiante");
       }
@@ -202,7 +200,7 @@ function GestionarAlumno() {
     }
   };
 
-  const estudiantesFiltrados = estudiantes.filter(est => {
+  const estudiantesFiltrados = estudiantes.filter((est) => {
     const searchTerm = busqueda.toLowerCase();
     return (
       est.nombres.toLowerCase().includes(searchTerm) ||
@@ -227,7 +225,7 @@ function GestionarAlumno() {
         <p className="escuela-info">Escuela Profesional de Ingeniería de Sistemas</p>
 
         <div className="layout-dos-columnas">
-          {/* COLUMNA IZQUIERDA: Lista de estudiantes */}
+          {/* COLUMNA IZQUIERDA */}
           <div className="columna-lista">
             <div className="busqueda-container">
               <input
@@ -236,6 +234,7 @@ function GestionarAlumno() {
                 value={busqueda}
                 onChange={(e) => setBusqueda(e.target.value)}
                 className="input-busqueda"
+                autoComplete="off"
               />
             </div>
 
@@ -254,7 +253,9 @@ function GestionarAlumno() {
                     onClick={() => handleSeleccionarEstudiante(estudiante)}
                   >
                     <div className="estudiante-info">
-                      <strong>{estudiante.apellidos}, {estudiante.nombres}</strong>
+                      <strong>
+                        {estudiante.apellidos}, {estudiante.nombres}
+                      </strong>
                       <small>Código: {estudiante.codigo_universitario}</small>
                       <small>DNI: {estudiante.dni}</small>
                     </div>
@@ -264,7 +265,7 @@ function GestionarAlumno() {
             </div>
           </div>
 
-          {/* COLUMNA DERECHA: Formulario de edición */}
+          {/* COLUMNA DERECHA */}
           <div className="columna-formulario">
             {!estudianteSeleccionado ? (
               <div className="placeholder">
@@ -275,10 +276,17 @@ function GestionarAlumno() {
                 <div className="header-formulario">
                   <h3>Detalles del Estudiante</h3>
                   {!modoEdicion && (
-                  <div className="botones-accion">
-                  <button onClick={handleEditar} className="btn-editar">✏️ Editar</button>
-                  <button onClick={() => setMostrarModalEliminar(true)} className="btn-eliminar">🗑️ Eliminar</button>
-                  </div>  
+                    <div className="botones-accion">
+                      <button onClick={handleEditar} className="btn-editar">
+                        ✏️ Editar
+                      </button>
+                      <button
+                        onClick={() => setMostrarModalEliminar(true)}
+                        className="btn-eliminar"
+                      >
+                        🗑️ Eliminar
+                      </button>
+                    </div>
                   )}
                 </div>
 
@@ -295,6 +303,7 @@ function GestionarAlumno() {
                       onChange={handleChange}
                       disabled={!modoEdicion || isSubmitting}
                       required
+                      autoComplete="given-name"
                     />
                   </div>
 
@@ -308,6 +317,7 @@ function GestionarAlumno() {
                         onChange={handleChange}
                         disabled={!modoEdicion || isSubmitting}
                         required
+                        autoComplete="family-name"
                       />
                     </div>
 
@@ -320,6 +330,7 @@ function GestionarAlumno() {
                         onChange={handleChange}
                         disabled={!modoEdicion || isSubmitting}
                         required
+                        autoComplete="family-name"
                       />
                     </div>
                   </div>
@@ -336,6 +347,7 @@ function GestionarAlumno() {
                         pattern="[0-9]{8}"
                         disabled={!modoEdicion || isSubmitting}
                         required
+                        autoComplete="off"
                       />
                     </div>
 
@@ -349,6 +361,7 @@ function GestionarAlumno() {
                         maxLength="10"
                         disabled={!modoEdicion || isSubmitting}
                         required
+                        autoComplete="off"
                       />
                     </div>
                   </div>
@@ -362,13 +375,30 @@ function GestionarAlumno() {
                       onChange={handleChange}
                       disabled={!modoEdicion || isSubmitting}
                       required
+                      autoComplete="email"
                     />
-                    {modoEdicion && formData.correo_institucional && 
-                     !validarCorreoInstitucional(formData.correo_institucional) && (
-                      <small className="error-hint">
-                        ⚠️ El correo debe terminar en @alumnounfv.edu.pe
-                      </small>
-                    )}
+                    {modoEdicion &&
+                      formData.correo_institucional &&
+                      !validarCorreoInstitucional(formData.correo_institucional) && (
+                        <small className="error-hint">
+                          ⚠️ El correo debe terminar en @alumnounfv.edu.pe
+                        </small>
+                      )}
+                  </div>
+
+                  <div className="mb-3">
+                    <label className="form-label">Ciclo actual</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      name="ciclo_actual"
+                      value={formData.ciclo_actual}
+                      onChange={(e) =>
+                        setFormData({ ...formData, ciclo_actual: e.target.value })
+                      }
+                      placeholder="Ejemplo: VIII"
+                      autoComplete="off"
+                    />
                   </div>
 
                   <div className="form-group">
@@ -382,6 +412,7 @@ function GestionarAlumno() {
                       pattern="[0-9]{9}"
                       disabled={!modoEdicion || isSubmitting}
                       required
+                      autoComplete="tel"
                     />
                   </div>
 
@@ -423,17 +454,30 @@ function GestionarAlumno() {
           </div>
         </div>
       </div>
-            {/* Modal de confirmación para eliminar */}
+
       {mostrarModalEliminar && (
-        <div className="modal-overlay" onClick={() => setMostrarModalEliminar(false)}>
+        <div
+          className="modal-overlay"
+          onClick={() => setMostrarModalEliminar(false)}
+        >
           <div className="modal-confirmar" onClick={(e) => e.stopPropagation()}>
             <h3>⚠️ Confirmar Eliminación</h3>
             <p>
-              ¿Estás seguro de que deseas eliminar al estudiante <strong>{formData.nombres} {formData.apellido_paterno} {formData.apellido_materno}</strong>?
+              ¿Estás seguro de que deseas eliminar al estudiante{" "}
+              <strong>
+                {formData.nombres} {formData.apellido_paterno}{" "}
+                {formData.apellido_materno}
+              </strong>
+              ?
             </p>
-            <p className="advertencia">Esta acción desactivará al estudiante del sistema.</p>
+            <p className="advertencia">
+              Esta acción desactivará al estudiante del sistema.
+            </p>
             <div className="modal-botones">
-              <button onClick={() => setMostrarModalEliminar(false)} className="btn-modal-cancelar">
+              <button
+                onClick={() => setMostrarModalEliminar(false)}
+                className="btn-modal-cancelar"
+              >
                 Cancelar
               </button>
               <button onClick={handleEliminar} className="btn-confirmar-eliminar">

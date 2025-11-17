@@ -3,7 +3,12 @@ from dotenv import load_dotenv
 
 # Carga las variables del archivo .env
 load_dotenv()
+BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 
+UPLOAD_FOLDER = os.path.join(BASE_DIR, "../uploads/material/")
+ALLOWED_EXTENSIONS = {"pdf", "png", "jpg", "jpeg", "docx", "pptx", "xlsx"}
+
+MAX_CONTENT_LENGTH = 50 * 1024 * 1024  # Máximo 50MB
 class Config:
     """Configuración base compartida"""
     SECRET_KEY = os.getenv('SECRET_KEY', 'una-clave-secreta-por-defecto-muy-dificil')
