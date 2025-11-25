@@ -32,19 +32,32 @@ export default function EliminarAsignaciones() {
           fetch(`${API_BASE}/secciones`),
         ]);
 
-      if (!asigRes.ok || !docRes.ok || !cursoRes.ok || !horarioRes.ok || !aulaRes.ok || !seccionRes.ok) {
+      if (
+        !asigRes.ok ||
+        !docRes.ok ||
+        !cursoRes.ok ||
+        !horarioRes.ok ||
+        !aulaRes.ok ||
+        !seccionRes.ok
+      ) {
         throw new Error("Error al cargar datos del servidor");
       }
 
-      const [asignacionesData, docentesData, cursosData, horariosData, aulasData, seccionesData] =
-        await Promise.all([
-          asigRes.json(),
-          docRes.json(),
-          cursoRes.json(),
-          horarioRes.json(),
-          aulaRes.json(),
-          seccionRes.json(),
-        ]);
+      const [
+        asignacionesData,
+        docentesData,
+        cursosData,
+        horariosData,
+        aulasData,
+        seccionesData,
+      ] = await Promise.all([
+        asigRes.json(),
+        docRes.json(),
+        cursoRes.json(),
+        horarioRes.json(),
+        aulaRes.json(),
+        seccionRes.json(),
+      ]);
 
       setAsignaciones(asignacionesData || []);
       setDocentes(docentesData || []);
@@ -73,9 +86,12 @@ export default function EliminarAsignaciones() {
 
   const confirmarEliminacion = async () => {
     try {
-      const res = await fetch(`${API_BASE}/eliminar-asignacion/${asignacionEliminar.asignacion_id}`, {
-        method: "DELETE",
-      });
+      const res = await fetch(
+        `${API_BASE}/eliminar-asignacion/${asignacionEliminar.asignacion_id}`,
+        {
+          method: "DELETE",
+        }
+      );
 
       const data = await res.json();
 
@@ -109,8 +125,12 @@ export default function EliminarAsignaciones() {
   const getNombreDocente = (docenteId) => {
     const docente = docentes.find((d) => d.docente_id === docenteId);
     if (!docente) return "N/A";
-    return docente.nombre_completo || 
-           (docente.nombres && docente.apellidos ? `${docente.nombres} ${docente.apellidos}` : "N/A");
+    return (
+      docente.nombre_completo ||
+      (docente.nombres && docente.apellidos
+        ? `${docente.nombres} ${docente.apellidos}`
+        : "N/A")
+    );
   };
 
   const getSeccion = (seccionId) => {
@@ -139,14 +159,18 @@ export default function EliminarAsignaciones() {
   return (
     <div className="asignaciones-wrapper">
       <div className="asignaciones-header">
-        <h2 className="page-title page-title-delete">
-          <span className="icon">🗑️</span> Eliminar Asignaciones
-        </h2>
-        <p className="page-subtitle">Gestiona y elimina asignaciones del sistema</p>
+        <h2 className="page-title page-title-delete">Eliminar Asignaciones</h2>
+        <p className="page-subtitle">
+          Gestiona y elimina asignaciones del sistema
+        </p>
       </div>
 
       {mensaje && (
-        <div className={`alert ${mensajeTipo === "success" ? "alert-success" : "alert-error"}`}>
+        <div
+          className={`alert ${
+            mensajeTipo === "success" ? "alert-success" : "alert-error"
+          }`}
+        >
           {mensaje}
         </div>
       )}
@@ -182,7 +206,11 @@ export default function EliminarAsignaciones() {
                   <td>{getHorario(asig.bloque_id)}</td>
                   <td>{getAula(asig.aula_id)}</td>
                   <td>
-                    <span className={`badge ${asig.observaciones ? "badge-warning" : "badge-success"}`}>
+                    <span
+                      className={`badge ${
+                        asig.observaciones ? "badge-warning" : "badge-success"
+                      }`}
+                    >
                       {asig.observaciones ? "CON OBSERVACIONES" : "ACTIVO"}
                     </span>
                   </td>
@@ -192,7 +220,15 @@ export default function EliminarAsignaciones() {
                       className="btn-action btn-delete"
                       title="Eliminar"
                     >
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                      >
                         <polyline points="3 6 5 6 21 6"></polyline>
                         <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
                       </svg>
@@ -208,9 +244,20 @@ export default function EliminarAsignaciones() {
       {/* MODAL DE CONFIRMACIÓN DE ELIMINACIÓN */}
       {mostrarModal && asignacionEliminar && (
         <div className="modal-overlay" onClick={cerrarModal}>
-          <div className="modal-content modal-delete" onClick={(e) => e.stopPropagation()}>
+          <div
+            className="modal-content modal-delete"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="modal-icon-delete">
-              <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="48"
+                height="48"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
                 <circle cx="12" cy="12" r="10"></circle>
                 <line x1="15" y1="9" x2="9" y2="15"></line>
                 <line x1="9" y1="9" x2="15" y2="15"></line>
@@ -223,9 +270,18 @@ export default function EliminarAsignaciones() {
             </p>
 
             <div className="delete-info">
-              <p><strong>Curso:</strong> {getNombreCurso(asignacionEliminar.curso_id)}</p>
-              <p><strong>Docente:</strong> {getNombreDocente(asignacionEliminar.docente_id)}</p>
-              <p><strong>Sección:</strong> {getSeccion(asignacionEliminar.seccion_id)}</p>
+              <p>
+                <strong>Curso:</strong>{" "}
+                {getNombreCurso(asignacionEliminar.curso_id)}
+              </p>
+              <p>
+                <strong>Docente:</strong>{" "}
+                {getNombreDocente(asignacionEliminar.docente_id)}
+              </p>
+              <p>
+                <strong>Sección:</strong>{" "}
+                {getSeccion(asignacionEliminar.seccion_id)}
+              </p>
             </div>
 
             <div className="modal-actions">

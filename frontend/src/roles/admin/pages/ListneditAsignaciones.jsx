@@ -42,19 +42,32 @@ export default function ListneditAsignaciones() {
           fetch(`${API_BASE}/secciones`),
         ]);
 
-      if (!asigRes.ok || !docRes.ok || !cursoRes.ok || !horarioRes.ok || !aulaRes.ok || !seccionRes.ok) {
+      if (
+        !asigRes.ok ||
+        !docRes.ok ||
+        !cursoRes.ok ||
+        !horarioRes.ok ||
+        !aulaRes.ok ||
+        !seccionRes.ok
+      ) {
         throw new Error("Error al cargar datos del servidor");
       }
 
-      const [asignacionesData, docentesData, cursosData, horariosData, aulasData, seccionesData] =
-        await Promise.all([
-          asigRes.json(),
-          docRes.json(),
-          cursoRes.json(),
-          horarioRes.json(),
-          aulaRes.json(),
-          seccionRes.json(),
-        ]);
+      const [
+        asignacionesData,
+        docentesData,
+        cursosData,
+        horariosData,
+        aulasData,
+        seccionesData,
+      ] = await Promise.all([
+        asigRes.json(),
+        docRes.json(),
+        cursoRes.json(),
+        horarioRes.json(),
+        aulaRes.json(),
+        seccionRes.json(),
+      ]);
 
       setAsignaciones(asignacionesData || []);
       setDocentes(docentesData || []);
@@ -108,11 +121,14 @@ export default function ListneditAsignaciones() {
     e.preventDefault();
 
     try {
-      const res = await fetch(`${API_BASE}/editar-asignacion/${asignacionEditando}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formEdit),
-      });
+      const res = await fetch(
+        `${API_BASE}/editar-asignacion/${asignacionEditando}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(formEdit),
+        }
+      );
 
       const data = await res.json();
 
@@ -146,8 +162,12 @@ export default function ListneditAsignaciones() {
   const getNombreDocente = (docenteId) => {
     const docente = docentes.find((d) => d.docente_id === docenteId);
     if (!docente) return "N/A";
-    return docente.nombre_completo || 
-           (docente.nombres && docente.apellidos ? `${docente.nombres} ${docente.apellidos}` : "N/A");
+    return (
+      docente.nombre_completo ||
+      (docente.nombres && docente.apellidos
+        ? `${docente.nombres} ${docente.apellidos}`
+        : "N/A")
+    );
   };
 
   const getSeccion = (seccionId) => {
@@ -176,14 +196,18 @@ export default function ListneditAsignaciones() {
   return (
     <div className="asignaciones-wrapper">
       <div className="asignaciones-header">
-        <h2 className="page-title-edit">
-          <span className="icon">📋</span> Listar y Editar Asignaciones
-        </h2>
-        <p className="page-subtitle">Administra las asignaciones del centro educativo</p>
+        <h2 className="page-title-edit">Listar y Editar Asignaciones</h2>
+        <p className="page-subtitle">
+          Administra las asignaciones del centro educativo
+        </p>
       </div>
 
       {mensaje && (
-        <div className={`alert ${mensajeTipo === "success" ? "alert-success" : "alert-error"}`}>
+        <div
+          className={`alert ${
+            mensajeTipo === "success" ? "alert-success" : "alert-error"
+          }`}
+        >
           {mensaje}
         </div>
       )}
@@ -227,7 +251,15 @@ export default function ListneditAsignaciones() {
                       className="btn-action btn-edit"
                       title="Editar"
                     >
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                      >
                         <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
                         <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
                       </svg>
@@ -243,17 +275,27 @@ export default function ListneditAsignaciones() {
       {/* MODAL DE EDICIÓN */}
       {mostrarModal && (
         <div className="modal-overlay" onClick={cerrarModal}>
-          <div className="modal-content modal-edit" onClick={(e) => e.stopPropagation()}>
+          <div
+            className="modal-content modal-edit"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="modal-header-edit">
               <h3 className="modal-title-edit">Editar Asignación</h3>
-              <button className="modal-close" onClick={cerrarModal}>×</button>
+              <button className="modal-close" onClick={cerrarModal}>
+                ×
+              </button>
             </div>
 
             <form onSubmit={handleSubmitEdit} className="modal-form">
               <div className="form-row">
                 <div className="form-field">
                   <label>Nombre del Curso *</label>
-                  <select name="curso_id" value={formEdit.curso_id} onChange={handleChangeEdit} required>
+                  <select
+                    name="curso_id"
+                    value={formEdit.curso_id}
+                    onChange={handleChangeEdit}
+                    required
+                  >
                     {cursos.map((c) => (
                       <option key={c.curso_id} value={c.curso_id}>
                         {c.nombre} ({c.codigo})
@@ -264,14 +306,25 @@ export default function ListneditAsignaciones() {
 
                 <div className="form-field">
                   <label>Capacidad *</label>
-                  <input type="number" name="estudiantes" value={formEdit.estudiantes} onChange={handleChangeEdit} required />
+                  <input
+                    type="number"
+                    name="estudiantes"
+                    value={formEdit.estudiantes}
+                    onChange={handleChangeEdit}
+                    required
+                  />
                 </div>
               </div>
 
               <div className="form-row">
                 <div className="form-field">
                   <label>Tipo de Aula *</label>
-                  <select name="aula_id" value={formEdit.aula_id} onChange={handleChangeEdit} required>
+                  <select
+                    name="aula_id"
+                    value={formEdit.aula_id}
+                    onChange={handleChangeEdit}
+                    required
+                  >
                     {aulas.map((a) => (
                       <option key={a.aula_id} value={a.aula_id}>
                         {a.nombre} - {a.pabellon}
@@ -282,7 +335,12 @@ export default function ListneditAsignaciones() {
 
                 <div className="form-field">
                   <label>Pabellón *</label>
-                  <select name="seccion_id" value={formEdit.seccion_id} onChange={handleChangeEdit} required>
+                  <select
+                    name="seccion_id"
+                    value={formEdit.seccion_id}
+                    onChange={handleChangeEdit}
+                    required
+                  >
                     {secciones.map((s) => (
                       <option key={s.seccion_id} value={s.seccion_id}>
                         {s.codigo} - {s.periodo}
@@ -295,7 +353,12 @@ export default function ListneditAsignaciones() {
               <div className="form-row">
                 <div className="form-field">
                   <label>Docente *</label>
-                  <select name="docente_id" value={formEdit.docente_id} onChange={handleChangeEdit} required>
+                  <select
+                    name="docente_id"
+                    value={formEdit.docente_id}
+                    onChange={handleChangeEdit}
+                    required
+                  >
                     {docentes.map((d) => (
                       <option key={d.docente_id} value={d.docente_id}>
                         {d.nombre_completo || `${d.nombres} ${d.apellidos}`}
@@ -306,7 +369,12 @@ export default function ListneditAsignaciones() {
 
                 <div className="form-field">
                   <label>Estado *</label>
-                  <select name="horario_id" value={formEdit.horario_id} onChange={handleChangeEdit} required>
+                  <select
+                    name="horario_id"
+                    value={formEdit.horario_id}
+                    onChange={handleChangeEdit}
+                    required
+                  >
                     {horarios.map((h) => (
                       <option key={h.bloque_id} value={h.bloque_id}>
                         {h.descripcion}
@@ -317,7 +385,11 @@ export default function ListneditAsignaciones() {
               </div>
 
               <div className="modal-actions">
-                <button type="button" onClick={cerrarModal} className="btn-secondary">
+                <button
+                  type="button"
+                  onClick={cerrarModal}
+                  className="btn-secondary"
+                >
                   Cancelar
                 </button>
                 <button type="submit" className="btn-primary">

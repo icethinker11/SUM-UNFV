@@ -57,16 +57,6 @@ function SidebarAdmin({ usuario }) {
           <span className="nav-text">Modificar Datos Estudiante</span>
         </Link>
 
-        <h3 className="sidebar-section">Matrículas</h3>
-        <Link to="/admin/aprobar-matricula">
-          <span className="nav-icon">✅</span>
-          <span className="nav-text">Aprobar Matrícula</span>
-        </Link>
-        <Link to="/admin/rechazar-matricula">
-          <span className="nav-icon">❌</span>
-          <span className="nav-text">Rechazar Matrícula</span>
-        </Link>
-
         <h3 className="sidebar-section">Asignaciones</h3>
 
         <Link to="/admin/registrar-asignaciones">
@@ -82,12 +72,6 @@ function SidebarAdmin({ usuario }) {
         <Link to="/admin/eliminar-asignaciones">
           <span className="nav-icon">🗑️</span>
           <span className="nav-text">Eliminar Asignaciones</span>
-        </Link>
-
-        <h3 className="sidebar-section">Infraestructura</h3>
-        <Link to="/admin/asignar-aula">
-          <span className="nav-icon">🏫</span>
-          <span className="nav-text">Asignar Aula</span>
         </Link>
       </nav>
 

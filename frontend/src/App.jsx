@@ -51,14 +51,12 @@ import PerfilDocente from "./roles/docente/pages/PerfilDocente";
 import CalendarioDocente from "./roles/docente/pages/CalendarioDocente";
 import TomarAsistencia from "./roles/docente/pages/TomarAsistencia";
 
-
 // 🎓 Páginas Alumno
 import SolicitarMatricula from "./roles/alumno/pages/SolicitarMatricula";
 import VerHorario from "./roles/alumno/pages/VerHorario";
 import VerMisAsignaciones from "./roles/alumno/pages/VerMisAsignaciones";
 import MatriculaAlumno from "./roles/alumno/pages/MatriculaAlumno";
 import VerMisCalificaciones from "./roles/alumno/pages/VerMisCalificaciones";
-
 
 function App() {
   const [user, setUser] = useState(null);
@@ -230,15 +228,15 @@ function App() {
 
           {/* 🆕 NUEVA RUTA: Listar y editar Asignaciones*/}
           <Route
-  path="/admin/listar-editar-asignaciones"
-  element={<ListneditAsignaciones />}
-/>
+            path="/admin/listar-editar-asignaciones"
+            element={<ListneditAsignaciones />}
+          />
 
           {/* 🆕 NUEVA RUTA: Eliminar Asignaciones*/}
           <Route
-  path="/admin/eliminar-asignaciones"
-  element={<EliminarAsignaciones />}
-/>
+            path="/admin/eliminar-asignaciones"
+            element={<EliminarAsignaciones />}
+          />
 
           {/* 🆕 NUEVA RUTA: Mi Perfil del Administrador */}
           <Route
@@ -250,36 +248,35 @@ function App() {
       );
 
     case "Docente":
-  return renderRoleLayout(
-    SidebarDocente,
-    <>
-      <Route
-        path="/docente/perfil"
-        element={<PerfilDocente usuarioId={user.usuario_id} />}
-      />
+      return renderRoleLayout(
+        SidebarDocente,
+        <>
+          <Route
+            path="/docente/perfil"
+            element={<PerfilDocente usuarioId={user.usuario_id} />}
+          />
 
-      {/* 🔹 Pasa el docente_id correctamente al componente */}
-      <Route
-        path="/docente/registrar-nota"
-        element={<RegistrarNotasDocente docenteId={user.usuario_id} />}
-      />
-      {/* 🔹 Subir Material */}
-      <Route 
-        path="/docente/subir-material" 
-        element={<SubirMaterial docenteId={user.usuario_id} />} 
-        
-      />
-      {/* Asistencia*/}
-      <Route path="/docente/asistencia" element={<TomarAsistencia />} />
+          {/* 🔹 Pasa el docente_id correctamente al componente */}
+          <Route
+            path="/docente/registrar-nota"
+            element={<RegistrarNotasDocente docenteId={user.usuario_id} />}
+          />
+          {/* 🔹 Subir Material */}
+          <Route
+            path="/docente/subir-material"
+            element={<SubirMaterial docenteId={user.usuario_id} />}
+          />
+          {/* Asistencia*/}
+          <Route path="/docente/asistencia" element={<TomarAsistencia />} />
 
-      {/* 🔹 NUEVO — Calendario del docente */}
-      <Route 
-        path="/docente/calendario" 
-        element={<CalendarioDocente usuarioId={user.usuario_id} />} 
-      />
-    </>,
-    "/docente/perfil" // 🧭 Ruta por defecto al iniciar sesión
-  );
+          {/* 🔹 NUEVO — Calendario del docente */}
+          <Route
+            path="/docente/calendario"
+            element={<CalendarioDocente usuarioId={user.usuario_id} />}
+          />
+        </>,
+        "/docente/perfil" // 🧭 Ruta por defecto al iniciar sesión
+      );
 
     case "Alumno":
       return renderRoleLayout(
@@ -287,17 +284,20 @@ function App() {
         <>
           <Route
             path="/alumno/mis-asignaciones"
-            element={<VerMisAsignaciones usuario={user} />}/>
+            element={<VerMisAsignaciones usuario={user} />}
+          />
           <Route
             path="/alumno/solicitar-matricula"
-            element={<MatriculaAlumno usuario={user} />}/>
+            element={<MatriculaAlumno usuario={user} />}
+          />
           <Route
             path="/alumno/mi-horario"
-            element={<VerHorario estudianteId={user.estudiante_id} />}/>
+            element={<VerHorario estudianteId={user.estudiante_id} />}
+          />
           <Route
             path="/alumno/mis-calificaciones"
-            element={<VerMisCalificaciones estudianteId={user.estudiante_id} />}/>
-
+            element={<VerMisCalificaciones estudianteId={user.estudiante_id} />}
+          />
         </>,
         "/alumno/solicitar-matricula"
       );
