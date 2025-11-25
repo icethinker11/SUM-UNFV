@@ -1,189 +1,163 @@
-/* === Contenedor principal === */
+/* ===========================================
+   CONTENEDOR PRINCIPAL
+=========================================== */
 .listar-horarios {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 2rem;
-  background-color: #f8f9fa;
-  min-height: 100vh;
-  font-family: "Poppins", sans-serif;
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 30px;
+
+  background: rgba(255, 255, 255, 0.14);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+
+  border-radius: 22px;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+
+  color: #1d1d1f;
+  animation: fadeIn 0.6s ease;
 }
 
+/* ANIMACIÓN SUAVE */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Título */
 .listar-horarios h2 {
-  color: #2c3e50;
-  margin-bottom: 1.5rem;
-  font-weight: 600;
   text-align: center;
+  margin-bottom: 25px;
+  font-size: 28px;
+  font-weight: 700;
+  color: #1d1d1f;
 }
 
-/* === Barra de búsqueda y filtros === */
+/* ===========================================
+   FILTROS
+=========================================== */
 .barra-filtros {
   display: flex;
-  align-items: center;
-  justify-content: center;
+  gap: 12px;
+  margin-bottom: 20px;
   flex-wrap: wrap;
-  gap: 10px;
-  margin-bottom: 1.5rem;
-  width: 100%;
-  max-width: 900px;
 }
 
-.barra-filtros input {
-  flex: 1;
-  max-width: 280px;
-  padding: 7px 10px;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-  outline: none;
-  transition: all 0.2s ease;
-  font-size: 0.95rem;
-}
-
-.barra-filtros input:focus {
-  border-color: #007bff;
-  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.2);
-}
-
+.barra-filtros input,
 .barra-filtros select {
-  width: 160px;
-  padding: 7px 10px;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-  background-color: white;
-  cursor: pointer;
-  font-size: 0.95rem;
-  transition: all 0.2s ease;
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(8px);
+
+  font-size: 15px;
+  transition: 0.25s;
 }
 
-.barra-filtros select:hover {
-  border-color: #007bff;
+.barra-filtros input:focus,
+.barra-filtros select:focus {
+  border-color: #4f75ff;
+  box-shadow: 0 0 8px rgba(79, 117, 255, 0.35);
+  outline: none;
 }
 
-/* === Tabla === */
+/* ===========================================
+   TABLA
+=========================================== */
 .tabla-horarios {
   width: 100%;
-  max-width: 1000px;
   border-collapse: collapse;
-  background: white;
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
-  border-radius: 10px;
+  margin-top: 15px;
+  font-size: 15px;
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 18px;
   overflow: hidden;
+  backdrop-filter: blur(10px);
+}
+
+.tabla-horarios thead {
+  background: rgba(0, 0, 0, 0.07);
 }
 
 .tabla-horarios th {
-  background-color: #2c3e50;
-  color: white;
-  text-align: center;
+  font-weight: bold;
   padding: 12px 10px;
-  font-weight: 600;
-  font-size: 0.95rem;
+  text-align: center;
 }
 
 .tabla-horarios td {
+  padding: 12px 8px;
   text-align: center;
-  padding: 9px 10px;
-  border-bottom: 1px solid #e0e0e0;
-  color: #333;
-  vertical-align: middle;
-  font-size: 0.9rem;
 }
 
 .tabla-horarios tr:nth-child(even) {
-  background-color: #f9f9f9;
+  background: rgba(255, 255, 255, 0.15);
 }
 
 .tabla-horarios tr:hover {
-  background-color: #f1f7ff;
+  background: rgba(79, 117, 255, 0.15);
+  transition: 0.3s ease;
 }
 
-/* === Badges (Turnos y Estado) === */
+/* ===========================================
+   BADGES DE TURNOS
+=========================================== */
 .badge {
-  display: inline-block;
-  padding: 4px 10px;
-  border-radius: 12px;
-  font-size: 0.8rem;
-  font-weight: 500;
+  padding: 6px 12px;
+  border-radius: 999px;
+  color: white;
+  font-weight: 600;
+  font-size: 13px;
 }
 
 /* Turnos */
 .turno-mañana {
-  background-color: #fff4cc;
-  color: #9b870c;
+  background: #4f75ff;
 }
+
 .turno-tarde {
-  background-color: #d8eaff;
-  color: #0a58ca;
+  background: #ff9533;
 }
+
 .turno-noche {
-  background-color: #e8dcff;
-  color: #5a189a;
+  background: #7b43c1;
 }
 
-/* Estado */
+/* ===========================================
+   BADGES DE ESTADO
+=========================================== */
 .estado-badge {
-  display: inline-block;
-  padding: 5px 12px;
-  border-radius: 12px;
-  font-weight: 500;
-  font-size: 0.8rem;
-}
-.estado-badge.activo {
-  background-color: #d4f8d4;
-  color: #1b8a1b;
-}
-.estado-badge.inactivo {
-  background-color: #ffd6d6;
-  color: #b10000;
-}
-
-/* === Acciones === */
-.acciones {
-  display: flex;
-  justify-content: center;
-  gap: 6px;
-}
-
-.acciones button {
-  border: none;
-  border-radius: 6px;
-  padding: 5px 10px;
-  cursor: pointer;
-  font-weight: 500;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 13px;
   color: white;
-  font-size: 0.85rem;
-  transition: background 0.2s ease, transform 0.1s ease;
 }
 
-.acciones button:hover {
-  transform: scale(1.05);
+.estado-badge.activo {
+  background: #2ecc71;
 }
 
-/* Botones individuales */
-.btn-ver {
-  background-color: #0d6efd;
-}
-.btn-ver:hover {
-  background-color: #0b5ed7;
+.estado-badge.inactivo {
+  background: #e74c3c;
 }
 
-.btn-editar {
-  background-color: #f0ad4e;
-}
-.btn-editar:hover {
-  background-color: #ec9a29;
-}
-
-.btn-eliminar {
-  background-color: #dc3545;
-}
-.btn-eliminar:hover {
-  background-color: #bb2d3b;
-}
-
-/* === Mensajes === */
+/* ===========================================
+   MENSAJE
+=========================================== */
 .mensaje {
-  margin-top: 1rem;
+  margin-top: 15px;
+  font-size: 16px;
   text-align: center;
+  color: #1d1d1f;
   font-weight: 500;
-  color: #b10000;
 }

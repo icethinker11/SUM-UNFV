@@ -1,0 +1,176 @@
+/* ================================================================== */
+/* OVERLAY DEL MODAL (oscuro suave)                                   */
+/* ================================================================== */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 10px;
+  height: 20;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(3px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 16px;
+  z-index: 9999;
+  animation: fadeIn 0.25s ease-out;
+  background-color: black;
+}
+
+/* ================================================================== */
+/* CONTENIDO DEL MODAL                                                */
+/* ================================================================== */
+.modal-content {
+  max-width: 420px;
+  background: #ffffff;
+  border-radius: 18px;
+  padding: 28px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+  animation: slideUp 0.25s ease-out;
+
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display",
+    "Helvetica Neue", Arial, sans-serif;
+}
+
+/* ================================================================== */
+/* TÍTULO                                                             */
+/* ================================================================== */
+.modal-header {
+  font-size: 22px;
+  font-weight: 700;
+  color: #1c1c1e;
+  text-align: center;
+}
+
+/* ================================================================== */
+/* GRUPOS DE FORMULARIO                                               */
+/* ================================================================== */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-group label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #2c2c2e;
+}
+
+/* Inputs */
+.form-group input,
+.form-group select {
+  padding: 11px 12px;
+  border: 1px solid #d2d2d7;
+  border-radius: 10px;
+  font-size: 15px;
+  background: #f9f9fb;
+  transition: 0.2s ease;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  border-color: #007aff;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.18);
+  outline: none;
+}
+
+/* ================================================================== */
+/* ERRORES                                                            */
+/* ================================================================== */
+.error-text {
+  font-size: 13px;
+  color: #d70015;
+  margin-top: -2px;
+}
+
+/* ================================================================== */
+/* BOTONES                                                            */
+/* ================================================================== */
+.modal-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.btn {
+  padding: 12px 18px;
+  font-size: 15px;
+  font-weight: 600;
+  border-radius: 10px;
+  cursor: pointer;
+  border: none;
+  transition: 0.2s ease;
+}
+
+/* Botón guardar */
+.btn-primary {
+  background: #007aff;
+  color: white;
+}
+
+.btn-primary:hover {
+  background: #0062cc;
+}
+
+/* Botón cancelar */
+.btn-secondary {
+  background: #e5e5ea;
+  color: #1c1c1e;
+}
+
+.btn-secondary:hover {
+  background: #d1d1d6;
+}
+
+/* ================================================================== */
+/* ANIMACIONES                                                        */
+/* ================================================================== */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ================================================================== */
+/* RESPONSIVE                                                         */
+/* ================================================================== */
+@media (max-width: 480px) {
+  .modal-content {
+    max-width: 92%;
+    padding: 22px;
+  }
+
+  .modal-header {
+    font-size: 20px;
+  }
+
+  .modal-actions {
+    flex-direction: column;
+  }
+
+  .btn {
+    width: 100%;
+  }
+}

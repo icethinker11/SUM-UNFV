@@ -46,7 +46,7 @@ export default function ListarHorarios() {
 
   return (
     <div className="listar-horarios">
-      <h2>📋 Listado de Bloques Horarios</h2>
+      <h2>Listado de Bloques Horarios</h2>
 
       {/* 🔎 Filtros */}
       <div className="barra-filtros">

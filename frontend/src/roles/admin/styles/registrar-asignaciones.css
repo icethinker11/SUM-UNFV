@@ -1,0 +1,54 @@
+/* Card centrado pero desplazado a la derecha */
+.glass-card {
+  width: 100%;
+  max-width: 880px;
+  margin-top: 160px;
+  margin-left: 800px; /* <<< ESTO lo mueve a la derecha */
+
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.6),
+    rgba(250, 250, 250, 0.45)
+  );
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: 20px;
+  backdrop-filter: blur(10px) saturate(120%);
+  -webkit-backdrop-filter: blur(10px) saturate(120%);
+  box-shadow: 0 8px 30px rgba(12, 15, 20, 0.12);
+  padding: 1.5rem;
+}
+
+/* Resto igual */
+.form-column {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.9rem;
+}
+
+@media (min-width: 860px) {
+  .form-column {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.25rem;
+  }
+}
+
+label {
+  font-size: 0.9rem;
+  margin-bottom: 0.35rem;
+  font-weight: 600;
+}
+
+input,
+select,
+textarea {
+  width: 100%;
+  padding: 0.65rem 0.75rem;
+  border-radius: 10px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .glass-card {
+    margin-left: 0; /* en móviles vuelve al centro */
+  }
+}

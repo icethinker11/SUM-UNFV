@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import "../styles/modal-seccion.css";
 
 function ModalSeccion({ isOpen, onClose, onSave, seccionData, initialState }) {
   const [formData, setFormData] = useState(initialState);
@@ -51,6 +52,7 @@ function ModalSeccion({ isOpen, onClose, onSave, seccionData, initialState }) {
 
         {/* Formulario */}
         <form onSubmit={handleSubmit}>
+          {/* Código */}
           <div className="form-group">
             <label>Código:</label>
             <select
@@ -67,6 +69,7 @@ function ModalSeccion({ isOpen, onClose, onSave, seccionData, initialState }) {
             {errors.codigo && <p className="error-text">{errors.codigo}</p>}
           </div>
 
+          {/* Ciclo académico */}
           <div className="form-group">
             <label>Ciclo Académico:</label>
             <select
@@ -98,6 +101,7 @@ function ModalSeccion({ isOpen, onClose, onSave, seccionData, initialState }) {
             )}
           </div>
 
+          {/* Periodo */}
           <div className="form-group">
             <label>Periodo:</label>
             <input
@@ -113,6 +117,7 @@ function ModalSeccion({ isOpen, onClose, onSave, seccionData, initialState }) {
             {errors.periodo && <p className="error-text">{errors.periodo}</p>}
           </div>
 
+          {/* Estado */}
           <div className="form-group">
             <label>Estado:</label>
             <select
@@ -127,16 +132,17 @@ function ModalSeccion({ isOpen, onClose, onSave, seccionData, initialState }) {
             {errors.estado && <p className="error-text">{errors.estado}</p>}
           </div>
 
+          {/* Acciones */}
           <div className="modal-actions">
             <button type="submit" className="btn btn-primary">
-              💾 Guardar
+              Guardar
             </button>
             <button
               type="button"
               className="btn btn-secondary"
               onClick={onClose}
             >
-              ✖ Cancelar
+              Cancelar
             </button>
           </div>
         </form>

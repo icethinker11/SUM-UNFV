@@ -2,7 +2,7 @@
 from flask import Blueprint, request, jsonify
 from database.db import get_db
 from psycopg2.extras import RealDictCursor
-
+import re
 curso_bp = Blueprint("curso", __name__)
 
 # ===========================
@@ -14,22 +14,104 @@ def crear_curso():
     codigo = data.get("codigo")
     nombre = data.get("nombre")
     creditos = data.get("creditos")
-    ciclo = data.get("ciclo")
+    ciclo = data.get("ciclo")  
     horas_teoricas = data.get("horasTeoricas")
     horas_practicas = data.get("horasPracticas")
-    tipo = data.get("tipo")
+    tipo = data.get("tipo")          
     usuario_creacion = data.get("usuario_creacion")
 
+    # ---------------------
+    # CICLOS ROMANOS
+    # ---------------------
+
     try:
+        
+        # ======================================================
+        # VALIDACIONES DEL CÓDIGO
+        # ======================================================
+
+        # ---- CASO 1: Curso electivo ----
+        if tipo.lower() == "electivo":
+
+            patron = r"^EL\d{3}(I|II|III|IV|V|VI|VII|VIII|IX|X)$"
+
+            if not re.fullmatch(patron, codigo):
+                return jsonify({
+                    "error": "Formato electivo incorrecto. Ej: EL402VI ❌"
+                }), 400
+
+            if not ciclo:
+                return jsonify({"error": "Ciclo inválido ❌"}), 400
+
+            if not codigo.endswith(ciclo):
+                return jsonify({
+                    "error": f"El código debe terminar en {ciclo} según el ciclo seleccionado ❌"
+                }), 400
+
+        # ---- CASO 2: Curso NO electivo ----
+        else:
+            # No puede empezar con EL
+            if codigo.startswith("EL"):
+                return jsonify({
+                    "error": "El código no puede comenzar con 'EL' para cursos no electivos ❌"
+                }), 400
+
+            # Solo números
+            if not re.fullmatch(r"\d+", codigo):
+                return jsonify({
+                    "error": "El código del curso solo debe contener números ❌"
+                }), 400
+
+            # Longitud entre 1 y 7 dígitos
+            if len(codigo) > 7:
+                return jsonify({
+                    "error": "El código solo puede tener como máximo 7 dígitos ❌"
+                }), 400
+
+            # Validar dígitos repetidos consecutivos (no más de 4 iguales)
+            if re.search(r"(\d)\1{4,}", codigo):
+                return jsonify({
+                    "error": "El código no puede repetir un mismo número más de 4 veces consecutivas ❌"
+                }), 400 
+
+        # ======================================================
+        # VALIDAR CRÉDITOS (1 dígito)
+        # ======================================================
+        if not re.fullmatch(r"[1-9]", str(creditos)):
+            return jsonify({
+                "error": "El número de créditos debe ser un solo dígito entre 1 y 9 ❌"
+            }), 400
+
+        # ======================================================
+        # VALIDAR HORAS TEÓRICAS (1 dígito)
+        # ======================================================
+        if not re.fullmatch(r"[0-9]", str(horas_teoricas)):
+            return jsonify({
+                "error": "Las horas teóricas deben ser un solo dígito (0-9) ❌"
+            }), 400
+
+        # ======================================================
+        # VALIDAR HORAS PRÁCTICAS (1 dígito)
+        # ======================================================
+        if not re.fullmatch(r"[0-9]", str(horas_practicas)):
+            return jsonify({
+                "error": "Las horas prácticas deben ser un solo dígito (0-9) ❌"
+            }), 400
+
+
+        # ======================================================
+        # VALIDAR UNICIDAD DEL CÓDIGO
+        # ======================================================
         conn = get_db()
         cur = conn.cursor()
 
-        # 🔎 validar que el código sea único
         cur.execute("SELECT 1 FROM curso WHERE codigo = %s", (codigo,))
         if cur.fetchone():
             return jsonify({"error": "El código del curso ya existe ❌"}), 400
 
-        # insertar
+        # ======================================================
+        # INSERTAR CURSO
+        # ======================================================
         cur.execute("""
             INSERT INTO curso (codigo, nombre, creditos, ciclo, horas_teoricas, horas_practicas, tipo, usuario_creacion)
             VALUES (%s,%s,%s,%s,%s,%s,%s,%s)

@@ -1,113 +1,134 @@
-/* Contenedor principal */
+/* === HELVETICA === */
+body,
 .crear-curso {
-  margin-left: 240px; /* mismo ancho que el sidebar */
-  padding: 2rem;
-  min-height: 100vh;
-  background-color: #f8fafc;
+  font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica,
+    Arial, sans-serif;
 }
 
-/* Formulario */
-.form-curso {
-  max-width: 650px;
-  margin: 0 auto;
-  background: white;
-  padding: 3rem;
-  border-radius: 15px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
+/* === CONTENEDOR PRINCIPAL === */
+.crear-curso {
+  max-width: 540px;
+  margin-top: 2px;
+
+  margin-left: 580px;
+  margin-right: 120px;
+  padding: 30px;
+
+  background: rgba(255, 255, 255, 0.14);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+
+  border-radius: 22px;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+
+  color: #1d1d1f;
+
+  transition: transform 0.35s ease, box-shadow 0.35s ease;
 }
 
-/* Título */
+/* === TITULO === */
 .crear-curso h2 {
-  font-size: 1.8rem;
-  font-weight: bold;
-  color: #1f2937;
-  margin-bottom: 1.5rem;
   text-align: center;
-  padding-bottom: 0.5rem;
-  border-bottom: 2px solid #000;
+  font-size: 1.8rem;
+  font-weight: 600;
+  margin-bottom: 25px;
+  color: #1d1d1f;
 }
 
-/* Labels + inputs */
+/* === ETIQUETAS === */
 .form-curso label {
   display: flex;
   flex-direction: column;
   font-weight: 500;
-  color: #374151;
-  font-size: 1rem;
+  margin-bottom: 12px;
+  color: #2a2a2c;
 }
 
+/* === INPUTS === */
 .form-curso input,
 .form-curso select {
-  margin-top: 0.5rem;
-  width: 100%;
-  padding: 0.75rem 1rem;
-  border: 2px solid #e5e7eb;
-  border-radius: 8px;
-  font-size: 1rem;
-  transition: border-color 0.3s ease;
+  padding: 10px 12px;
+  margin-top: 4px;
+
+  border-radius: 10px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+
+  background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(10px);
+
+  font-size: 15px;
+  outline: none;
+  transition: border 0.2s, box-shadow 0.2s;
 }
 
 .form-curso input:focus,
 .form-curso select:focus {
-  outline: none;
-  border-color: #000;
-  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.1);
+  border-color: #007aff;
+  box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.18);
 }
 
-.form-curso input::placeholder {
-  color: #9ca3af;
+.input-error {
+  border-color: #e63946 !important;
 }
 
-/* Botón */
+/* === BOTÓN === */
 .form-curso button {
+  margin-top: 18px;
   width: 100%;
-  background-color: #000;
-  color: white;
-  border: none;
-  padding: 0.875rem;
-  border-radius: 8px;
-  font-size: 1rem;
+  padding: 12px 18px;
+  font-size: 16px;
   font-weight: 600;
+  color: white;
+  background: linear-gradient(135deg, #007aff, #0061d6);
+  border: none;
+  border-radius: 12px;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  transition: transform 0.15s ease, box-shadow 0.2s ease;
 }
 
 .form-curso button:hover {
-  background-color: #333;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(0, 122, 255, 0.35);
 }
 
-/* Mensajes */
+.form-curso button:active {
+  transform: scale(0.98);
+}
+
+/* === MENSAJE === */
 .mensaje {
-  max-width: 650px;
-  margin: 1.5rem auto;
-  padding: 1rem;
-  border-radius: 8px;
-  font-weight: 500;
+  margin-top: 15px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  text-align: center;
+  font-size: 15px;
+
+  background: rgba(255, 255, 255, 0.35);
+  backdrop-filter: blur(10px);
 }
 
-.mensaje:has(> .success) {
-  background-color: #dcfce7;
-  color: #166534;
-  border-left: 4px solid #22c55e;
+.campo {
+  margin-bottom: 16px; /* separa los campos entre ellos */
+  position: relative;
 }
 
-.mensaje:has(> .error) {
-  background-color: #fee2e2;
-  color: #991b1b;
-  border-left: 4px solid #ef4444;
+.error {
+  margin-top: -8px;
+  color: #e63946;
+  font-size: 13px;
+  display: block;
 }
 
-/* Responsive */
+.mensaje-pequeno {
+  margin-top: 0px; /* hace que esté cerca del input */
+}
+
+/* === RESPONSIVE === */
 @media (max-width: 768px) {
   .crear-curso {
-    margin-left: 0;
-    padding: 1rem;
-  }
-
-  .form-curso {
-    padding: 1.5rem;
+    width: 90%;
+    margin: 25px 10px;
   }
 }

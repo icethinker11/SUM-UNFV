@@ -5,7 +5,7 @@ from database.db import get_db
 bloques_horarios_bp = Blueprint('bloques_horarios', __name__)
 
 # ======================================================
-# 🕒 GESTIONAR BLOQUE HORARIO
+# Registrar los bloques de horarios
 # ======================================================
 
 @bloques_horarios_bp.route("/bloques-horarios", methods=["POST"])
@@ -14,9 +14,8 @@ def crear_bloque_horario():
     dia = data.get("dia")
     hora_inicio = data.get("hora_inicio")
     hora_fin = data.get("hora_fin")
-    estado = data.get("estado")
 
-    if not all([dia, hora_inicio, hora_fin, estado]):
+    if not all([dia, hora_inicio, hora_fin]):
         return jsonify({"error": "⚠️ Todos los campos obligatorios deben estar completos."}), 400
 
     formato = "%H:%M"
@@ -24,8 +23,14 @@ def crear_bloque_horario():
     fin = datetime.strptime(hora_fin, formato)
     duracion = (fin - inicio).total_seconds() / 3600
 
+    duracion_minima = 50 / 60
+
+    if duracion < duracion_minima:
+        return jsonify({"error": "⛔ La duración mínima de un bloque es de 50 minutos."}), 400
+
     if duracion <= 0:
         return jsonify({"error": "⛔ La hora de fin debe ser posterior a la de inicio."}), 400
+
     if duracion > 6:
         return jsonify({"error": "⛔ Un bloque no puede durar más de 6 horas."}), 400
 
@@ -70,10 +75,10 @@ def crear_bloque_horario():
 
         # Insertar en BD
         cur.execute("""
-            INSERT INTO bloque_horario (dia, hora_inicio, hora_fin, estado, codigo_bloque)
-            VALUES (%s, %s, %s, %s, %s)
+            INSERT INTO bloque_horario (dia, hora_inicio, hora_fin, codigo_bloque)
+            VALUES (%s, %s, %s, %s)
             RETURNING bloque_id, codigo_bloque;
-        """, (dia, hora_inicio, hora_fin, estado, codigo_bloque))
+        """, (dia, hora_inicio, hora_fin, codigo_bloque))
 
         bloque_id, codigo = cur.fetchone()
         conn.commit()
@@ -95,6 +100,59 @@ def crear_bloque_horario():
         if conn: conn.close()
 
 
+# ======================================================
+# Obtener siguiente código sin registrar (PREVIEW)
+# ======================================================
+
+@bloques_horarios_bp.route("/bloques-horarios/proximo-codigo", methods=["GET"])
+def obtener_proximo_codigo():
+    dia = request.args.get("dia")
+    hora_inicio = request.args.get("hora_inicio")
+
+    if not dia or not hora_inicio:
+        return jsonify({"error": "Faltan parámetros: día y hora_inicio"}), 400
+
+    formato = "%H:%M"
+    inicio = datetime.strptime(hora_inicio, formato)
+
+    # Determinar turno
+    turno = "M" if inicio.hour < 12 else "T" if inicio.hour < 19 else "N"
+
+    try:
+        conn = get_db()
+        cur = conn.cursor()
+
+        # Buscar último correlativo
+        cur.execute("""
+            SELECT codigo_bloque
+            FROM bloque_horario
+            WHERE dia = %s AND codigo_bloque LIKE %s
+            ORDER BY bloque_id DESC
+            LIMIT 1;
+        """, (dia, f"{dia[:3].upper()}-{turno}%"))
+
+        ultimo = cur.fetchone()
+
+        if ultimo and "-" in ultimo[0]:
+            num = ''.join(ch for ch in ultimo[0] if ch.isdigit())
+            siguiente_num = int(num) + 1 if num else 1
+        else:
+            siguiente_num = 1
+
+        codigo_siguiente = f"{dia[:3].upper()}-{turno}{siguiente_num}"
+
+        return jsonify({"codigo_sugerido": codigo_siguiente}), 200
+
+    except Exception as e:
+        print("❌ Error:", e)
+        return jsonify({"error": str(e)}), 500
+    finally:
+        if cur: cur.close()
+        if conn: conn.close()
+        
+# ======================================================
+# LISTAR LOS BLOQUES DE HORARIOS 
+# ======================================================
 @bloques_horarios_bp.route("/bloques-horarios-listar", methods=["GET"])
 def listar_bloques_horarios():
     try:

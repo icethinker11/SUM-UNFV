@@ -56,6 +56,17 @@ def create_seccion():
         conn = get_db()
         cur = conn.cursor(cursor_factory=RealDictCursor)
         
+        # Verificar duplicado antes de insertar
+        cur.execute("""
+            SELECT 1 FROM secciones 
+            WHERE codigo = %s AND ciclo_academico = %s AND periodo = %s
+        """, (codigo, ciclo_academico, periodo))
+
+        if cur.fetchone():
+            return jsonify({
+                "error": "⛔ La sección ya existe (código, ciclo y periodo)."
+            }), 400
+
         cur.execute(
             """
             INSERT INTO secciones (codigo, ciclo_academico, periodo, estado) 

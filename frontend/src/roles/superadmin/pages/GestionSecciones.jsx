@@ -5,7 +5,6 @@ import { Search, Plus, Edit, Trash2, Layers } from "lucide-react";
 
 import ModalSeccion from "./ModalSeccion.jsx";
 import "../styles/gestion-secciones.css";
-
 const BASE_URL = "http://localhost:5000/superadmin/secciones";
 
 const SECCION_INICIAL = {
@@ -23,7 +22,11 @@ function GestionSecciones() {
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
 
-  // Para evitar búsquedas excesivas
+  // ESTADOS QUE FALTABAN
+  const [filtroActual, setFiltroActual] = useState("código");
+  const [mostrarFiltros, setMostrarFiltros] = useState(false);
+
+  // Evita búsquedas excesivas
   useEffect(() => {
     const timerId = setTimeout(() => {
       setDebouncedSearchTerm(searchTerm);
@@ -93,18 +96,23 @@ function GestionSecciones() {
     return "status-tag";
   };
 
-  const seccionesFiltradas = secciones.filter(
-    (sec) =>
-      (sec.codigo?.toLowerCase() || "").includes(
-        debouncedSearchTerm.toLowerCase()
-      ) ||
-      (sec.ciclo_academico?.toLowerCase() || "").includes(
-        debouncedSearchTerm.toLowerCase()
-      ) ||
-      (sec.periodo?.toLowerCase() || "").includes(
-        debouncedSearchTerm.toLowerCase()
-      )
-  );
+  // 🔍 FILTRO INTELIGENTE
+  const seccionesFiltradas = secciones.filter((sec) => {
+    const valor = debouncedSearchTerm.toLowerCase();
+
+    switch (filtroActual) {
+      case "código":
+        return sec.codigo?.toLowerCase().includes(valor);
+      case "ciclo":
+        return sec.ciclo_academico?.toLowerCase().includes(valor);
+      case "periodo":
+        return sec.periodo?.toLowerCase().includes(valor);
+      case "estado":
+        return sec.estado?.toLowerCase().includes(valor);
+      default:
+        return true;
+    }
+  });
 
   if (loading)
     return (
@@ -122,20 +130,23 @@ function GestionSecciones() {
       </div>
 
       <div className="search-bar-actions">
+        {/* INPUT DE BÚSQUEDA */}
         <div className="search-input-group">
           <Search size={18} />
           <input
             type="text"
-            placeholder="Buscar por código, ciclo o periodo..."
+            placeholder={`Buscar por ${filtroActual}...`}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
+
         <button className="btn-primary" onClick={() => handleOpenModal()}>
           <Plus size={20} /> Nueva Sección
         </button>
       </div>
 
+      {/* === TABLA === */}
       <div className="secciones-table-container">
         {seccionesFiltradas.length > 0 ? (
           <table className="secciones-table">

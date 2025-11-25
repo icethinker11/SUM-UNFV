@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import "../styles/crear-asignaciones.css";
+import "../styles/registrar-asignaciones.css";
 
 export default function RegistrarAsignaciones() {
   // URL base (usa el prefijo /admin porque tu blueprint se registrará así)
@@ -130,213 +130,217 @@ export default function RegistrarAsignaciones() {
 
   // 🔹 Renderizado del formulario
   return (
-    <div className="p-6 max-w-3xl mx-auto bg-white rounded-2xl shadow-lg mt-8">
-      <h2 className="text-2xl font-bold mb-6 text-center">
-        🧩 Nueva Asignación
-      </h2>
+    <div classname="page-center">
+      <div classname="glass-card">
+        <div className="p-6 max-w-3xl mx-auto rounded-2xl mt-8 glass-card">
+          <h2 className="text-2xl font-bold mb-6 text-center">
+            Nueva Asignación
+          </h2>
 
-      <form onSubmit={handleSubmit} className="asignaciones-form">
-        {/* ---------------- PASO 1 ---------------- */}
-        <h3 className="text-lg font-semibold mb-4">
-          Paso 1: Información General
-        </h3>
+          <form onSubmit={handleSubmit} className="asignaciones-form">
+            {/* ---------------- PASO 1 ---------------- */}
+            <h3 className="text-lg font-semibold mb-4">
+              Paso 1: Información General
+            </h3>
 
-        <div className="form-column">
-          {/* Curso */}
-          <div>
-            <label>Curso *</label>
-            <select
-              name="curso_id"
-              value={formData.curso_id}
-              onChange={handleChange}
-              required
-            >
-              <option value="">Seleccionar curso</option>
-              {cursos.map((c) => (
-                <option key={c.curso_id} value={c.curso_id}>
-                  {c.nombre} ({"CICLO:" + c.ciclo}) — {c.codigo}
-                </option>
-              ))}
-            </select>
-          </div>
+            <div className="form-column">
+              {/* Curso */}
+              <div>
+                <label>Curso *</label>
+                <select
+                  name="curso_id"
+                  value={formData.curso_id}
+                  onChange={handleChange}
+                  required
+                >
+                  <option value="">Seleccionar curso</option>
+                  {cursos.map((c) => (
+                    <option key={c.curso_id} value={c.curso_id}>
+                      {c.nombre} ({"CICLO:" + c.ciclo}) — {c.codigo}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-          {/* Sección */}
-          <div>
-            <label>Sección *</label>
-            <select
-              name="seccion_codigo"
-              value={formData.seccion_codigo || ""}
-              onChange={(e) => {
-                const codigoSeleccionado = e.target.value;
-                setFormData((prev) => ({
-                  ...prev,
-                  seccion_codigo: codigoSeleccionado,
-                  seccion_id: "", // resetea
-                  periodo: "", // limpia
-                }));
-              }}
-              required
-            >
-              <option value="">Seleccionar sección</option>
-              {["A", "B", "C"].map((letra) => (
-                <option key={letra} value={letra}>
-                  {letra}
-                </option>
-              ))}
-            </select>
-          </div>
+              {/* Sección */}
+              <div>
+                <label>Sección *</label>
+                <select
+                  name="seccion_codigo"
+                  value={formData.seccion_codigo || ""}
+                  onChange={(e) => {
+                    const codigoSeleccionado = e.target.value;
+                    setFormData((prev) => ({
+                      ...prev,
+                      seccion_codigo: codigoSeleccionado,
+                      seccion_id: "", // resetea
+                      periodo: "", // limpia
+                    }));
+                  }}
+                  required
+                >
+                  <option value="">Seleccionar sección</option>
+                  {["A", "B", "C"].map((letra) => (
+                    <option key={letra} value={letra}>
+                      {letra}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-          {/* Periodo */}
-          <div>
-            <label>Periodo *</label>
-            <select
-              name="seccion_id"
-              value={formData.seccion_id}
-              onChange={(e) => {
-                const seccionSeleccionada = secciones.find(
-                  (s) => s.seccion_id === Number(e.target.value)
-                );
-                setFormData((prev) => ({
-                  ...prev,
-                  seccion_id: e.target.value,
-                  periodo: seccionSeleccionada
-                    ? seccionSeleccionada.periodo
-                    : "",
-                }));
-              }}
-              required
-              disabled={!formData.seccion_codigo}
-            >
-              <option value="">
-                {formData.seccion_codigo
-                  ? "Seleccionar periodo"
-                  : "Primero selecciona una sección"}
-              </option>
-
-              {secciones
-                .filter((s) => s.codigo === formData.seccion_codigo)
-                .map((s) => (
-                  <option key={s.seccion_id} value={s.seccion_id}>
-                    {s.periodo} ({s.ciclo_academico})
+              {/* Periodo */}
+              <div>
+                <label>Periodo *</label>
+                <select
+                  name="seccion_id"
+                  value={formData.seccion_id}
+                  onChange={(e) => {
+                    const seccionSeleccionada = secciones.find(
+                      (s) => s.seccion_id === Number(e.target.value)
+                    );
+                    setFormData((prev) => ({
+                      ...prev,
+                      seccion_id: e.target.value,
+                      periodo: seccionSeleccionada
+                        ? seccionSeleccionada.periodo
+                        : "",
+                    }));
+                  }}
+                  required
+                  disabled={!formData.seccion_codigo}
+                >
+                  <option value="">
+                    {formData.seccion_codigo
+                      ? "Seleccionar periodo"
+                      : "Primero selecciona una sección"}
                   </option>
-                ))}
-            </select>
-          </div>
 
-          {/* Estudiantes */}
-          <div>
-            <label>Estudiantes *</label>
-            <input
-              type="number"
-              name="estudiantes"
-              value={formData.estudiantes}
-              onChange={handleChange}
-              required
-              placeholder="N° de estudiantes"
-            />
-          </div>
+                  {secciones
+                    .filter((s) => s.codigo === formData.seccion_codigo)
+                    .map((s) => (
+                      <option key={s.seccion_id} value={s.seccion_id}>
+                        {s.periodo} ({s.ciclo_academico})
+                      </option>
+                    ))}
+                </select>
+              </div>
 
-          {/* Docente */}
-          <div>
-            <label>Docente *</label>
-            <select
-              name="docente_id"
-              value={formData.docente_id}
-              onChange={handleChange}
-              required
+              {/* Estudiantes */}
+              <div>
+                <label>Estudiantes *</label>
+                <input
+                  type="number"
+                  name="estudiantes"
+                  value={formData.estudiantes}
+                  onChange={handleChange}
+                  required
+                  placeholder="N° de estudiantes"
+                />
+              </div>
+
+              {/* Docente */}
+              <div>
+                <label>Docente *</label>
+                <select
+                  name="docente_id"
+                  value={formData.docente_id}
+                  onChange={handleChange}
+                  required
+                >
+                  <option value="">Seleccionar docente</option>
+                  {Array.isArray(docentes) && docentes.length > 0 ? (
+                    docentes.map((d) => (
+                      <option
+                        key={d.docente_id || d.dni}
+                        value={d.docente_id || d.dni}
+                      >
+                        {d.nombres && d.apellidos
+                          ? `${d.nombres} ${d.apellidos}`
+                          : d.apellidos || "Sin nombre"}{" "}
+                        ({d.correo || "Sin correo"})
+                      </option>
+                    ))
+                  ) : (
+                    <option disabled>Cargando docentes...</option>
+                  )}
+                </select>
+              </div>
+
+              {/* Observaciones */}
+              <div>
+                <label>Observaciones</label>
+                <textarea
+                  name="observaciones"
+                  value={formData.observaciones}
+                  onChange={handleChange}
+                  placeholder="Notas adicionales..."
+                />
+              </div>
+            </div>
+
+            {/* ---------------- PASO 2 ---------------- */}
+            <h3 className="text-lg font-semibold mt-8 mb-4">
+              Paso 2: Horario y Aula
+            </h3>
+
+            <div className="form-column">
+              {/* Horario */}
+              <div>
+                <label>Horario *</label>
+                <select
+                  name="horario_id"
+                  value={formData.horario_id}
+                  onChange={handleChange}
+                  required
+                >
+                  <option value="">Seleccionar horario</option>
+                  {horarios.map((h) => (
+                    <option key={h.bloque_id} value={h.bloque_id}>
+                      {h.codigo_bloque} — {h.descripcion}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Aula */}
+              <div>
+                <label>Aula *</label>
+                <select
+                  name="aula_id"
+                  value={formData.aula_id}
+                  onChange={handleChange}
+                  required
+                >
+                  <option value="">Seleccionar aula</option>
+                  {aulas.map((a) => (
+                    <option key={a.aula_id} value={a.aula_id}>
+                      {a.nombre} — Pabellón: {a.pabellon} — Tipo: {a.tipo_aula}{" "}
+                      — Capacidad: {a.capacidad}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div className="mt-6 flex justify-center">
+              <button type="submit" className="btn-submit">
+                Registrar Asignación
+              </button>
+            </div>
+          </form>
+
+          {/* Mensaje de estado */}
+          {mensaje && (
+            <div
+              className={`mt-4 text-center font-medium ${
+                mensaje.includes("✅") ? "text-green-600" : "text-red-600"
+              }`}
             >
-              <option value="">Seleccionar docente</option>
-              {Array.isArray(docentes) && docentes.length > 0 ? (
-                docentes.map((d) => (
-                  <option
-                    key={d.docente_id || d.dni}
-                    value={d.docente_id || d.dni}
-                  >
-                    {d.nombres && d.apellidos
-                      ? `${d.nombres} ${d.apellidos}`
-                      : d.apellidos || "Sin nombre"}{" "}
-                    ({d.correo || "Sin correo"})
-                  </option>
-                ))
-              ) : (
-                <option disabled>Cargando docentes...</option>
-              )}
-            </select>
-          </div>
-
-          {/* Observaciones */}
-          <div>
-            <label>Observaciones</label>
-            <textarea
-              name="observaciones"
-              value={formData.observaciones}
-              onChange={handleChange}
-              placeholder="Notas adicionales..."
-            />
-          </div>
+              {mensaje}
+            </div>
+          )}
         </div>
-
-        {/* ---------------- PASO 2 ---------------- */}
-        <h3 className="text-lg font-semibold mt-8 mb-4">
-          Paso 2: Horario y Aula
-        </h3>
-
-        <div className="form-column">
-          {/* Horario */}
-          <div>
-            <label>Horario *</label>
-            <select
-              name="horario_id"
-              value={formData.horario_id}
-              onChange={handleChange}
-              required
-            >
-              <option value="">Seleccionar horario</option>
-              {horarios.map((h) => (
-                <option key={h.bloque_id} value={h.bloque_id}>
-                  {h.codigo_bloque} — {h.descripcion}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Aula */}
-          <div>
-            <label>Aula *</label>
-            <select
-              name="aula_id"
-              value={formData.aula_id}
-              onChange={handleChange}
-              required
-            >
-              <option value="">Seleccionar aula</option>
-              {aulas.map((a) => (
-                <option key={a.aula_id} value={a.aula_id}>
-                  {a.nombre} — Pabellón: {a.pabellon} — Tipo: {a.tipo_aula} —
-                  Capacidad: {a.capacidad}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
-
-        <div className="mt-6 flex justify-center">
-          <button type="submit" className="btn-submit">
-            💾 Registrar Asignación
-          </button>
-        </div>
-      </form>
-
-      {/* Mensaje de estado */}
-      {mensaje && (
-        <div
-          className={`mt-4 text-center font-medium ${
-            mensaje.includes("✅") ? "text-green-600" : "text-red-600"
-          }`}
-        >
-          {mensaje}
-        </div>
-      )}
+      </div>
     </div>
   );
 }
