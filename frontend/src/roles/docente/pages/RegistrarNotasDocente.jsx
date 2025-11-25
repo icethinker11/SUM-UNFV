@@ -7,10 +7,9 @@ const RegistrarNotasDocente = () => {
   const [cursos, setCursos] = useState([]);
   const [estudiantes, setEstudiantes] = useState([]);
   const [cursoSeleccionado, setCursoSeleccionado] = useState(null);
-  const [notas, setNotas] = useState({}); // Almacena notas nuevas o existentes
+  const [notas, setNotas] = useState({});
   const [cargando, setCargando] = useState(false);
 
-  // --- 1. CARGA INICIAL DE CURSOS ---
   useEffect(() => {
     if (docenteId) {
       axios
@@ -20,12 +19,10 @@ const RegistrarNotasDocente = () => {
     }
   }, [docenteId]);
 
-  // --- 2. CARGA ESTUDIANTES Y NOTAS AL SELECCIONAR CURSO ---
   const seleccionarCurso = (curso) => {
     setCursoSeleccionado(curso);
     setCargando(true);
 
-    // 💡 Paso A: Cargar estudiantes para la asignación
     axios
       .get(
         `http://localhost:5000/api/calificaciones/curso/${curso.asignacion_id}/estudiantes`
@@ -33,28 +30,15 @@ const RegistrarNotasDocente = () => {
       .then((resEstudiantes) => {
         const listaEstudiantes = resEstudiantes.data;
         setEstudiantes(listaEstudiantes);
-
-        // 💡 Paso B: Cargar las calificaciones (requiere nueva ruta o consulta)
         fetchCalificaciones(listaEstudiantes, curso.curso_id);
       })
       .catch((err) => console.error("Error al cargar estudiantes:", err));
   };
   
-  // --- FUNCIÓN ADICIONAL: Cargar Notas Guardadas (Simulado o real) ---
   const fetchCalificaciones = (listaEstudiantes, curso_id) => {
-    // ⚠️ NOTA: Asumiremos que tu backend tiene una ruta para obtener
-    // TODAS las calificaciones de un curso específico.
-    // Si no la tienes, esta es la que necesitas crear en Flask/calificaciones_bp.
-    
-    // Por ahora, usamos una ruta general. Si tu backend solo tiene
-    // una ruta para UN estudiante, tendrías que hacer N peticiones, lo cual es ineficiente.
-    
-    // Suponiendo que tienes una ruta nueva: /api/calificaciones/curso/notas?curso_id=X&docente_id=Y
     axios.get(`http://localhost:5000/api/calificaciones/notas/${curso_id}/${docenteId}`)
       .then(resNotas => {
-        const notasGuardadas = resNotas.data; // Esperamos un array de objetos con las notas
-        
-        // Mapear las notas a un objeto para fácil acceso por estudiante_id
+        const notasGuardadas = resNotas.data;
         const notasIniciales = {};
         notasGuardadas.forEach(nota => {
           notasIniciales[nota.estudiante_id] = {
@@ -65,7 +49,6 @@ const RegistrarNotasDocente = () => {
             estado: nota.estado || "",
           };
         });
-        
         setNotas(notasIniciales);
         setCargando(false);
       })
@@ -75,12 +58,10 @@ const RegistrarNotasDocente = () => {
       });
   };
 
-  // --- CÁLCULO DE PROMEDIO Y ESTADO ---
   const calcularPromedioEstado = (estudianteId) => {
     const notasEstudiante = notas[estudianteId];
     if (!notasEstudiante) return { promedio: 0, estado: "PENDIENTE" };
 
-    // Convertir a números y filtrar nulos/cero para el promedio
     const n_practicas = parseFloat(notasEstudiante.practicas) || 0;
     const n_parcial = parseFloat(notasEstudiante.parcial) || 0;
     const n_final = parseFloat(notasEstudiante.final) || 0;
@@ -89,20 +70,17 @@ const RegistrarNotasDocente = () => {
     
     let promedio = 0;
     if (notasValidas.length > 0) {
-        // Fórmula de promedio simple (suma / cantidad de notas)
         promedio = (n_practicas + n_parcial + n_final) / notasValidas.length;
     }
     
-    promedio = Math.round(promedio * 100) / 100; // Redondear a 2 decimales
+    promedio = Math.round(promedio * 100) / 100;
     const estado = promedio >= 11 ? "APROBADO" : "DESAPROBADO";
 
     return { promedio, estado };
   };
 
   const handleChange = (id, field, value) => {
-    // Convertir a número antes de almacenar para el cálculo de promedio en el frontend
     const numericValue = value === "" ? "" : parseFloat(value);
-
     setNotas((prev) => ({
       ...prev,
       [id]: { ...prev[id], [field]: numericValue },
@@ -118,13 +96,9 @@ const RegistrarNotasDocente = () => {
       estudiante_id: estudiante.estudiante_id,
       curso_id: cursoSeleccionado.curso_id,
       docente_id: docenteId,
-      // Se envían las notas como string (el backend las convertirá a número)
       practicas: String(notas[estudiante.estudiante_id]?.practicas || 0),
       parcial: String(notas[estudiante.estudiante_id]?.parcial || 0),
       final: String(notas[estudiante.estudiante_id]?.final || 0),
-      // El backend debe calcular el promedio y estado, pero los incluimos si son necesarios
-      // promedio: promedio, 
-      // estado: estado
     };
 
     try {
@@ -134,7 +108,6 @@ const RegistrarNotasDocente = () => {
       );
       alert(res.data.mensaje);
       
-      // Actualizar el estado local con el promedio/estado que devuelve el backend
       setNotas(prev => ({
           ...prev,
           [estudiante.estudiante_id]: {
@@ -150,109 +123,154 @@ const RegistrarNotasDocente = () => {
     }
   };
 
-  // --- RENDERIZADO ---
   return (
     <div className="notas-container">
-      <h2>🧾 Registro de Calificaciones</h2>
+      <div className="notas-content">
+        
+        {/* Header Principal */}
+        <div className="notas-header">
+          <h2>🧾 Registro de Calificaciones</h2>
+          <p>Selecciona un curso para gestionar las calificaciones de los estudiantes</p>
+        </div>
 
-      {!cursoSeleccionado ? (
-        <div className="cards-container">
-          {/* ... (renderizado de cards de cursos) ... */}
-          {cursos.length === 0 ? (
-            <p>No tienes cursos asignados.</p>
-          ) : (
-            cursos.map((c) => (
-              <div
-                key={c.asignacion_id}
-                className="curso-card"
-                onClick={() => seleccionarCurso(c)}
-              >
-                <h3>{c.curso}</h3>
-                <p>Sección: {c.seccion}</p>
-                <p>Ciclo: {c.ciclo}</p>
+        {!cursoSeleccionado ? (
+          <div className="cursos-grid">
+            {cursos.length === 0 ? (
+              <div className="estado-vacio">
+                <div className="icono-vacio">📚</div>
+                <p>No tienes cursos asignados</p>
               </div>
-            ))
-          )}
-        </div>
-      ) : (
-        <div className="tabla-container">
-          <button className="volver-btn" onClick={() => setCursoSeleccionado(null)}>
-            🔙 Volver a cursos
-          </button>
-          <h3>
-            {cursoSeleccionado.curso} - Sección {cursoSeleccionado.seccion}
-          </h3>
-          {cargando ? (
-              <p>Cargando estudiantes y notas...</p>
-          ) : (
-            <table className="tabla-notas">
-              <thead>
-                <tr>
-                  <th>Alumno</th>
-                  <th>Prácticas</th>
-                  <th>Parcial</th>
-                  <th>Final</th>
-                  <th>Promedio</th> {/* 💡 Nuevo */}
-                  <th>Estado</th>    {/* 💡 Nuevo */}
-                  <th>Acción</th>
-                </tr>
-              </thead>
-              <tbody>
-                {estudiantes.map((e) => {
-                    const currentNotas = notas[e.estudiante_id] || {};
-                    const { promedio, estado } = calcularPromedioEstado(e.estudiante_id); // Calcula localmente
+            ) : (
+              cursos.map((c) => (
+                <div
+                  key={c.asignacion_id}
+                  className="curso-card"
+                  onClick={() => seleccionarCurso(c)}
+                >
+                  <div className="curso-card-header">
+                    <h3>{c.curso}</h3>
+                  </div>
+                  <div className="curso-card-body">
+                    <div className="curso-info">
+                      <span className="info-label">Sección:</span>
+                      <span className="info-value">{c.seccion}</span>
+                    </div>
+                    <div className="curso-info">
+                      <span className="info-label">Ciclo:</span>
+                      <span className="info-value">{c.ciclo}</span>
+                    </div>
                     
-                    return (
-                      <tr key={e.estudiante_id}>
-                        <td>{e.nombre_completo}</td>
-                        <td>
-                          <input
-                            type="number"
-                            min="0"
-                            max="20"
-                            value={currentNotas.practicas || ""}
-                            onChange={(ev) =>
-                              handleChange(e.estudiante_id, "practicas", ev.target.value)
-                            }
-                          />
-                        </td>
-                        <td>
-                          <input
-                            type="number"
-                            min="0"
-                            max="20"
-                            value={currentNotas.parcial || ""}
-                            onChange={(ev) =>
-                              handleChange(e.estudiante_id, "parcial", ev.target.value)
-                            }
-                          />
-                        </td>
-                        <td>
-                          <input
-                            type="number"
-                            min="0"
-                            max="20"
-                            value={currentNotas.final || ""}
-                            onChange={(ev) =>
-                              handleChange(e.estudiante_id, "final", ev.target.value)
-                            }
-                          />
-                        </td>
-                        <td className="promedio">{promedio.toFixed(2)}</td> {/* Muestra el promedio */}
-                        <td className={`estado ${estado.toLowerCase()}`}>
-                            {estado} {/* Muestra el estado */}
-                        </td> 
-                        <td>
-                          <button onClick={(ev) => guardarNota(ev, e)}>💾 Guardar</button>
-                        </td>
-                      </tr>
-                    );
-                })}
-              </tbody>
-            </table>
-          )}
-        </div>
-      )}
+                  </div>
+                  <div className="curso-card-footer">
+                    <button className="btn-seleccionar">
+                      Gestionar Notas →
+                    </button>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        ) : (
+          <div className="tabla-container">
+            <div className="tabla-header">
+              <div>
+                <h3>{cursoSeleccionado.curso} - Sección {cursoSeleccionado.seccion}</h3>
+                <p style={{color: '#64748b', margin: '0.25rem 0 0 0', fontSize: '0.875rem'}}>
+                  Ciclo {cursoSeleccionado.ciclo} • Código: {cursoSeleccionado.codigo_curso}
+                </p>
+              </div>
+              <button className="btn-volver" onClick={() => setCursoSeleccionado(null)}>
+                ← Volver a cursos
+              </button>
+            </div>
+
+            {cargando ? (
+              <div className="estado-carga">
+                <p>Cargando estudiantes y notas...</p>
+              </div>
+            ) : (
+              <table className="tabla-notas">
+                <thead>
+                  <tr>
+                    <th>Estudiante</th>
+                    <th>Prácticas</th>
+                    <th>Parcial</th>
+                    <th>Final</th>
+                    <th>Promedio</th>
+                    <th>Estado</th>
+                    <th>Acción</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {estudiantes.map((e) => {
+                      const currentNotas = notas[e.estudiante_id] || {};
+                      const { promedio, estado } = calcularPromedioEstado(e.estudiante_id);
+                      
+                      return (
+                        <tr key={e.estudiante_id}>
+                          <td>{e.nombre_completo}</td>
+                          <td>
+                            <input
+                              type="number"
+                              min="0"
+                              max="20"
+                              step="0.1"
+                              className="nota-input"
+                              value={currentNotas.practicas || ""}
+                              onChange={(ev) =>
+                                handleChange(e.estudiante_id, "practicas", ev.target.value)
+                              }
+                            />
+                          </td>
+                          <td>
+                            <input
+                              type="number"
+                              min="0"
+                              max="20"
+                              step="0.1"
+                              className="nota-input"
+                              value={currentNotas.parcial || ""}
+                              onChange={(ev) =>
+                                handleChange(e.estudiante_id, "parcial", ev.target.value)
+                              }
+                            />
+                          </td>
+                          <td>
+                            <input
+                              type="number"
+                              min="0"
+                              max="20"
+                              step="0.1"
+                              className="nota-input"
+                              value={currentNotas.final || ""}
+                              onChange={(ev) =>
+                                handleChange(e.estudiante_id, "final", ev.target.value)
+                              }
+                            />
+                          </td>
+                          <td className="promedio">{promedio.toFixed(2)}</td>
+                          <td>
+                            <span className={`estado ${estado.toLowerCase()}`}>
+                              {estado}
+                            </span>
+                          </td>
+                          <td>
+                            <button 
+                              className="btn-guardar" 
+                              onClick={(ev) => guardarNota(ev, e)}
+                            >
+                              💾 Guardar
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                  })}
+                </tbody>
+              </table>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 };

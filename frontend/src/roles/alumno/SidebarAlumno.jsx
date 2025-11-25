@@ -9,8 +9,8 @@ function SidebarAlumno({ usuario }) {
       <nav>
         <Link to="/alumno/solicitar-matricula">📝 Solicitar Matrícula</Link>
         <Link to="/alumno/mis-asignaciones">📚 Mis Asignaciones</Link> {/* 👈 NUEVO */}
-        <Link to="/alumno/horario">📅 Ver Horario</Link>
-        <Link to="/alumno/calificaciones">🧾 Consultar Calificaciones</Link>
+        <Link to="/alumno/mi-horario">📅 Ver Horario</Link>
+        <Link to="/alumno/mis-calificaciones">🧾 Consultar Calificaciones</Link>
         <Link to="/alumno/material">📚 Descargar Material</Link>
       </nav>
     </div>

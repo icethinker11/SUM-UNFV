@@ -49,6 +49,7 @@ import RegistrarNotasDocente from "./roles/docente/pages/RegistrarNotasDocente";
 import SubirMaterial from "./roles/docente/pages/SubirMaterial";
 import PerfilDocente from "./roles/docente/pages/PerfilDocente";
 import CalendarioDocente from "./roles/docente/pages/CalendarioDocente";
+import TomarAsistencia from "./roles/docente/pages/TomarAsistencia";
 
 
 // 🎓 Páginas Alumno
@@ -56,6 +57,8 @@ import SolicitarMatricula from "./roles/alumno/pages/SolicitarMatricula";
 import VerHorario from "./roles/alumno/pages/VerHorario";
 import VerMisAsignaciones from "./roles/alumno/pages/VerMisAsignaciones";
 import MatriculaAlumno from "./roles/alumno/pages/MatriculaAlumno";
+import VerMisCalificaciones from "./roles/alumno/pages/VerMisCalificaciones";
+
 
 function App() {
   const [user, setUser] = useState(null);
@@ -260,12 +263,14 @@ function App() {
         path="/docente/registrar-nota"
         element={<RegistrarNotasDocente docenteId={user.usuario_id} />}
       />
-{/* 🔹 Subir Material */}
+      {/* 🔹 Subir Material */}
       <Route 
         path="/docente/subir-material" 
         element={<SubirMaterial docenteId={user.usuario_id} />} 
         
       />
+      {/* Asistencia*/}
+      <Route path="/docente/asistencia" element={<TomarAsistencia />} />
 
       {/* 🔹 NUEVO — Calendario del docente */}
       <Route 
@@ -280,14 +285,19 @@ function App() {
       return renderRoleLayout(
         SidebarAlumno,
         <>
-
-          <Route path="/alumno/horario" element={<VerHorario />} />
           <Route
             path="/alumno/mis-asignaciones"
             element={<VerMisAsignaciones usuario={user} />}/>
           <Route
             path="/alumno/solicitar-matricula"
             element={<MatriculaAlumno usuario={user} />}/>
+          <Route
+            path="/alumno/mi-horario"
+            element={<VerHorario estudianteId={user.estudiante_id} />}/>
+          <Route
+            path="/alumno/mis-calificaciones"
+            element={<VerMisCalificaciones estudianteId={user.estudiante_id} />}/>
+
         </>,
         "/alumno/solicitar-matricula"
       );

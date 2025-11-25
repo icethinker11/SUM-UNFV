@@ -1,0 +1,63 @@
+.vmc-container {
+  padding: 20px;
+  max-width: 900px;
+  margin: auto;
+  font-family: "Inter", sans-serif;
+}
+
+.vmc-title {
+  font-size: 28px;
+  margin-bottom: 20px;
+  color: #1a237e;
+  font-weight: bold;
+}
+
+.vmc-empty,
+.vmc-loading {
+  text-align: center;
+  font-size: 18px;
+  color: #555;
+}
+
+.vmc-card {
+  background: white;
+  padding: 18px;
+  margin-bottom: 18px;
+  border-radius: 12px;
+  box-shadow: 0px 3px 10px rgba(0, 0, 0, 0.08);
+  border-left: 5px solid #1a237e;
+}
+
+.vmc-header {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 10px;
+}
+
+.vmc-header h3 {
+  font-size: 22px;
+  color: #0d47a1;
+  margin: 0;
+}
+
+.vmc-docente {
+  font-size: 14px;
+  color: #333;
+}
+
+.vmc-notas p {
+  margin: 4px 0;
+  font-size: 15px;
+}
+
+.vmc-promedio {
+  margin-top: 10px;
+  font-size: 18px;
+  color: #1a237e;
+}
+
+.vmc-estado {
+  margin-top: 12px;
+  font-size: 16px;
+  font-weight: bold;
+}
