@@ -18,100 +18,276 @@ function CrearAlumno() {
   const [mensaje, setMensaje] = useState("");
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [validationErrors, setValidationErrors] = useState({});
 
   useEffect(() => {
-    // Generar ciclos académicos válidos
     const generarCiclos = () => {
       const ciclos = [];
       const añoActual = new Date().getFullYear();
       
-      // Generar ciclos desde 2020 hasta el año actual + 1
       for (let año = 2020; año <= añoActual + 1; año++) {
         ciclos.push(`${año}-I`);
         ciclos.push(`${año}-II`);
       }
       
-      setCiclosAcademicos(ciclos.reverse()); // Más recientes primero
+      setCiclosAcademicos(ciclos.reverse());
     };
 
     generarCiclos();
   }, []);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value
-    });
-  };
-
+  // ========== FUNCIONES DE VALIDACIÓN ==========
+  
   const validarCorreoInstitucional = (correo) => {
     return correo.endsWith("@alumnounfv.edu.pe");
   };
 
-  const handleSubmit = async (e) => {
-  e.preventDefault();
-  setMensaje("");
-  setError("");
+  const validarCodigoUniversitario = (codigo) => {
+    const errors = [];
+    
+    if (!/^\d{10}$/.test(codigo)) {
+      errors.push("Debe contener exactamente 10 dígitos");
+      return errors;
+    }
+    
+    const todosIguales = codigo.split('').every(digit => digit === codigo[0]);
+    if (todosIguales) {
+      errors.push("No puede contener todos los dígitos iguales");
+    }
+    
+    return errors;
+  };
 
-  // Validar dominio del correo institucional
-  if (!validarCorreoInstitucional(formData.correo_institucional)) {
-    setError("El correo institucional debe pertenecer al dominio @alumnounfv.edu.pe");
-    return;
-  }
+  const validarDNI = (dni) => {
+    const errors = [];
+    
+    if (!/^\d{8}$/.test(dni)) {
+      errors.push("Debe contener exactamente 8 dígitos");
+      return errors;
+    }
+    
+    const todosIguales = dni.split('').every(digit => digit === dni[0]);
+    if (todosIguales) {
+      errors.push("No puede contener todos los dígitos iguales");
+    }
+    
+    return errors;
+  };
 
-  // Deshabilitar botón mientras se procesa
-  setIsSubmitting(true);
+  const validarNombres = (nombres) => {
+    const errors = [];
+    
+    if (!/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/.test(nombres)) {
+      errors.push("Solo debe contener letras");
+    }
+    
+    if (nombres.length < 2) {
+      errors.push("Debe tener al menos 2 caracteres");
+    }
+    if (nombres.length > 50) {
+      errors.push("No puede exceder 50 caracteres");
+    }
+    
+    if (/\s{3,}/.test(nombres)) {
+      errors.push("No puede tener espacios excesivos");
+    }
+    
+    return errors;
+  };
 
-  try {
-    const response = await fetch("http://localhost:5000/admin/alumnos/crear-alumno", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        ...formData,
-        escuela_id: 1 // ID fijo para Escuela de Ingeniería de Sistemas
-      })
+  const validarApellidos = (paterno, materno) => {
+    const errors = [];
+    
+    if (paterno.trim().toLowerCase() === materno.trim().toLowerCase() && paterno.trim() !== "") {
+      errors.push("El apellido paterno y materno no pueden ser iguales");
+    }
+    
+    const validarFormato = (apellido, tipo) => {
+      if (!/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/.test(apellido)) {
+        errors.push(`${tipo} solo debe contener letras`);
+      }
+      if (apellido.length < 2) {
+        errors.push(`${tipo} debe tener al menos 2 caracteres`);
+      }
+      if (apellido.length > 30) {
+        errors.push(`${tipo} no puede exceder 30 caracteres`);
+      }
+    };
+    
+    if (paterno) validarFormato(paterno, "Apellido paterno");
+    if (materno) validarFormato(materno, "Apellido materno");
+    
+    return errors;
+  };
+
+  const validarTelefono = (telefono) => {
+    const errors = [];
+    
+    if (!/^\d{9}$/.test(telefono)) {
+      errors.push("Debe contener exactamente 9 dígitos");
+      return errors;
+    }
+    
+    const todosIguales = telefono.split('').every(digit => digit === telefono[0]);
+    if (todosIguales) {
+      errors.push("No puede contener todos los dígitos iguales");
+    }
+    
+    if (!telefono.startsWith('9')) {
+      errors.push("El teléfono debe comenzar con 9");
+    }
+    
+    return errors;
+  };
+
+  const validarCampo = (name, value) => {
+    let errors = [];
+    
+    switch(name) {
+      case 'codigo_universitario':
+        errors = validarCodigoUniversitario(value);
+        break;
+      case 'dni':
+        errors = validarDNI(value);
+        break;
+      case 'nombres':
+        errors = validarNombres(value);
+        break;
+      case 'apellido_paterno':
+      case 'apellido_materno':
+        errors = validarApellidos(
+          name === 'apellido_paterno' ? value : formData.apellido_paterno,
+          name === 'apellido_materno' ? value : formData.apellido_materno
+        );
+        break;
+      case 'telefono':
+        errors = validarTelefono(value);
+        break;
+      case 'correo_institucional':
+        if (value && !validarCorreoInstitucional(value)) {
+          errors.push("Debe terminar en @alumnounfv.edu.pe");
+        }
+        break;
+    }
+    
+    setValidationErrors(prev => ({
+      ...prev,
+      [name]: errors
+    }));
+  };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    
+    let newValue = value;
+    
+    // Restricciones de entrada en tiempo real
+    if (name === 'dni' || name === 'telefono' || name === 'codigo_universitario') {
+      newValue = value.replace(/\D/g, '');
+    }
+    
+    if (name === 'nombres' || name === 'apellido_paterno' || name === 'apellido_materno') {
+      newValue = value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '');
+    }
+    
+    setFormData({
+      ...formData,
+      [name]: newValue
     });
-
-    const data = await response.json();
-
-    if (response.ok) {
-      // 📧 Mensaje mejorado según si se envió el correo o no
-      const mensajeExito = data.correo_enviado 
-        ? "Estudiante registrado exitosamente ✅\n📧 Se envió un correo con las credenciales al correo personal" 
-        : "Estudiante registrado exitosamente ✅\n⚠️ No se pudo enviar el correo (pero el estudiante fue creado)";
-      
-      setMensaje(mensajeExito);
-      
-      // Limpiar formulario después de 2 segundos y redirigir
-      setTimeout(() => {
-        setFormData({
-          nombres: "",
-          apellido_paterno: "",
-          apellido_materno: "",
-          correo_institucional: "",
-          correo_personal: "",
-          dni: "",
-          telefono: "",
-          codigo_universitario: "",
-          ciclo_ingreso: ""
-        });
-        setIsSubmitting(false);
-        // Aquí puedes redirigir a la lista de estudiantes
-        // window.location.href = "/admin/estudiantes";
-      }, 3000); // Aumenté a 3 segundos para que lean el mensaje
+    
+    // Validar en tiempo real
+    if (newValue) {
+      validarCampo(name, newValue);
     } else {
-      setError(data.error || "Error al registrar estudiante");
+      setValidationErrors(prev => ({
+        ...prev,
+        [name]: []
+      }));
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setMensaje("");
+    setError("");
+
+    // Validar todos los campos antes de enviar
+    const allErrors = {
+      codigo_universitario: validarCodigoUniversitario(formData.codigo_universitario),
+      dni: validarDNI(formData.dni),
+      nombres: validarNombres(formData.nombres),
+      apellidos: validarApellidos(formData.apellido_paterno, formData.apellido_materno),
+      telefono: validarTelefono(formData.telefono)
+    };
+
+    const hayErrores = Object.values(allErrors).some(errors => errors.length > 0);
+    
+    if (hayErrores) {
+      setError("Por favor corrija los errores en el formulario");
+      setValidationErrors({
+        codigo_universitario: allErrors.codigo_universitario,
+        dni: allErrors.dni,
+        nombres: allErrors.nombres,
+        apellido_paterno: allErrors.apellidos,
+        apellido_materno: allErrors.apellidos,
+        telefono: allErrors.telefono
+      });
+      return;
+    }
+
+    if (!validarCorreoInstitucional(formData.correo_institucional)) {
+      setError("El correo institucional debe pertenecer al dominio @alumnounfv.edu.pe");
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const response = await fetch("http://localhost:5000/admin/alumnos/crear-alumno", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          ...formData,
+          escuela_id: 1
+        })
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        const mensajeExito = data.correo_enviado 
+          ? "Estudiante registrado exitosamente ✅\n📧 Se envió un correo con las credenciales al correo personal" 
+          : "Estudiante registrado exitosamente ✅\n⚠️ No se pudo enviar el correo (pero el estudiante fue creado)";
+        
+        setMensaje(mensajeExito);
+        setValidationErrors({});
+        
+        setTimeout(() => {
+          setFormData({
+            nombres: "",
+            apellido_paterno: "",
+            apellido_materno: "",
+            correo_institucional: "",
+            correo_personal: "",
+            dni: "",
+            telefono: "",
+            codigo_universitario: "",
+            ciclo_ingreso: ""
+          });
+          setIsSubmitting(false);
+        }, 3000);
+      } else {
+        setError(data.error || "Error al registrar estudiante");
+        setIsSubmitting(false);
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      setError("Error de conexión con el servidor");
       setIsSubmitting(false);
     }
-  } catch (error) {
-    console.error("Error:", error);
-    setError("Error de conexión con el servidor");
-    setIsSubmitting(false);
-  }
-};
+  };
 
   return (
     <div className="crear-alumno-container">
@@ -132,9 +308,14 @@ function CrearAlumno() {
               value={formData.nombres}
               onChange={handleChange}
               placeholder="Ingrese nombres completos"
+              maxLength="50"
               required
               disabled={isSubmitting}
+              style={validationErrors.nombres?.length > 0 ? { borderColor: '#ef4444' } : {}}
             />
+            {validationErrors.nombres?.map((err, idx) => (
+              <small key={idx} className="error-hint">⚠️ {err}</small>
+            ))}
           </div>
 
           {/* Apellidos en fila */}
@@ -147,9 +328,14 @@ function CrearAlumno() {
                 value={formData.apellido_paterno}
                 onChange={handleChange}
                 placeholder="Apellido paterno"
+                maxLength="30"
                 required
                 disabled={isSubmitting}
+                style={validationErrors.apellido_paterno?.length > 0 ? { borderColor: '#ef4444' } : {}}
               />
+              {validationErrors.apellido_paterno?.map((err, idx) => (
+                <small key={idx} className="error-hint">⚠️ {err}</small>
+              ))}
             </div>
 
             <div className="form-group">
@@ -160,9 +346,14 @@ function CrearAlumno() {
                 value={formData.apellido_materno}
                 onChange={handleChange}
                 placeholder="Apellido materno"
+                maxLength="30"
                 required
                 disabled={isSubmitting}
+                style={validationErrors.apellido_materno?.length > 0 ? { borderColor: '#ef4444' } : {}}
               />
+              {validationErrors.apellido_materno?.map((err, idx) => (
+                <small key={idx} className="error-hint">⚠️ {err}</small>
+              ))}
             </div>
           </div>
 
@@ -177,10 +368,13 @@ function CrearAlumno() {
                 onChange={handleChange}
                 placeholder="8 dígitos"
                 maxLength="8"
-                pattern="[0-9]{8}"
                 required
                 disabled={isSubmitting}
+                style={validationErrors.dni?.length > 0 ? { borderColor: '#ef4444' } : {}}
               />
+              {validationErrors.dni?.map((err, idx) => (
+                <small key={idx} className="error-hint">⚠️ {err}</small>
+              ))}
             </div>
 
             <div className="form-group">
@@ -190,11 +384,15 @@ function CrearAlumno() {
                 name="codigo_universitario"
                 value={formData.codigo_universitario}
                 onChange={handleChange}
-                placeholder="Ej: 2024001234"
+                placeholder="10 dígitos (Ej: 2024001234)"
                 maxLength="10"
                 required
                 disabled={isSubmitting}
+                style={validationErrors.codigo_universitario?.length > 0 ? { borderColor: '#ef4444' } : {}}
               />
+              {validationErrors.codigo_universitario?.map((err, idx) => (
+                <small key={idx} className="error-hint">⚠️ {err}</small>
+              ))}
             </div>
           </div>
 
@@ -209,10 +407,11 @@ function CrearAlumno() {
               placeholder="ejemplo@alumnounfv.edu.pe"
               required
               disabled={isSubmitting}
+              style={validationErrors.correo_institucional?.length > 0 ? { borderColor: '#ef4444' } : {}}
             />
-            {formData.correo_institucional && !validarCorreoInstitucional(formData.correo_institucional) && (
-              <small className="error-hint">⚠️ El correo debe terminar en @alumnounfv.edu.pe</small>
-            )}
+            {validationErrors.correo_institucional?.map((err, idx) => (
+              <small key={idx} className="error-hint">⚠️ {err}</small>
+            ))}
           </div>
 
           {/* Correo Personal */}
@@ -238,12 +437,15 @@ function CrearAlumno() {
                 name="telefono"
                 value={formData.telefono}
                 onChange={handleChange}
-                placeholder="9 dígitos"
+                placeholder="9 dígitos (comienza con 9)"
                 maxLength="9"
-                pattern="[0-9]{9}"
                 required
                 disabled={isSubmitting}
+                style={validationErrors.telefono?.length > 0 ? { borderColor: '#ef4444' } : {}}
               />
+              {validationErrors.telefono?.map((err, idx) => (
+                <small key={idx} className="error-hint">⚠️ {err}</small>
+              ))}
             </div>
 
             <div className="form-group">

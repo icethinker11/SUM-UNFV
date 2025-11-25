@@ -8,6 +8,7 @@ export default function EliminarCurso() {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [showWarningModal, setShowWarningModal] = useState(false);
   const [warningMessage, setWarningMessage] = useState("");
+  const [additionalWarning, setAdditionalWarning] = useState(""); // Para advertencias informativas
   const [loading, setLoading] = useState(false);
   const [mensaje, setMensaje] = useState("");
 
@@ -51,8 +52,14 @@ export default function EliminarCurso() {
         `http://localhost:5000/curso/${curso.curso_id}/docente`
       );
 
+      // 🆕 Verificar asignaciones (para mostrar advertencia informativa)
+      const responseAsignaciones = await fetch(
+        `http://localhost:5000/curso/${curso.curso_id}/asignaciones`
+      );
+
       let tieneEstudiantes = false;
       let tieneDocente = false;
+      let cantidadAsignaciones = 0;
 
       if (responseEstudiantes.ok) {
         const dataEstudiantes = await responseEstudiantes.json();
@@ -64,24 +71,31 @@ export default function EliminarCurso() {
         tieneDocente = dataDocente.tiene_docente;
       }
 
-      return { tieneEstudiantes, tieneDocente };
+      if (responseAsignaciones.ok) {
+        const dataAsignaciones = await responseAsignaciones.json();
+        cantidadAsignaciones = dataAsignaciones.cantidad || 0;
+      }
+
+      return { tieneEstudiantes, tieneDocente, cantidadAsignaciones };
     } catch (error) {
       console.error("Error en verificación:", error);
       setMensaje("⚠️ Error al verificar las condiciones del curso");
-      return { tieneEstudiantes: false, tieneDocente: false };
+      return { tieneEstudiantes: false, tieneDocente: false, cantidadAsignaciones: 0 };
     }
   };
 
   const handleEliminarClick = async (curso) => {
     setSelectedCurso(curso);
     setMensaje(""); // Limpiar mensajes anteriores
+    setAdditionalWarning(""); // Limpiar advertencias adicionales
 
     // Validar según criterios de aceptación
-    const { tieneEstudiantes, tieneDocente } = await verificarEliminacion(curso);
+    const { tieneEstudiantes, tieneDocente, cantidadAsignaciones } = await verificarEliminacion(curso);
 
+    // Solo bloqueamos por estudiantes o docentes activos
     if (tieneEstudiantes) {
       setWarningMessage(
-        "No se puede eliminar el curso porque tiene estudiantes matriculados."
+        "No se puede eliminar el curso porque tiene estudiantes matriculados activos. Debe primero dar de baja las matrículas."
       );
       setShowWarningModal(true);
       return;
@@ -89,10 +103,17 @@ export default function EliminarCurso() {
 
     if (tieneDocente) {
       setWarningMessage(
-        "No se puede eliminar el curso porque está asignado a un docente."
+        "No se puede eliminar el curso porque tiene secciones activas con docentes asignados. Debe primero finalizar o cancelar las secciones."
       );
       setShowWarningModal(true);
       return;
+    }
+
+    // Si tiene asignaciones pero no estudiantes/docentes, mostrar confirmación con advertencia
+    if (cantidadAsignaciones > 0) {
+      setAdditionalWarning(
+        `⚠️ Este curso tiene ${cantidadAsignaciones} asignación(es) que también serán eliminadas junto con sus dependencias.`
+      );
     }
 
     // Si pasa todas las validaciones, mostrar modal de confirmación
@@ -111,11 +132,24 @@ export default function EliminarCurso() {
       );
 
       if (response.ok) {
+        const data = await response.json();
+        
         // Eliminar del estado local (desaparece inmediatamente)
         setCursos(cursos.filter((c) => c.curso_id !== selectedCurso.curso_id));
-        setMensaje("✅ Curso eliminado exitosamente");
+        
+        // Mostrar mensaje con detalles de lo eliminado
+        let detalleMsg = "✅ Curso eliminado exitosamente";
+        if (data.detalles) {
+          const { asignaciones_eliminadas, secciones_eliminadas, matriculas_eliminadas } = data.detalles;
+          if (asignaciones_eliminadas > 0 || secciones_eliminadas > 0 || matriculas_eliminadas > 0) {
+            detalleMsg += ` (Asignaciones: ${asignaciones_eliminadas}, Secciones: ${secciones_eliminadas}, Matrículas: ${matriculas_eliminadas})`;
+          }
+        }
+        
+        setMensaje(detalleMsg);
         setShowConfirmModal(false);
         setSelectedCurso(null);
+        setAdditionalWarning("");
       } else {
         const data = await response.json();
         setMensaje("❌ Error: " + data.error);
@@ -202,9 +236,16 @@ export default function EliminarCurso() {
               <div className="curso-detail">
                 <strong>{selectedCurso?.codigo}</strong> - {selectedCurso?.nombre}
               </div>
+              
+              {/* Mostrar advertencia si hay asignaciones */}
+              {additionalWarning && (
+                <div className="additional-warning">
+                  {additionalWarning}
+                </div>
+              )}
+              
               <p className="warning-text">
-                ⚠️ Esta acción no se puede deshacer. El curso desaparecerá
-                inmediatamente de la lista.
+                ⚠️ Esta acción eliminará el curso y todas sus dependencias (asignaciones, secciones, matrículas). No se puede deshacer.
               </p>
             </div>
 
@@ -214,6 +255,7 @@ export default function EliminarCurso() {
                 onClick={() => {
                   setShowConfirmModal(false);
                   setSelectedCurso(null);
+                  setAdditionalWarning("");
                 }}
                 disabled={loading}
               >

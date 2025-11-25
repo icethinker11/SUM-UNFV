@@ -3,6 +3,7 @@ from flask import Blueprint, request, jsonify
 from database.db import get_db
 from psycopg2.extras import RealDictCursor
 import re
+
 curso_bp = Blueprint("curso", __name__)
 
 # ===========================
@@ -20,19 +21,13 @@ def crear_curso():
     tipo = data.get("tipo")          
     usuario_creacion = data.get("usuario_creacion")
 
-    # ---------------------
-    # CICLOS ROMANOS
-    # ---------------------
-
     try:
-        
         # ======================================================
         # VALIDACIONES DEL CÓDIGO
         # ======================================================
 
         # ---- CASO 1: Curso electivo ----
         if tipo.lower() == "electivo":
-
             patron = r"^EL\d{3}(I|II|III|IV|V|VI|VII|VIII|IX|X)$"
 
             if not re.fullmatch(patron, codigo):
@@ -98,7 +93,6 @@ def crear_curso():
                 "error": "Las horas prácticas deben ser un solo dígito (0-9) ❌"
             }), 400
 
-
         # ======================================================
         # VALIDAR UNICIDAD DEL CÓDIGO
         # ======================================================
@@ -127,6 +121,37 @@ def crear_curso():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+
+# ===========================
+# LISTAR TODOS LOS CURSOS (RUTA PRINCIPAL)
+# ===========================
+@curso_bp.route("/", methods=["GET"])
+def listar_cursos():
+    conn = None
+    cur = None
+    try:
+        conn = get_db()
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+        
+        cur.execute("""
+            SELECT c.curso_id, c.codigo, c.nombre, c.creditos, c.ciclo, 
+                   c.horas_teoricas, c.horas_practicas, c.tipo, c.estado, c.fecha_creacion
+            FROM curso c
+            ORDER BY c.nombre ASC
+        """)
+        
+        cursos = cur.fetchall()
+        return jsonify(cursos), 200
+    
+    except Exception as e:
+        print(f"❌ Error en listar_cursos: {e}")
+        return jsonify({"error": "Error interno al obtener la lista de cursos."}), 500
+        
+    finally:
+        if cur: cur.close()
+        if conn: conn.close()
+
 
 # ===========================
 # OBTENER CURSO POR ID
@@ -164,8 +189,9 @@ def obtener_curso(curso_id):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+
 # ===========================
-# ACTUALIZAR CURSO (VERSIÓN SIMPLE - SIN CAMPOS DE AUDITORÍA)
+# ACTUALIZAR CURSO
 # ===========================
 @curso_bp.route("/actualizar/<int:curso_id>", methods=["PUT"])
 def actualizar_curso(curso_id):
@@ -192,7 +218,7 @@ def actualizar_curso(curso_id):
         if cur.fetchone():
             return jsonify({"error": "El código del curso ya está en uso por otro curso ❌"}), 400
 
-        # Actualizar el curso - SOLO CAMPOS BÁSICOS
+        # Actualizar el curso
         cur.execute("""
             UPDATE curso 
             SET 
@@ -227,63 +253,94 @@ def actualizar_curso(curso_id):
 
 
 # ===========================
-# ELIMINAR CURSO
+# ELIMINAR CURSO (CON ELIMINACIÓN EN CASCADA)
 # ===========================
 @curso_bp.route("/eliminar/<int:curso_id>", methods=["DELETE"])
 def eliminar_curso(curso_id):
-    try:
-        conn = get_db()
-        cur = conn.cursor()
-
-        # Eliminar curso
-        cur.execute("DELETE FROM curso WHERE curso_id = %s", (curso_id,))
-        conn.commit()
-        cur.close()
-        conn.close()
-
-        return jsonify({"mensaje": "Curso eliminado correctamente."}), 200
-
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-@curso_bp.route("/", methods=["GET"])
-def listar_cursos():
+    """Elimina un curso y todas sus dependencias (asignaciones, secciones, matrículas, etc.)."""
     conn = None
     cur = None
     try:
         conn = get_db()
-        cur = conn.cursor(cursor_factory=RealDictCursor)
-        
-        # Consulta que devuelve las columnas necesarias (curso_id, codigo, nombre)
+        cur = conn.cursor()
+
+        # Verificar que el curso existe
+        cur.execute("SELECT codigo, nombre FROM curso WHERE curso_id = %s", (curso_id,))
+        curso = cur.fetchone()
+        if not curso:
+            return jsonify({"error": "El curso no existe"}), 404
+
+        print(f"🗑️ Iniciando eliminación del curso: {curso[0]} - {curso[1]}")
+
+        # 1️⃣ Eliminar matrículas de las secciones de este curso
         cur.execute("""
-            SELECT c.curso_id, c.codigo, c.nombre, c.creditos, c.ciclo, 
-                   c.horas_teoricas, c.horas_practicas, c.tipo, c.estado, c.fecha_creacion
-            FROM curso c
-            ORDER BY c.nombre ASC
-        """)
+            DELETE FROM matriculas 
+            WHERE asignacion_id IN (
+                SELECT asignacion_id FROM asignaciones WHERE curso_id = %s
+            )
+        """, (curso_id,))
+        matriculas_eliminadas = cur.rowcount
+        print(f"   ✓ Matrículas eliminadas: {matriculas_eliminadas}")
+
+        # 2️⃣ Eliminar asignaciones del curso
+        cur.execute("DELETE FROM asignaciones WHERE curso_id = %s", (curso_id,))
+        asignaciones_eliminadas = cur.rowcount
+        print(f"   ✓ Asignaciones eliminadas: {asignaciones_eliminadas}")
+
+        # 3️⃣ Eliminar secciones del curso (si existen)
+        try:
+            cur.execute("DELETE FROM seccion WHERE curso_id = %s", (curso_id,))
+            secciones_eliminadas = cur.rowcount
+            print(f"   ✓ Secciones eliminadas: {secciones_eliminadas}")
+        except Exception as e:
+            print(f"   ⚠️ No se encontraron secciones o no existen: {str(e)}")
+            secciones_eliminadas = 0
+
+        # 4️⃣ Eliminar prerrequisitos (donde este curso es requisito o es requerido)
+        try:
+            cur.execute("""
+                DELETE FROM prerrequisito 
+                WHERE id_curso = %s OR id_curso_requerido = %s
+            """, (curso_id, curso_id))
+            prerrequisitos_eliminados = cur.rowcount
+            print(f"   ✓ Prerrequisitos eliminados: {prerrequisitos_eliminados}")
+        except Exception as e:
+            print(f"   ⚠️ No se encontraron prerrequisitos: {str(e)}")
+            prerrequisitos_eliminados = 0
+
+        # 5️⃣ Finalmente eliminar el curso
+        cur.execute("DELETE FROM curso WHERE curso_id = %s", (curso_id,))
+        print(f"   ✓ Curso eliminado exitosamente")
+
+        conn.commit()
         
-        cursos = cur.fetchall()
-        
-        # 🔑 Formato esperado por tu frontend: Devuelve el array de objetos directamente.
-        # [ {"curso_id": 1, "codigo": "IS101", "nombre": "..."}, {...} ]
-        return jsonify(cursos), 200
-    
+        return jsonify({
+            "mensaje": "Curso y todas sus dependencias eliminadas exitosamente ✅",
+            "detalles": {
+                "matriculas_eliminadas": matriculas_eliminadas,
+                "asignaciones_eliminadas": asignaciones_eliminadas,
+                "secciones_eliminadas": secciones_eliminadas,
+                "prerrequisitos_eliminados": prerrequisitos_eliminados
+            }
+        }), 200
+
     except Exception as e:
-        print(f"❌ Error en listar_cursos: {e}")
-        return jsonify({"error": "Error interno al obtener la lista de cursos."}), 500
-        
+        if conn: 
+            conn.rollback()
+        print("❌ Error al eliminar curso:", str(e))
+        return jsonify({"error": f"Error al eliminar: {str(e)}"}), 500
     finally:
-        # Cerrar recursos de la base de datos
         if cur: cur.close()
         if conn: conn.close()
 
+
 # ===========================
-# CONSULTAR CURSOS 
+# CONSULTAR CURSOS CON FILTROS
 # ===========================
 @curso_bp.route("/listar", methods=["GET"])
 def consultar_cursos():
     try:
-        ciclo = request.args.get("ciclo")  # Ejemplo: /curso/listar?ciclo=III
+        ciclo = request.args.get("ciclo")
         conn = get_db()
         cur = conn.cursor(cursor_factory=RealDictCursor)
 
@@ -311,7 +368,8 @@ def consultar_cursos():
     except Exception as e:
         print("Error en consultar_cursos:", e)
         return jsonify({"error": str(e)}), 500
-    
+
+
 # ===========================
 # VERIFICAR SI TIENE ESTUDIANTES MATRICULADOS
 # ===========================
@@ -321,7 +379,6 @@ def verificar_estudiantes_curso(curso_id):
         conn = get_db()
         cur = conn.cursor()
         
-        # Verificar si existen matrículas en secciones de este curso
         cur.execute("""
             SELECT COUNT(DISTINCT m.estudiante_id) 
             FROM matricula m
@@ -338,6 +395,7 @@ def verificar_estudiantes_curso(curso_id):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+
 # ===========================
 # VERIFICAR SI TIENE DOCENTE ASIGNADO
 # ===========================
@@ -347,7 +405,6 @@ def verificar_docente_curso(curso_id):
         conn = get_db()
         cur = conn.cursor()
         
-        # Verificar si hay secciones con docente asignado
         cur.execute("""
             SELECT COUNT(*) 
             FROM seccion 
@@ -363,4 +420,37 @@ def verificar_docente_curso(curso_id):
         return jsonify({"tiene_docente": count > 0, "secciones": count}), 200
         
     except Exception as e:
-        return jsonify({"error": str(e)}), 500      
+        return jsonify({"error": str(e)}), 500
+
+
+# ===========================
+# VERIFICAR SI TIENE ASIGNACIONES
+# ===========================
+@curso_bp.route("/<int:curso_id>/asignaciones", methods=["GET"])
+def verificar_asignaciones(curso_id):
+    """Verifica si el curso tiene asignaciones registradas."""
+    conn = None
+    cur = None
+    try:
+        conn = get_db()
+        cur = conn.cursor()
+
+        cur.execute("""
+            SELECT COUNT(*) FROM asignaciones 
+            WHERE curso_id = %s
+        """, (curso_id,))
+        
+        count = cur.fetchone()[0]
+        tiene_asignaciones = count > 0
+
+        return jsonify({
+            "tiene_asignaciones": tiene_asignaciones,
+            "cantidad": count
+        }), 200
+
+    except Exception as e:
+        print("❌ Error al verificar asignaciones:", str(e))
+        return jsonify({"error": str(e)}), 500
+    finally:
+        if cur: cur.close()
+        if conn: conn.close()

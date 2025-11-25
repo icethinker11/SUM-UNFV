@@ -5,12 +5,13 @@ const EliminarHorario = () => {
   const [horarios, setHorarios] = useState([]);
   const [busqueda, setBusqueda] = useState("");
 
-  const API_URL = "http://localhost:5000/superadmin/bloques-horarios-listar"; // ✅ misma URL que listar
+  const API_URL_LISTAR = "http://localhost:5000/superadmin/bloques-horarios-listar";
+  const API_URL_ELIMINAR = "http://localhost:5000/superadmin/bloques-horarios";
 
   useEffect(() => {
     const obtenerHorarios = async () => {
       try {
-        const respuesta = await fetch(API_URL);
+        const respuesta = await fetch(API_URL_LISTAR);
         if (!respuesta.ok) throw new Error("Error al obtener horarios");
         const data = await respuesta.json();
         setHorarios(data);
@@ -24,11 +25,16 @@ const EliminarHorario = () => {
   const eliminarHorario = async (id) => {
     if (window.confirm("¿Estás seguro de eliminar este horario?")) {
       try {
-        const resp = await fetch(`${API_URL}/${id}`, { method: "DELETE" });
-        if (!resp.ok) throw new Error("Error al eliminar horario");
+        const resp = await fetch(`${API_URL_ELIMINAR}/${id}`, { method: "DELETE" });
+        if (!resp.ok) {
+          const error = await resp.json();
+          throw new Error(error.error || "Error al eliminar horario");
+        }
         setHorarios(horarios.filter((h) => h.bloque_id !== id));
+        alert("✅ Horario eliminado correctamente");
       } catch (error) {
         console.error("❌ Error al eliminar horario:", error);
+        alert("❌ " + error.message);
       }
     }
   };
