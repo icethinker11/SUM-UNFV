@@ -230,15 +230,15 @@ function App() {
 
           {/* 🆕 NUEVA RUTA: Listar y editar Asignaciones*/}
           <Route
-            path="/admin/registrar-asignaciones"
-            element={<ListneditAsignaciones />}
-          />
+  path="/admin/listar-editar-asignaciones"
+  element={<ListneditAsignaciones />}
+/>
 
           {/* 🆕 NUEVA RUTA: Eliminar Asignaciones*/}
           <Route
-            path="/admin/registrar-asignaciones"
-            element={<EliminarAsignaciones />}
-          />
+  path="/admin/eliminar-asignaciones"
+  element={<EliminarAsignaciones />}
+/>
 
           {/* 🆕 NUEVA RUTA: Mi Perfil del Administrador */}
           <Route

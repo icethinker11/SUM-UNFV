@@ -200,3 +200,148 @@ def crear_asignacion():
     finally:
         cur.close()
         conn.close()
+
+# -----------------------------
+# LISTAR ASIGNACIONES
+# -----------------------------
+@asignaciones_bp.route("/listar-asignaciones", methods=["GET"])
+def listar_asignaciones():
+    conn = get_db()
+    cur = conn.cursor(cursor_factory=RealDictCursor)
+    try:
+        cur.execute("""
+            SELECT 
+                a.asignacion_id,
+                a.curso_id,
+                a.seccion_id,
+                a.docente_id,
+                a.cantidad_estudiantes,
+                a.observaciones,
+                a.bloque_id,
+                a.aula_id
+            FROM asignaciones a
+            ORDER BY a.asignacion_id DESC
+        """)
+        asignaciones = cur.fetchall()
+        return jsonify(asignaciones)
+    except Exception as e:
+        return jsonify({"error": f"Error al listar asignaciones: {str(e)}"}), 500
+    finally:
+        cur.close()
+        conn.close()
+
+
+# -----------------------------
+# EDITAR ASIGNACIÓN
+# -----------------------------
+@asignaciones_bp.route("/editar-asignacion/<int:asignacion_id>", methods=["PUT"])
+def editar_asignacion(asignacion_id):
+    data = request.get_json() or {}
+
+    curso_id = data.get("curso_id")
+    seccion_id = data.get("seccion_id")
+    docente_id = data.get("docente_id")
+    cantidad_estudiantes = data.get("estudiantes")
+    observaciones = data.get("observaciones", "")
+    bloque_id = data.get("horario_id")
+    aula_id = data.get("aula_id")
+
+    if not all([curso_id, seccion_id, docente_id, cantidad_estudiantes, bloque_id, aula_id]):
+        return jsonify({"error": "⚠️ Faltan campos obligatorios"}), 400
+
+    try:
+        cantidad_estudiantes = int(cantidad_estudiantes)
+        if cantidad_estudiantes <= 0:
+            return jsonify({"error": "⚠️ La cantidad de estudiantes debe ser mayor que 0."}), 400
+    except (ValueError, TypeError):
+        return jsonify({"error": "⚠️ La cantidad de estudiantes debe ser un número válido."}), 400
+
+    conn = get_db()
+    cur = conn.cursor()
+
+    try:
+        # Validar que la asignación existe
+        cur.execute("SELECT 1 FROM asignaciones WHERE asignacion_id=%s", (asignacion_id,))
+        if not cur.fetchone():
+            return jsonify({"error": "La asignación no existe."}), 404
+
+        # Validar capacidad del aula
+        cur.execute("SELECT capacidad FROM aula WHERE aula_id=%s AND UPPER(estado)='OPERATIVO'", (aula_id,))
+        aula = cur.fetchone()
+        if not aula:
+            return jsonify({"error": "El aula seleccionada no está operativa o no existe."}), 400
+
+        capacidad_aula = aula[0]
+        if cantidad_estudiantes > capacidad_aula:
+            return jsonify({
+                "error": f"La cantidad de estudiantes ({cantidad_estudiantes}) supera la capacidad del aula ({capacidad_aula})."
+            }), 400
+
+        # Validar conflicto de aula (excepto la asignación actual)
+        cur.execute("""
+            SELECT 1 FROM asignaciones 
+            WHERE bloque_id=%s AND aula_id=%s AND asignacion_id != %s
+        """, (bloque_id, aula_id, asignacion_id))
+        if cur.fetchone():
+            return jsonify({"error": "El aula ya está ocupada en ese horario."}), 400
+
+        # Validar conflicto de docente (excepto la asignación actual)
+        cur.execute("""
+            SELECT 1 FROM asignaciones 
+            WHERE bloque_id=%s AND docente_id=%s AND asignacion_id != %s
+        """, (bloque_id, docente_id, asignacion_id))
+        if cur.fetchone():
+            return jsonify({"error": "El docente ya tiene una clase asignada en ese horario."}), 400
+
+        # Actualizar asignación
+        cur.execute("""
+            UPDATE asignaciones
+            SET curso_id = %s,
+                seccion_id = %s,
+                docente_id = %s,
+                cantidad_estudiantes = %s,
+                observaciones = %s,
+                bloque_id = %s,
+                aula_id = %s
+            WHERE asignacion_id = %s
+        """, (curso_id, seccion_id, docente_id, cantidad_estudiantes, observaciones, bloque_id, aula_id, asignacion_id))
+
+        conn.commit()
+        return jsonify({"mensaje": "✅ Asignación actualizada exitosamente."}), 200
+
+    except Exception as e:
+        conn.rollback()
+        return jsonify({"error": f"Error interno: {str(e)}"}), 500
+
+    finally:
+        cur.close()
+        conn.close()
+
+
+# -----------------------------
+# ELIMINAR ASIGNACIÓN
+# -----------------------------
+@asignaciones_bp.route("/eliminar-asignacion/<int:asignacion_id>", methods=["DELETE"])
+def eliminar_asignacion(asignacion_id):
+    conn = get_db()
+    cur = conn.cursor()
+
+    try:
+        # Verificar que la asignación existe
+        cur.execute("SELECT 1 FROM asignaciones WHERE asignacion_id=%s", (asignacion_id,))
+        if not cur.fetchone():
+            return jsonify({"error": "La asignación no existe."}), 404
+
+        # Eliminar asignación
+        cur.execute("DELETE FROM asignaciones WHERE asignacion_id=%s", (asignacion_id,))
+        conn.commit()
+
+        return jsonify({"mensaje": "✅ Asignación eliminada exitosamente."}), 200
+
+    except Exception as e:
+        conn.rollback()
+        return jsonify({"error": f"Error interno: {str(e)}"}), 500
+
+    finally:
+        cur.close()
+        conn.close()
