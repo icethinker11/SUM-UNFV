@@ -22,6 +22,10 @@ export default function RegistrarAsignaciones() {
     observaciones: "",
     horario_id: "",
     aula_id: "",
+
+    // ✅ Segundo bloque opcional
+    horario_id_2: "",
+    aula_id_2: "",
     periodo: "",
   });
 
@@ -130,7 +134,7 @@ export default function RegistrarAsignaciones() {
 
   // 🔹 Renderizado del formulario
   return (
-    <div classname="page-center">
+    <div className="page-center">
       <div classname="glass-card">
         <div className="p-6 max-w-3xl mx-auto rounded-2xl mt-8 glass-card">
           <h2 className="text-2xl font-bold mb-6 text-center">
@@ -280,7 +284,7 @@ export default function RegistrarAsignaciones() {
 
             {/* ---------------- PASO 2 ---------------- */}
             <h3 className="text-lg font-semibold mt-8 mb-4">
-              Paso 2: Horario y Aula
+              Paso 2: Selección del primer bloque de horario
             </h3>
 
             <div className="form-column">
@@ -312,6 +316,55 @@ export default function RegistrarAsignaciones() {
                   required
                 >
                   <option value="">Seleccionar aula</option>
+                  {aulas.map((a) => (
+                    <option key={a.aula_id} value={a.aula_id}>
+                      {a.nombre} — Pabellón: {a.pabellon} — Tipo: {a.tipo_aula}{" "}
+                      — Capacidad: {a.capacidad}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            {/* ---------------- PASO 3 ---------------- */}
+            <h3 className="text-lg font-semibold mt-8 mb-4">
+              Paso 3: Segundo Bloque de Horario (Opcional)
+            </h3>
+
+            <div className="form-column">
+              {/* Segundo Horario */}
+              <div>
+                <label>Horario 2</label>
+                <select
+                  name="horario_id_2"
+                  value={formData.horario_id_2}
+                  onChange={handleChange}
+                >
+                  <option value="">
+                    Seleccionar segundo horario (opcional)
+                  </option>
+                  {horarios.map((h) => (
+                    <option key={h.bloque_id} value={h.bloque_id}>
+                      {h.codigo_bloque} — {h.descripcion}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Segunda Aula */}
+              <div>
+                <label>Aula 2</label>
+                <select
+                  name="aula_id_2"
+                  value={formData.aula_id_2}
+                  onChange={handleChange}
+                  disabled={!formData.horario_id_2}
+                >
+                  <option value="">
+                    {formData.horario_id_2
+                      ? "Seleccionar aula"
+                      : "Primero selecciona un horario"}
+                  </option>
+
                   {aulas.map((a) => (
                     <option key={a.aula_id} value={a.aula_id}>
                       {a.nombre} — Pabellón: {a.pabellon} — Tipo: {a.tipo_aula}{" "}

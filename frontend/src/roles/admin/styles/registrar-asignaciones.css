@@ -2,7 +2,7 @@
 .glass-card {
   width: 100%;
   max-width: 880px;
-  margin-top: 160px;
+  margin-top: 130px;
   margin-left: 800px; /* <<< ESTO lo mueve a la derecha */
 
   background: linear-gradient(
