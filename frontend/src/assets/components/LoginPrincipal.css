@@ -199,7 +199,7 @@
 .role-selection-section h2 {
   color: #FF6600;
   margin-bottom: 40px;
-  font-size: 32px;
+  font-size: 50px;
   text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
 }
 
@@ -325,15 +325,16 @@
 
 /* SECTIONS AND FORM STYLES */
 .info-section, .form-section {
-  padding: 80px 5vw;
+  padding: 80px 10vw;
   text-align: center;
-  min-height: 50vh; 
+  min-height: 100vh; 
+  font-size: 25px; /* tamaño del texto */
 }
 
 .info-section h2, .form-section h2 {
   color: #FF6600;
   margin-bottom: 30px;
-  font-size: 32px;
+  font-size: 50px;
 }
 
 /* FOOTER STYLES */
@@ -452,5 +453,44 @@
 
   .features-list {
     padding: 0 5%;
+  }
+}
+
+/* Estilos para la sección About con imagen */
+.about-content {
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+  margin-top: 6rem;
+}
+
+.about-image-container {
+  flex: 0 0 50%;
+  width: 70%;
+}
+
+.about-image {
+  width: 100%;
+  height: auto;
+  border-radius: 30px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  object-fit: cover;
+}
+
+.about-text {
+  flex: 0 0 50%;
+  width: 50%;
+}
+
+/* Responsive: Para pantallas pequeñas */
+@media (max-width: 768px) {
+  .about-content {
+    flex-direction: column;
+  }
+  
+  .about-image-container,
+  .about-text {
+    flex: 1 1 100%;
+    width: 100%;
   }
 }

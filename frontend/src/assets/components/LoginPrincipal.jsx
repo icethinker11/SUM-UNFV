@@ -95,6 +95,26 @@ function LoginPrincipal({ onLoginSuccess }) {
         </div>
       </section>
 
+      {/* About Section */}
+      <section id="about" className="info-section">
+        <h2>¡Bienvenidos al SUN!</h2>
+         <div className="about-content">
+          <img 
+            src="/images/ejemplo.jpg" 
+            alt="Sistema SUN" 
+            className="about-image" />
+         <div className="about-text">
+            <p>
+              Les damos la más cordial bienvenida al SUN, el Sistema Único de Notas desarrollado para la gestión académica de la Escuela Profesional de Ingeniería de Sistemas (EPIS).
+               Esta plataforma web tiene como finalidad modernizar el acceso y administración de las calificaciones, mejorando la organización y eficiencia en el control del 
+               rendimiento académico.</p> <p>SUN está diseñado para el registro, consulta y gestión de notas de manera rápida y segura, facilitando los 
+               procesos para docentes, estudiantes y personal administrativo. El sistema centraliza información clave como reportes de notas, historial académico, actas y 
+               evaluaciones, asegurando precisión en los registros y una consulta clara y ordenada desde la plataforma web.
+            </p>
+          </div>
+        </div>
+      </section>
+
       {/* SECCIÓN DE ROLES */}
       <section id="role-selection" className="role-selection-section">
         <h2>Selecciona tu Tipo de Usuario</h2>
@@ -175,16 +195,6 @@ function LoginPrincipal({ onLoginSuccess }) {
         </div>
       </section>
 
-      {/* About Section */}
-      <section id="about" className="info-section">
-        <h2>Sobre Nosotros</h2>
-        <p>
-          La Facultad de Ingeniería Industrial y de Sistemas impulsa la
-          innovación, la investigación y el desarrollo de proyectos que
-          transforman la sociedad. Aquí podrás informarte sobre nuestros
-          programas, cursos y actividades.
-        </p>
-      </section>
 
       {/* Contact Section */}
       <section id="contact" className="info-section">
@@ -199,7 +209,7 @@ function LoginPrincipal({ onLoginSuccess }) {
       <footer className="footer">
         <p>© 2025 Universidad Nacional Federico Villarreal - FIIS</p>
         <div className="social-links">
-          <a href="https://www.facebook.com/unfv.oficial" target="_blank" rel="noreferrer">Facebook</a>
+          <a href="https://www.facebook.com/UNFV.EDU" target="_blank" rel="noreferrer">Facebook</a>
           <a href="https://www.instagram.com/" target="_blank" rel="noreferrer">Instagram</a>
           <a href="https://www.linkedin.com/" target="_blank" rel="noreferrer">LinkedIn</a>
         </div>
