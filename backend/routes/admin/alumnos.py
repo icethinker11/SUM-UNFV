@@ -353,11 +353,11 @@ def crear_alumno():
             conn.close()
 
 # ===========================
-# LISTAR ALUMNOS
+# LISTAR ALUMNOS (MODIFICADO)
 # ===========================
 @alumnos_bp.route("/alumnos", methods=["GET"])
 def listar_alumnos():
-    """Obtiene la lista completa de alumnos ACTIVOS"""
+    """Obtiene la lista completa de alumnos (ACTIVOS e INACTIVOS)"""
     conn = None
     cur = None
     
@@ -366,6 +366,7 @@ def listar_alumnos():
         # Usar RealDictCursor para obtener resultados como diccionarios
         cur = conn.cursor(cursor_factory=RealDictCursor)
         
+        # 🔄 CAMBIO: Ahora trae TODOS los estudiantes, no solo activos
         cur.execute("""
             SELECT 
                 e.estudiante_id,
@@ -382,8 +383,9 @@ def listar_alumnos():
             JOIN persona p ON e.persona_id = p.persona_id
             JOIN usuario u ON p.usuario_id = u.usuario_id
             JOIN escuela esc ON e.escuela_id = esc.escuela_id
-            WHERE u.estado = 'ACTIVO'
-            ORDER BY p.apellidos, p.nombres
+            ORDER BY 
+                CASE WHEN u.estado = 'ACTIVO' THEN 0 ELSE 1 END,
+                p.apellidos, p.nombres
         """)
         
         alumnos = cur.fetchall()
@@ -397,6 +399,7 @@ def listar_alumnos():
             cur.close()
         if conn:
             conn.close()
+
 
 # ===========================
 # OBTENER ALUMNO POR ID
@@ -639,7 +642,7 @@ def modificar_alumno(estudiante_id):
 
 
 # ===========================
-# ELIMINAR ALUMNO (DESACTIVAR)
+# ELIMINAR ALUMNO (DESACTIVAR) - SIN CAMBIOS
 # ===========================
 @alumnos_bp.route("/alumnos/<int:estudiante_id>", methods=["DELETE"])
 def eliminar_alumno(estudiante_id):
@@ -683,7 +686,7 @@ def eliminar_alumno(estudiante_id):
         print("=" * 50)
 
         return jsonify({
-            "mensaje": "Estudiante eliminado correctamente",
+            "mensaje": "Estudiante desactivado correctamente",
             "estudiante_id": estudiante_id
         }), 200
 
@@ -694,6 +697,73 @@ def eliminar_alumno(estudiante_id):
         import traceback
         traceback.print_exc()
         return jsonify({"error": f"Error al eliminar estudiante: {str(e)}"}), 500
+    finally:
+        if cur:
+            cur.close()
+        if conn:
+            conn.close()
+
+# ===========================
+# REACTIVAR ALUMNO
+# ===========================
+@alumnos_bp.route("/alumnos/<int:estudiante_id>/reactivar", methods=["PATCH"])
+def reactivar_alumno(estudiante_id):
+    """
+    Reactiva un estudiante desactivado del sistema.
+    """
+    print("=" * 50)
+    print(f"🔵 INICIO - Reactivar Alumno ID: {estudiante_id}")
+    print("=" * 50)
+    
+    conn = None
+    cur = None
+
+    try:
+        conn = get_db()
+        cur = conn.cursor()
+
+        print(f"🔍 Verificando existencia del estudiante ID: {estudiante_id}")
+        cur.execute("""
+            SELECT e.persona_id, p.usuario_id, p.nombres, p.apellidos, u.estado
+            FROM estudiante e
+            JOIN persona p ON e.persona_id = p.persona_id
+            JOIN usuario u ON p.usuario_id = u.usuario_id
+            WHERE e.estudiante_id = %s
+        """, (estudiante_id,))
+        
+        result = cur.fetchone()
+        if not result:
+            print(f"❌ Estudiante ID {estudiante_id} no encontrado")
+            return jsonify({"error": "Estudiante no encontrado"}), 404
+        
+        persona_id, usuario_id, nombres, apellidos, estado_actual = result
+        print(f"✅ Estudiante encontrado: {nombres} {apellidos} (Estado actual: {estado_actual})")
+
+        if estado_actual == 'ACTIVO':
+            print(f"⚠️ El estudiante ya está activo")
+            return jsonify({"mensaje": "El estudiante ya está activo"}), 200
+
+        print("➡️ Reactivando usuario...")
+        cur.execute("UPDATE usuario SET estado = 'ACTIVO' WHERE usuario_id = %s", (usuario_id,))
+
+        conn.commit()
+        print("✅ COMMIT exitoso")
+        print("=" * 50)
+        print("🟢 FIN - Estudiante reactivado exitosamente")
+        print("=" * 50)
+
+        return jsonify({
+            "mensaje": "Estudiante reactivado correctamente",
+            "estudiante_id": estudiante_id
+        }), 200
+
+    except Exception as e:
+        if conn:
+            conn.rollback()
+        print(f"❌ ERROR al reactivar estudiante ID {estudiante_id}: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({"error": f"Error al reactivar estudiante: {str(e)}"}), 500
     finally:
         if cur:
             cur.close()
