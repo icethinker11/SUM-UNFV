@@ -353,11 +353,11 @@ def crear_alumno():
             conn.close()
 
 # ===========================
-# LISTAR ALUMNOS
+# LISTAR ALUMNOS (MODIFICADO)
 # ===========================
 @alumnos_bp.route("/alumnos", methods=["GET"])
 def listar_alumnos():
-    """Obtiene la lista completa de alumnos ACTIVOS"""
+    """Obtiene la lista completa de alumnos (ACTIVOS e INACTIVOS)"""
     conn = None
     cur = None
     
@@ -366,6 +366,7 @@ def listar_alumnos():
         # Usar RealDictCursor para obtener resultados como diccionarios
         cur = conn.cursor(cursor_factory=RealDictCursor)
         
+        # 🔄 CAMBIO: Ahora trae TODOS los estudiantes, no solo activos
         cur.execute("""
             SELECT 
                 e.estudiante_id,
@@ -382,7 +383,9 @@ def listar_alumnos():
             JOIN persona p ON e.persona_id = p.persona_id
             JOIN usuario u ON p.usuario_id = u.usuario_id
             JOIN escuela esc ON e.escuela_id = esc.escuela_id
-            ORDER BY p.apellidos, p.nombres
+            ORDER BY 
+                CASE WHEN u.estado = 'ACTIVO' THEN 0 ELSE 1 END,
+                p.apellidos, p.nombres
         """)
         
         alumnos = cur.fetchall()
@@ -396,6 +399,7 @@ def listar_alumnos():
             cur.close()
         if conn:
             conn.close()
+
 
 # ===========================
 # OBTENER ALUMNO POR ID
@@ -636,6 +640,10 @@ def modificar_alumno(estudiante_id):
         if conn:
             conn.close()
 
+
+# ===========================
+# ELIMINAR ALUMNO (DESACTIVAR)
+# ===========================
 @alumnos_bp.route("/alumnos/<int:estudiante_id>", methods=["DELETE"])
 def eliminar_alumno(estudiante_id):
     """
@@ -751,7 +759,7 @@ def eliminar_alumno(estudiante_id):
         print("=" * 50)
 
         return jsonify({
-            "mensaje": "Estudiante eliminado correctamente",
+            "mensaje": "Estudiante desactivado correctamente",
             "estudiante_id": estudiante_id
         }), 200
 
